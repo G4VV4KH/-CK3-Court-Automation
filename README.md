@@ -3,9 +3,9 @@
 ## At a glance
 
 - 🟢 **Version 0.2.1** · Targets CK3 **1.20.0.3**.
-- 🟢 Standalone court tools for landed players, with optional assistance for AI rulers.
+- 🟢 **Standalone:** no other mod required.
 - 🟢 One court automation picker, vacant court positions filled on demand, and random knights to fill your roster.
-- 🟢 English, French, German, Japanese, Korean, Polish, Russian, Simplified Chinese, and Spanish.
+- 🟢 **Languages:** English, French, German, Japanese, Korean, Polish, Russian, Simplified Chinese and Spanish.
 - 🟢 Conservative AI assistance is enabled by default and can be disabled with a game rule.
 - 🔴 Creates new characters without a recruitment fee. Court positions retain their normal salaries.
 - 🔴 Court Init covers vanilla court positions, including available DLC positions. Adventurer camp offices and positions added by other mods are outside its scope.
@@ -64,23 +64,27 @@ Court Init preserves existing appointees. It chooses the best remaining candidat
 
 For a report, include your CK3 version, enabled mods, ruler culture and government, the decision used, and the position or knight requirement involved.
 
+[Report an issue on GitHub](https://github.com/G4VV4KH/-CK3-Court-Automation/issues)
+
 Email: g4vv4kh@gmail.com
 
 ### [Want to support my work? Donate on Ko-fi 💛](https://ko-fi.com/g4vv4kh)
 
-## Find Court Automation elsewhere
+## Find this mod elsewhere
 
 - [Steam Workshop](https://steamcommunity.com/sharedfiles/filedetails/?id=3814028714)
 - [Paradox Mods](https://mods.paradoxplaza.com/mods/162080/Any)
 - [Nexus Mods](https://www.nexusmods.com/crusaderkings3/mods/408)
 - [GitHub](https://github.com/G4VV4KH/-CK3-Court-Automation)
 
-## My mods
+## My other mods
 
-- [Parley: The Negotiating Table](https://github.com/G4VV4KH/-CK3-Parley-The-Negotiating-Table) — negotiated character interactions.
-- [Marriage Calculation Assistant](https://github.com/G4VV4KH/-CK3-Marriage-Calculation-Assistant) — marriage candidate scores, breakdowns, and sorting.
-- [Your Own Hegemony](https://github.com/G4VV4KH/-CK3-Your-Own-Hegemony) — a decision for founding a custom hegemony.
-- [Vassalization Extended](https://github.com/G4VV4KH/-CK3-Vassalization-Extended) — Forced Vassalization without a county limit, with selectable peace terms.
+- [Parley: The Negotiating Table](https://steamcommunity.com/sharedfiles/filedetails/?id=3811090081) — negotiate diplomatic agreements.
+- [Marriage Calculation Assistant](https://steamcommunity.com/sharedfiles/filedetails/?id=3811100163) — compare and sort marriage candidates.
+- [Your Own Hegemony](https://steamcommunity.com/sharedfiles/filedetails/?id=3811201582) — found a custom hegemony.
+- [Vassalization Extended](https://steamcommunity.com/sharedfiles/filedetails/?id=3813943691) — choose Forced Vassalization terms without a county limit.
+
+These mods are optional.
 
 ## Credits
 
