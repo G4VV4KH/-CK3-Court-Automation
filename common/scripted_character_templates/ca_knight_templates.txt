@@ -1,0 +1,17 @@
+﻿# Ordinary lowborn adults, not the vanilla high-skill warrior templates.
+# The calling effect saves the recipient as ca_knight_owner before creation.
+ca_bare_knight_character = {
+	age = { 18 45 }
+	dynasty = none
+	culture = scope:ca_knight_owner.culture
+	faith = scope:ca_knight_owner.faith
+	rite = scope:ca_knight_owner.rite
+	gender_female_chance = ca_knight_female_chance
+	random_traits = yes
+	diplomacy = { 0 10 }
+	martial = { 0 10 }
+	stewardship = { 0 10 }
+	intrigue = { 0 10 }
+	learning = { 0 10 }
+	prowess = { 0 12 }
+}

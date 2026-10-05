@@ -1,0 +1,100 @@
+﻿# Scope: the ruler receiving the new knights.
+# Result variables on that ruler, retained for the decision's result message:
+# ca_knights_requested: vacancies at entry; ca_knights_created: new courtiers;
+# ca_knights_filled: new characters confirmed as active knights;
+# ca_knights_failed: 0 normally, 1 if an unexpected eligibility/engine failure;
+# ca_knights_remaining: vacancies after the operation.
+ca_fill_knights_effect = {
+	# Skip tooltip simulation: the variables and new characters below only
+	# exist when the decision executes, not when its effects are previewed.
+	hidden_effect_new_object = {
+		save_scope_as = ca_knight_owner
+		set_variable = { name = ca_knights_requested value = 0 }
+		set_variable = { name = ca_knights_created value = 0 }
+		set_variable = { name = ca_knights_filled value = 0 }
+		set_variable = { name = ca_knights_failed value = 0 }
+		set_variable = { name = ca_knights_remaining value = 0 }
+		if = {
+			limit = {
+				is_ruler = yes
+				number_of_knights < max_number_of_knights
+				exists = location
+			}
+			set_variable = {
+				name = ca_knights_requested
+				value = {
+					value = max_number_of_knights
+					subtract = number_of_knights
+					min = 0
+				}
+			}
+			if = {
+				limit = { exists = capital_province }
+				capital_province = { save_scope_as = ca_knight_location }
+			}
+			else = { location = { save_scope_as = ca_knight_location } }
+			# A frozen upper bound prevents population growth if knight assignment
+			# fails. The first failed candidate also stops the operation immediately.
+			while = {
+				count = var:ca_knights_requested
+				limit = {
+					number_of_knights < max_number_of_knights
+					var:ca_knights_failed = 0
+				}
+				create_character = {
+					template = ca_bare_knight_character
+					location = scope:ca_knight_location
+					save_scope_as = ca_new_knight
+				}
+				scope:ca_new_knight = {
+					# These two random traits can invalidate a freshly generated adult.
+					# Keep all other random traits and all naturally weak skill rolls.
+					remove_trait = blind
+					remove_trait = incapable
+					if = {
+						limit = {
+							scope:ca_knight_owner.culture = { has_cultural_parameter = minimum_prowess_for_knights }
+							prowess < 12
+						}
+						# Final prowess includes trait penalties. Repeat only as needed
+						# if a negative underlying score was clamped to zero.
+						while = {
+							count = 10
+							limit = { prowess < 12 }
+							add_prowess_skill = { value = 12 subtract = prowess }
+						}
+					}
+				}
+				add_courtier = scope:ca_new_knight
+				change_variable = { name = ca_knights_created add = 1 }
+				if = {
+					limit = {
+						scope:ca_new_knight = {
+							is_courtier_of = scope:ca_knight_owner
+							can_be_knight_trigger = { ARMY_OWNER = scope:ca_knight_owner }
+							is_potential_knight = yes
+						}
+					}
+					scope:ca_new_knight = { set_knight_status = force }
+				}
+				if = {
+					limit = { scope:ca_new_knight = { is_knight_of = scope:ca_knight_owner } }
+					change_variable = { name = ca_knights_filled add = 1 }
+				}
+				else = {
+					# Preserve this one new courtier and report the failure. Never
+					# kill generated people or retry indefinitely to fill the slot.
+					set_variable = { name = ca_knights_failed value = 1 }
+				}
+			}
+			set_variable = {
+				name = ca_knights_remaining
+				value = {
+					value = max_number_of_knights
+					subtract = number_of_knights
+					min = 0
+				}
+			}
+		}
+	}
+}

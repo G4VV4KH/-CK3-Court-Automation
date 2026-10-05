@@ -1,0 +1,370 @@
+﻿# Court Init: call ca_court_init_effect in the ruler's scope.
+# Existing appointments and native unlock/eligibility rules are preserved.
+# The call leaves three ruler variables for the result notification:
+# ca_court_init_filled, ca_court_init_generated, ca_court_init_unfilled.
+# Camp offices are intentionally outside this court-position feature.
+
+# Snapshot vacancies first: failed appointments must not repeatedly count an
+# already occupied slot. CAPACITY is a reviewed literal (at most 3 in vanilla).
+ca_court_init_fill_type_effect = {
+	if = {
+		limit = { can_employ_court_position_type = $POSITION$ }
+		set_variable = { name = ca_court_init_slots_to_fill value = $CAPACITY$ }
+		every_court_position_holder = {
+			type = $POSITION$
+			scope:ca_court_init_employer = {
+				change_variable = { name = ca_court_init_slots_to_fill subtract = 1 }
+			}
+		}
+		if = {
+			limit = {
+				has_variable = ca_court_init_slots_to_fill
+				var:ca_court_init_slots_to_fill > 0
+			}
+			while = {
+				count = var:ca_court_init_slots_to_fill
+				ca_court_init_fill_slot_effect = { POSITION = $POSITION$ }
+			}
+		}
+	}
+}
+
+# One attempt per slot. Native ranking measures raw aptitude, not the 0-4 tier.
+# POSITION is a literal type, needed by aptitude_score's suffix.
+ca_court_init_fill_slot_effect = {
+	if = {
+		limit = { can_employ_court_position_type = $POSITION$ }
+		clear_saved_scope = ca_court_init_candidate
+		court_position_type:$POSITION$ = { save_scope_as = ca_court_init_type }
+		ordered_court_position_candidate = {
+			court_position_type = scope:ca_court_init_type
+			order_by = aptitude_score:$POSITION$
+			max = 1
+			check_range_bounds = no
+			limit = {
+				NOT = { has_court_position = $POSITION$ }
+				would_be_valid_for_court_position = {
+					court_position = $POSITION$
+					employer = scope:ca_court_init_employer
+				}
+			}
+			save_scope_as = ca_court_init_candidate
+		}
+		if = {
+			limit = {
+				NOT = { exists = scope:ca_court_init_candidate }
+				# Favored Minister must already be a councillor. Never alter the council.
+				NOT = { scope:ca_court_init_type = court_position_type:favored_minister_court_position }
+			}
+			if = {
+				limit = { scope:ca_court_init_type = court_position_type:garuda_court_position }
+				# A new Garuda needs an actual knight seat. Existing Garudas stay
+				# appointed, so do not generate futile recruits when they occupy
+				# the whole knight capacity (including the zero-capacity case).
+				set_variable = { name = ca_court_init_garuda_capacity value = max_number_of_knights }
+				every_court_position_holder = {
+					type = garuda_court_position
+					limit = { is_knight = yes }
+					scope:ca_court_init_employer = {
+						change_variable = { name = ca_court_init_garuda_capacity subtract = 1 }
+					}
+				}
+				if = {
+					limit = {
+						has_variable = ca_court_init_garuda_capacity
+						var:ca_court_init_garuda_capacity > 0
+					}
+					ca_court_init_generate_candidate_effect = yes
+				}
+				remove_variable = ca_court_init_garuda_capacity
+			}
+			else = { ca_court_init_generate_candidate_effect = yes }
+		}
+		if = {
+			limit = {
+				exists = scope:ca_court_init_candidate
+				can_appoint_char_to_court_position = {
+					CHAR = scope:ca_court_init_candidate
+					COURT_POS = $POSITION$
+				}
+				can_employ_court_position_type = $POSITION$
+			}
+			appoint_court_position = {
+				recipient = scope:ca_court_init_candidate
+				court_position = $POSITION$
+			}
+			if = {
+				limit = {
+					scope:ca_court_init_candidate = {
+						is_court_position_employer = {
+							court_position = $POSITION$
+							who = scope:ca_court_init_employer
+						}
+					}
+				}
+				change_variable = { name = ca_court_init_filled add = 1 }
+			}
+			else = { change_variable = { name = ca_court_init_unfilled add = 1 } }
+		}
+		else = { change_variable = { name = ca_court_init_unfilled add = 1 } }
+		clear_saved_scope = ca_court_init_candidate
+	}
+}
+
+# Minimum total skill, with a finite retry bound for clamped negative totals.
+# Never called on an existing character.
+ca_court_init_minimum_skill_effect = {
+	while = {
+		count = 10
+		limit = { $SKILL$ < $MINIMUM$ }
+		add_$SKILL$_skill = { value = $MINIMUM$ subtract = $SKILL$ }
+	}
+}
+
+ca_court_init_generate_candidate_effect = {
+	# Keep local names/faith unless this particular job needs a foreign recruit.
+	culture = { save_scope_as = ca_court_init_recruit_culture }
+	faith = { save_scope_as = ca_court_init_recruit_faith }
+	rite = { save_scope_as = ca_court_init_recruit_rite }
+	if = {
+		limit = { scope:ca_court_init_type = court_position_type:akolouthos_court_position }
+		culture:norse = { save_scope_as = ca_court_init_recruit_culture }
+	}
+	else_if = {
+		limit = { scope:ca_court_init_type = court_position_type:foreign_emissary_court_position }
+		if = {
+			limit = { culture = culture:norse }
+			culture:greek = { save_scope_as = ca_court_init_recruit_culture }
+		}
+		else = { culture:norse = { save_scope_as = ca_court_init_recruit_culture } }
+	}
+	else_if = {
+		limit = {
+			scope:ca_court_init_type = court_position_type:master_of_hunt_court_position
+			culture = { has_cultural_parameter = cannot_hunt }
+		}
+		culture:norse = { save_scope_as = ca_court_init_recruit_culture }
+	}
+	if = {
+		limit = {
+			OR = {
+				scope:ca_court_init_type = court_position_type:court_guru_court_position
+				scope:ca_court_init_type = court_position_type:court_brahmin_court_position
+			}
+			NOR = {
+				has_religion = religion:buddhism_religion
+				has_religion = religion:hinduism_religion
+			}
+		}
+		faith:theravada_faith = { save_scope_as = ca_court_init_recruit_faith }
+		rite:theravada = { save_scope_as = ca_court_init_recruit_rite }
+	}
+	else_if = {
+		limit = {
+			scope:ca_court_init_type = court_position_type:chief_qadi_court_position
+			NOT = { has_religion = religion:islam_religion }
+		}
+		faith:shia = { save_scope_as = ca_court_init_recruit_faith }
+		rite:nizari = { save_scope_as = ca_court_init_recruit_rite }
+	}
+	else_if = {
+		limit = {
+			scope:ca_court_init_type = court_position_type:master_assassin_court_position
+			rite = {
+				OR = {
+					rite_has_tenet = tenet_pacifism
+					rite_has_tenet = tenet_dharmic_pacifism
+				}
+			}
+		}
+		faith:shia = { save_scope_as = ca_court_init_recruit_faith }
+		rite:nizari = { save_scope_as = ca_court_init_recruit_rite }
+	}
+	create_character = {
+		template = ca_court_init_random_courtier_template
+		gender_female_chance = ca_court_init_recruit_female_chance
+		culture = scope:ca_court_init_recruit_culture
+		faith = scope:ca_court_init_recruit_faith
+		rite = scope:ca_court_init_recruit_rite
+		employer = scope:ca_court_init_employer
+		after_creation = {
+			save_scope_as = ca_court_init_candidate
+			ca_court_init_prepare_candidate_effect = yes
+		}
+	}
+	change_variable = { name = ca_court_init_generated add = 1 }
+	clear_saved_scope = ca_court_init_recruit_culture
+	clear_saved_scope = ca_court_init_recruit_faith
+	clear_saved_scope = ca_court_init_recruit_rite
+}
+
+# Apply only prerequisites to newly generated people. Aptitude itself stays
+# vanilla-calculated from their random skills, traits and employer bonuses.
+ca_court_init_prepare_candidate_effect = {
+	remove_trait = incapable
+	remove_trait = blind
+	remove_trait = infirm
+	remove_trait = devoted
+	remove_trait = eunuch_1
+	remove_trait = beardless_eunuch
+	if = {
+		limit = {
+			OR = {
+				scope:ca_court_init_type = court_position_type:boyan_court_position
+				scope:ca_court_init_type = court_position_type:yurtchi_court_position
+				scope:ca_court_init_type = court_position_type:cherbi_court_position
+				scope:ca_court_init_type = court_position_type:yeke_jarquchi_court_position
+				scope:ca_court_init_type = court_position_type:foreign_emissary_court_position
+				scope:ca_court_init_type = court_position_type:keeper_of_the_horses_court_position
+			}
+		}
+		change_government = nomad_government
+	}
+	if = {
+		limit = { scope:ca_court_init_type = court_position_type:chief_eunuch_court_position }
+		add_trait = eunuch_1
+	}
+	else_if = {
+		limit = { scope:ca_court_init_type = court_position_type:chief_qadi_court_position }
+		# Clear the random education before choosing a valid learning education.
+		ca_court_init_clear_education_effect = yes
+		random_list = {
+			25 = { add_trait = education_learning_1 }
+			25 = { add_trait = education_learning_2 }
+			25 = { add_trait = education_learning_3 }
+			25 = { add_trait = education_learning_4 }
+		}
+	}
+	else_if = {
+		limit = { scope:ca_court_init_type = court_position_type:cave_hermit_court_position }
+		add_trait = lifestyle_mystic
+		add_trait_xp = { trait = lifestyle_mystic value = 50 }
+	}
+	else_if = {
+		limit = { scope:ca_court_init_type = court_position_type:court_guru_court_position }
+		add_trait = lifestyle_mystic
+	}
+	else_if = {
+		limit = { scope:ca_court_init_type = court_position_type:court_astrologer_court_position }
+		if = {
+			limit = { NOT = { court_astrologer_validity_trigger = { EMPLOYER = scope:ca_court_init_employer } } }
+			add_trait = lifestyle_mystic
+		}
+	}
+	else_if = {
+		limit = { scope:ca_court_init_type = court_position_type:siege_engineer_court_position }
+		add_trait = military_engineer
+	}
+	else_if = {
+		limit = { scope:ca_court_init_type = court_position_type:court_artificer_court_position }
+		# A real inspiration satisfies vanilla; no forged completion flags.
+		random_list = {
+			1 = { create_inspiration = weapon_inspiration }
+			1 = { create_inspiration = armor_inspiration }
+			1 = { create_inspiration = smith_inspiration }
+			1 = { create_inspiration = book_inspiration }
+			1 = { create_inspiration = weaver_inspiration }
+			1 = { create_inspiration = artisan_inspiration }
+		}
+	}
+	else_if = {
+		limit = { scope:ca_court_init_type = court_position_type:executioner_court_position }
+		if = {
+			limit = { NOT = { executioner_validity_trigger = { EMPLOYER = scope:ca_court_init_employer } } }
+			scope:ca_court_init_employer = {
+				add_hook = { type = strong_favor_hook target = scope:ca_court_init_candidate }
+			}
+		}
+	}
+	else_if = {
+		limit = { scope:ca_court_init_type = court_position_type:court_brewmaster_court_position }
+		if = {
+			limit = { drinks_alcohol_trigger = no }
+			add_trait = drunkard
+		}
+		if = {
+			limit = { NOT = { court_brewmaster_validity_trigger = { EMPLOYER = scope:ca_court_init_employer } } }
+			ca_court_init_minimum_skill_effect = { SKILL = learning MINIMUM = 12 }
+		}
+	}
+	else_if = {
+		limit = { scope:ca_court_init_type = court_position_type:court_brahmin_court_position }
+		ca_court_init_minimum_skill_effect = { SKILL = learning MINIMUM = 12 }
+	}
+	else_if = {
+		limit = { scope:ca_court_init_type = court_position_type:bookmaker_court_position }
+		ca_court_init_minimum_skill_effect = { SKILL = stewardship MINIMUM = 8 }
+	}
+	else_if = {
+		limit = { scope:ca_court_init_type = court_position_type:cultural_emissary_court_position }
+		ca_court_init_minimum_skill_effect = { SKILL = diplomacy MINIMUM = 8 }
+	}
+	else_if = {
+		limit = { scope:ca_court_init_type = court_position_type:khlon_glan_court_position }
+		ca_court_init_minimum_skill_effect = { SKILL = martial MINIMUM = 10 }
+		ca_court_init_minimum_skill_effect = { SKILL = stewardship MINIMUM = 10 }
+	}
+	else_if = {
+		limit = { scope:ca_court_init_type = court_position_type:boyan_court_position }
+		ca_court_init_minimum_skill_effect = { SKILL = martial MINIMUM = 12 }
+	}
+	else_if = {
+		limit = { scope:ca_court_init_type = court_position_type:yurtchi_court_position }
+		ca_court_init_minimum_skill_effect = { SKILL = stewardship MINIMUM = 12 }
+	}
+	else_if = {
+		limit = { scope:ca_court_init_type = court_position_type:yeke_jarquchi_court_position }
+		ca_court_init_minimum_skill_effect = { SKILL = diplomacy MINIMUM = 12 }
+	}
+	else_if = {
+		limit = {
+			OR = {
+				scope:ca_court_init_type = court_position_type:cherbi_court_position
+				scope:ca_court_init_type = court_position_type:keeper_of_the_horses_court_position
+			}
+		}
+		ca_court_init_minimum_skill_effect = { SKILL = prowess MINIMUM = 12 }
+	}
+	else_if = {
+		limit = { scope:ca_court_init_type = court_position_type:garuda_court_position }
+		if = {
+			limit = { scope:ca_court_init_employer.culture = { has_cultural_parameter = minimum_prowess_for_knights } }
+			ca_court_init_minimum_skill_effect = { SKILL = prowess MINIMUM = 12 }
+		}
+		if = {
+			limit = {
+				is_potential_knight = yes
+				can_be_knight_trigger = { ARMY_OWNER = scope:ca_court_init_employer }
+			}
+			set_knight_status = force
+		}
+	}
+}
+
+ca_court_init_clear_education_effect = {
+	remove_trait = education_diplomacy_1
+	remove_trait = education_diplomacy_2
+	remove_trait = education_diplomacy_3
+	remove_trait = education_diplomacy_4
+	remove_trait = education_diplomacy_5
+	remove_trait = education_martial_1
+	remove_trait = education_martial_2
+	remove_trait = education_martial_3
+	remove_trait = education_martial_4
+	remove_trait = education_martial_5
+	remove_trait = education_stewardship_1
+	remove_trait = education_stewardship_2
+	remove_trait = education_stewardship_3
+	remove_trait = education_stewardship_4
+	remove_trait = education_stewardship_5
+	remove_trait = education_intrigue_1
+	remove_trait = education_intrigue_2
+	remove_trait = education_intrigue_3
+	remove_trait = education_intrigue_4
+	remove_trait = education_intrigue_5
+	remove_trait = education_learning_1
+	remove_trait = education_learning_2
+	remove_trait = education_learning_3
+	remove_trait = education_learning_4
+	remove_trait = education_learning_5
+}

@@ -1,0 +1,62 @@
+﻿# Court tools entry point. The vanilla court window instantiates only this type;
+# all decision availability, costs, tooltips and confirmation remain native.
+types CourtAutomationPanelTypes {
+	type ca_court_panel = vbox {
+		layoutpolicy_horizontal = expanding
+		minimumsize = { 0 32 }
+		margin_left = 15
+		margin_right = 15
+		margin_top = 10
+		margin_bottom = 5
+		spacing = 5
+		ignoreinvisible = yes
+		oncreate = "[BindFoldOutContext]"
+		oncreate = "[PdxGuiFoldOut.Fold]"
+
+		button_expandable_toggle_field = {
+			size = { 532 32 }
+			minimumsize = { 532 32 }
+			tooltip = "ca_court_panel_tooltip"
+			blockoverride "text" { text = "ca_court_panel_title" }
+		}
+		vbox = {
+			layoutpolicy_horizontal = expanding
+			visible = "[PdxGuiFoldOut.IsUnfolded]"
+			spacing = 5
+			button_decision_entry = {
+				name = "ca_automation_decision_court_shortcut"
+				datacontext = "[GetDecisionWithKey('ca_automation_decision')]"
+				layoutpolicy_horizontal = expanding
+				# Keep all three entries discoverable; the full knight roster
+				# disables its shortcut until the decision becomes visible again.
+				enabled = "[Decision.IsShownForPlayer]"
+				using = tooltip_se
+				blockoverride "button_size" { size = { 532 44 } }
+				onclick = "[OpenGameViewData( 'decision_detail', Decision.Self )]"
+			}
+			button_decision_entry = {
+				name = "ca_court_init_decision_court_shortcut"
+				datacontext = "[GetDecisionWithKey('ca_court_init_decision')]"
+				layoutpolicy_horizontal = expanding
+				# Keep all three entries discoverable; the full knight roster
+				# disables its shortcut until the decision becomes visible again.
+				enabled = "[Decision.IsShownForPlayer]"
+				using = tooltip_se
+				blockoverride "button_size" { size = { 532 44 } }
+				onclick = "[OpenGameViewData( 'decision_detail', Decision.Self )]"
+			}
+			button_decision_entry = {
+				name = "ca_bare_knights_decision_court_shortcut"
+				datacontext = "[GetDecisionWithKey('ca_bare_knights_decision')]"
+				layoutpolicy_horizontal = expanding
+				# Keep all three entries discoverable; the full knight roster
+				# disables its shortcut until the decision becomes visible again.
+				enabled = "[Decision.IsShownForPlayer]"
+				using = tooltip_se
+				blockoverride "button_size" { size = { 532 44 } }
+				onclick = "[OpenGameViewData( 'decision_detail', Decision.Self )]"
+			}
+		}
+	}
+}
+

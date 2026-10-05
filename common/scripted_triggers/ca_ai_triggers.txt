@@ -1,0 +1,42 @@
+﻿# Cheap gates run before any role/candidate scans. Gold/treasury balances are
+# current NET income: existing court salaries have already been deducted.
+ca_ai_support_eligible_trigger = {
+	has_game_rule = ca_ai_conservative
+	is_ai = yes
+	is_alive = yes
+	is_adult = yes
+	is_landed = yes
+	highest_held_title_tier >= tier_county
+	exists = location
+	NOT = { has_character_flag = ca_ai_annual_support_cooldown }
+	gold >= 25
+	monthly_character_balance > 0
+	trigger_if = {
+		limit = { has_treasury = yes }
+		treasury >= 25
+		monthly_character_treasury_balance > 0
+	}
+}
+
+# Per-slot incremental cost only, with a 50% salary buffer. Preserve half the
+# current surplus and hold twelve months of this buffered new wage in reserve.
+# Prestige/piety monthly NET is not exposed to script: require 24 buffered months
+# in stock instead, and let native AI decide whether to commit to the appointment.
+ca_ai_role_affordable_trigger = {
+	trigger_if = {
+		limit = { ca_court_salary_$ROLE$_prestige > 0 }
+		prestige >= { value = ca_court_salary_$ROLE$_prestige multiply = 36 add = 50 }
+	}
+	trigger_if = {
+		limit = { ca_court_salary_$ROLE$_piety > 0 }
+		piety >= { value = ca_court_salary_$ROLE$_piety multiply = 36 add = 50 }
+	}
+	monthly_character_balance >= { value = ca_court_salary_$ROLE$_gold multiply = 3 }
+	gold >= { value = ca_court_salary_$ROLE$_gold multiply = 18 add = 25 }
+	trigger_if = {
+		limit = { ca_court_salary_$ROLE$_treasury > 0 }
+		has_treasury = yes
+		monthly_character_treasury_balance >= { value = ca_court_salary_$ROLE$_treasury multiply = 3 }
+		treasury >= { value = ca_court_salary_$ROLE$_treasury multiply = 18 add = 25 }
+	}
+}

@@ -1,0 +1,10 @@
+﻿ca_court_salary_summary = {
+	type = character
+	text = {
+		trigger = { has_treasury = yes }
+		localization_key = ca_court_salary_summary_treasury
+	}
+	text = {
+		localization_key = ca_court_salary_summary_gold
+	}
+}

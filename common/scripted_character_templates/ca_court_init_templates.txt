@@ -1,0 +1,14 @@
+﻿# Court Init recruits have random ordinary skills and personality.
+# Required skills/traits are applied after creation only when a role needs them.
+# These are deliberately independent of vanilla's excellent-aptitude templates.
+ca_court_init_random_courtier_template = {
+	age = { 18 40 }
+	dynasty = none
+	random_traits = yes
+	diplomacy = { 0 12 }
+	martial = { 0 12 }
+	stewardship = { 0 12 }
+	intrigue = { 0 12 }
+	learning = { 0 12 }
+	prowess = { 0 18 }
+}

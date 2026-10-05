@@ -1,0 +1,20 @@
+﻿# Use the actual recipient rather than relying on the caller's root scope.
+# This follows vanilla root_soldier_female_chance, including the no-Royal-Court
+# faith rules and cultures with female-only or equal martial customs.
+ca_knight_female_chance = {
+	if = {
+		limit = {
+			NOT = { dummy_female = { can_be_combatant_based_on_gender_trigger = { ARMY_OWNER = scope:ca_knight_owner } } }
+			dummy_male = { can_be_combatant_based_on_gender_trigger = { ARMY_OWNER = scope:ca_knight_owner } }
+		}
+		add = 0
+	}
+	else_if = {
+		limit = {
+			dummy_female = { can_be_combatant_based_on_gender_trigger = { ARMY_OWNER = scope:ca_knight_owner } }
+			NOT = { dummy_male = { can_be_combatant_based_on_gender_trigger = { ARMY_OWNER = scope:ca_knight_owner } } }
+		}
+		add = 100
+	}
+	else = { add = 50 }
+}

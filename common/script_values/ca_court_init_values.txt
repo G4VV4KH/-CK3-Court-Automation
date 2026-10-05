@@ -1,0 +1,65 @@
+﻿# Uses the employer saved by ca_court_init_effect, not an event's ROOT.
+ca_court_init_combatant_female_chance = {
+	value = 50
+	if = {
+		limit = {
+			dummy_male = { can_be_combatant_based_on_gender_trigger = { ARMY_OWNER = scope:ca_court_init_employer } }
+			NOT = { dummy_female = { can_be_combatant_based_on_gender_trigger = { ARMY_OWNER = scope:ca_court_init_employer } } }
+		}
+		value = 0
+	}
+	else_if = {
+		limit = {
+			dummy_female = { can_be_combatant_based_on_gender_trigger = { ARMY_OWNER = scope:ca_court_init_employer } }
+			NOT = { dummy_male = { can_be_combatant_based_on_gender_trigger = { ARMY_OWNER = scope:ca_court_init_employer } } }
+		}
+		value = 100
+	}
+}
+
+ca_court_init_recruit_female_chance = {
+	value = 50
+	if = {
+		limit = {
+			OR = {
+				scope:ca_court_init_type = court_position_type:wet_nurse_court_position
+				scope:ca_court_init_type = court_position_type:lady_in_waiting_court_position
+				scope:ca_court_init_type = court_position_type:keeper_of_the_harem_court_position
+			}
+		}
+		value = 100
+	}
+	else_if = {
+		limit = { scope:ca_court_init_type = court_position_type:chief_eunuch_court_position }
+		value = 0
+	}
+	else_if = {
+		limit = { scope:ca_court_init_type = court_position_type:chief_qadi_court_position }
+		if = {
+			limit = { scope:ca_court_init_employer.rite = { rite_has_doctrine = doctrine_gender_male_dominated } }
+			value = 0
+		}
+		else_if = {
+			limit = { scope:ca_court_init_employer.rite = { rite_has_doctrine = doctrine_gender_female_dominated } }
+			value = 100
+		}
+	}
+	else_if = {
+		limit = {
+			OR = {
+				scope:ca_court_init_type = court_position_type:bodyguard_court_position
+				scope:ca_court_init_type = court_position_type:champion_court_position
+				scope:ca_court_init_type = court_position_type:master_of_hunt_court_position
+				scope:ca_court_init_type = court_position_type:master_assassin_court_position
+				scope:ca_court_init_type = court_position_type:charioteer_court_position
+				scope:ca_court_init_type = court_position_type:akolouthos_court_position
+				scope:ca_court_init_type = court_position_type:executioner_court_position
+				scope:ca_court_init_type = court_position_type:food_taster_court_position
+				scope:ca_court_init_type = court_position_type:garuda_court_position
+				scope:ca_court_init_type = court_position_type:boyan_court_position
+				scope:ca_court_init_type = court_position_type:cherbi_court_position
+			}
+		}
+		value = ca_court_init_combatant_female_chance
+	}
+}

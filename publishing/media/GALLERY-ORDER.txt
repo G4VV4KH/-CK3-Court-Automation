@@ -1,0 +1,11 @@
+Court Automation — gallery order
+1. Court tools: three shortcuts in the court panel.
+2. One automation policy for all court positions.
+3. Court Init: current monthly salaries and the full-court estimate.
+4. Bare Knights: fill the knight roster with randomly skilled newcomers.
+
+Main Steam preview: thumbnail.png (512x512, below 1 MB).
+Square catalogue cover: cover-square.png (1024x1024).
+Paradox cover: cover-paradox.jpg (1920x1080); PNG master also provided.
+Gallery uploads: GALLERY/*.jpg, authentic aspect ratio, below 1 MB each.
+Original captures and image-generation masters: ORIGINALS/, outside runtime.

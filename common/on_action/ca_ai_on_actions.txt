@@ -1,0 +1,10 @@
+﻿# The engine distributes this pulse across playable (count+) characters.
+# Append a named action; never scan every ruler or replace vanilla pulse effects.
+yearly_playable_pulse = {
+	on_actions = { ca_ai_yearly_support }
+}
+
+ca_ai_yearly_support = {
+	trigger = { ca_ai_support_eligible_trigger = yes }
+	effect = { ca_ai_yearly_support_effect = yes }
+}

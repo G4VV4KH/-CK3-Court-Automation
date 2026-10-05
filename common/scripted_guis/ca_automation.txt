@@ -1,0 +1,12 @@
+﻿# Only visibility is saved on the character; batch state remains local to the GUI.
+ca_automation_close = {
+	scope = character
+	is_valid = { is_ai = no }
+	effect = {
+		if = {
+			limit = { has_variable = ca_automation_window }
+			remove_variable = ca_automation_window
+		}
+	}
+}
+

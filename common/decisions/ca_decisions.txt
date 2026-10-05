@@ -1,0 +1,76 @@
+﻿# Player-only, on-demand tools. No AI polling or recurring character generation.
+ca_automation_decision = {
+	picture = { reference = "gfx/interface/illustrations/decisions/decision_byz_throne.dds" }
+	decision_group_type = ca_court_automation
+	desc = ca_automation_decision_desc
+	ai_check_interval = 0
+	is_shown = {
+		is_ai = no
+		is_landed = yes
+	}
+	effect = {
+		custom_tooltip = ca_automation_decision_effect
+		hidden_effect = { set_variable = { name = ca_automation_window value = 1 } }
+	}
+	ai_potential = { always = no }
+}
+
+ca_court_init_decision = {
+	picture = { reference = "gfx/interface/illustrations/decisions/decision_byz_throne.dds" }
+	decision_group_type = ca_court_automation
+	desc = ca_court_init_decision_desc
+	ai_check_interval = 0
+	is_shown = {
+		is_ai = no
+		is_landed = yes
+	}
+	is_valid = {
+		custom_tooltip = {
+			text = ca_court_init_vacancy_required
+			ca_court_init_has_vacancy_trigger = yes
+		}
+	}
+	effect = {
+		custom_tooltip = ca_court_init_decision_effect
+		hidden_effect = {
+			ca_court_init_effect = yes
+			send_interface_toast = {
+				title = ca_court_init_result_title
+				desc = ca_court_init_result_desc
+				left_icon = root
+			}
+		}
+	}
+	ai_potential = { always = no }
+}
+
+ca_bare_knights_decision = {
+	picture = { reference = "gfx/interface/illustrations/decisions/decision_invite_knights.dds" }
+	decision_group_type = ca_court_automation
+	desc = ca_bare_knights_decision_desc
+	ai_check_interval = 0
+	is_shown = {
+		is_ai = no
+		is_landed = yes
+		number_of_knights < max_number_of_knights
+	}
+	is_valid = {
+		custom_tooltip = {
+			text = ca_bare_knights_vacancy_required
+			number_of_knights < max_number_of_knights
+		}
+		exists = location
+	}
+	effect = {
+		custom_tooltip = ca_bare_knights_decision_effect
+		hidden_effect = {
+			ca_fill_knights_effect = yes
+			send_interface_toast = {
+				title = ca_bare_knights_result_title
+				desc = ca_bare_knights_result_desc
+				left_icon = root
+			}
+		}
+	}
+	ai_potential = { always = no }
+}

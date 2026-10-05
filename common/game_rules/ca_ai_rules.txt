@@ -1,0 +1,7 @@
+﻿# Annual, conservative assistance. This never exposes the player's bulk decisions to AI.
+ca_ai_support = {
+	default = ca_ai_conservative
+	categories = { tweaks }
+	ca_ai_conservative = { }
+	ca_ai_disabled = { }
+}

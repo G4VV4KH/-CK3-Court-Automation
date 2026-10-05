@@ -1,0 +1,119 @@
+{
+  "schema": 1,
+  "mod": "Court Automation",
+  "version": "0.2.1",
+  "date": "2026-10-05",
+  "artwork": "Generated with the built-in image_gen tool; medieval ruler magically conducting the user-supplied three-person court icon. Square original followed by a wide variant using the square composition as reference.",
+  "icon_reference": "User-supplied CK3 court icon. Reference only; preserved locally in ORIGINALS and not included as an independent runtime asset.",
+  "screenshots": "Four authentic 1920x1080 English screenshots supplied by the user from their GAME-PROD session. No gameplay content altered. Original PNG files retained byte-for-byte.",
+  "mechanical_exports": "System.Drawing: bicubic resampling of generated cover assets to platform dimensions; JPEG encoding of same-size screenshots at quality 90. No overlays, retouching or invented UI.",
+  "user_smoke_evidence": "User supplied screenshots and authorized publication. They visually establish court-group UI, selected automation policy and both decision descriptions; no separate save/reload or long-term AI result was explicitly reported.",
+  "public_credit": "Cover artwork was generated with AI.",
+  "files": [
+    {
+      "path": "cover-paradox.jpg",
+      "bytes": 617364,
+      "sha256": "6d7cd5bb61ec1412cc8838ff94b33ce2e3ea4f17dfcd831044a5aaffc5d82752",
+      "width": 1920,
+      "height": 1080
+    },
+    {
+      "path": "cover-paradox.png",
+      "bytes": 5092307,
+      "sha256": "30c78608800e00742f5e92708be98ebf91f1eaa42671be849cbbd87af932a7c0",
+      "width": 1920,
+      "height": 1080
+    },
+    {
+      "path": "cover-square.png",
+      "bytes": 2555339,
+      "sha256": "faeff8e5b0649e40b55d10d996e6fc3224b6d35dfa7bfc988a9c0f6168bf4f31",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "GALLERY/01-court-tools.jpg",
+      "bytes": 430660,
+      "sha256": "6b0529dd7cbf696eddca9ab6d4bc0003d44ce5c664848b2dcc861e5e9cc66e8d",
+      "width": 1920,
+      "height": 1080
+    },
+    {
+      "path": "GALLERY/02-automation-policy.jpg",
+      "bytes": 430837,
+      "sha256": "38a40b89254dbf862e4a68f6826baaf7915317d84db497545543a82ba82b27ff",
+      "width": 1920,
+      "height": 1080
+    },
+    {
+      "path": "GALLERY/03-court-init-salaries.jpg",
+      "bytes": 460946,
+      "sha256": "b999e7c3a7fda8861c3aab1701b3b4af04d0ba9bde216334578fd40f4a3848f9",
+      "width": 1920,
+      "height": 1080
+    },
+    {
+      "path": "GALLERY/04-bare-knights.jpg",
+      "bytes": 449758,
+      "sha256": "fdd772a2f63ad7c49e638c5116d20ffcaff722e47f73306e4cac0f6ef89f6594",
+      "width": 1920,
+      "height": 1080
+    },
+    {
+      "path": "ORIGINALS/01-court-tools.png",
+      "bytes": 3284174,
+      "sha256": "5ae516605c8c95d0af8f9f98201d7beb799731a41f329cf63c9bcfe6bf8740d1",
+      "width": 1920,
+      "height": 1080
+    },
+    {
+      "path": "ORIGINALS/02-automation-policy.png",
+      "bytes": 3182819,
+      "sha256": "370e93e57a04a9a456b93108d6a5e37e7d13fbbc0aec545c71146eccbf047436",
+      "width": 1920,
+      "height": 1080
+    },
+    {
+      "path": "ORIGINALS/03-court-init-salaries.png",
+      "bytes": 3305655,
+      "sha256": "0268d962d2e9a1ba1757543510f75dc152dc01e254490f98363fc6e356269301",
+      "width": 1920,
+      "height": 1080
+    },
+    {
+      "path": "ORIGINALS/04-bare-knights.png",
+      "bytes": 3273809,
+      "sha256": "4bb237170fca66d1055e9e59e947a3decaf28f7b5e94d677ba3c28c73a935f73",
+      "width": 1920,
+      "height": 1080
+    },
+    {
+      "path": "ORIGINALS/court-icon-reference.png",
+      "bytes": 1417,
+      "sha256": "64609a64e06eb57bf855c8f153061d8ba8ffd6a36490d1e5e385d4aba880ff48",
+      "width": 28,
+      "height": 23
+    },
+    {
+      "path": "ORIGINALS/cover-square-original.png",
+      "bytes": 2553510,
+      "sha256": "b0d69897f63ae77e45d97aeeac20014fa5d7494d1a1487d746356ed88fc4fe8a",
+      "width": 1254,
+      "height": 1254
+    },
+    {
+      "path": "ORIGINALS/cover-wide-original.png",
+      "bytes": 2594047,
+      "sha256": "381fbacc11c8e2b7a827bf1a24b12b19723d5502fbbe7c8a3095f9f047d0beca",
+      "width": 1672,
+      "height": 941
+    },
+    {
+      "path": "thumbnail.png",
+      "bytes": 661881,
+      "sha256": "dd199d357c3ae450208860e3548e9602be85b709294af8e949cf052e81918ec0",
+      "width": 512,
+      "height": 512
+    }
+  ]
+}

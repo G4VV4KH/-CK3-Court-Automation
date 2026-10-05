@@ -1,0 +1,132 @@
+﻿# Ruler scope. Counters describe the most recent eligible annual pass.
+# All public entry paths recheck rule/player/budget/cooldown restrictions.
+ca_ai_yearly_support_effect = {
+	if = {
+		limit = { ca_ai_support_eligible_trigger = yes }
+		add_character_flag = { flag = ca_ai_annual_support_cooldown days = 365 }
+		save_scope_as = ca_ai_owner
+		set_variable = { name = ca_ai_knights_created value = 0 }
+		set_variable = { name = ca_ai_court_candidates_created value = 0 }
+		set_variable = { name = ca_ai_knight_failed value = 0 }
+		ca_ai_supply_knights_effect = yes
+		set_variable = { name = ca_ai_best_position_score value = 0 }
+		clear_saved_scope = ca_ai_selected_type
+		ca_ai_select_court_role_effect = yes
+		ca_ai_generate_selected_court_candidate_effect = yes
+		remove_variable = ca_ai_best_position_score
+		clear_saved_scope = ca_ai_selected_type
+		clear_saved_scope = ca_ai_owner
+	}
+}
+
+# Internal helper shared by the annual path and the native vacancy fixture.
+# Requires ca_ai_selected_type from ca_ai_consider_court_role_effect, which has
+# already checked native desire, vacancy, affordability and missing candidates.
+ca_ai_generate_selected_court_candidate_effect = {
+	if = {
+		limit = { exists = scope:ca_ai_selected_type }
+		save_scope_as = ca_court_init_employer
+		scope:ca_ai_selected_type = { save_scope_as = ca_court_init_type }
+		set_variable = { name = ca_court_init_generated value = 0 }
+		clear_saved_scope = ca_court_init_candidate
+		ca_court_init_generate_candidate_effect = yes
+		set_variable = { name = ca_ai_court_candidates_created value = var:ca_court_init_generated }
+		# The engine evaluates its candidate score and makes the appointment.
+		# A surviving eligible courtier prevents another recruit for this role.
+		clear_saved_scope = ca_court_init_candidate
+		clear_saved_scope = ca_court_init_type
+		clear_saved_scope = ca_court_init_employer
+	}
+}
+
+# ROLE is a reviewed vanilla short type name. Native can_employ includes unlocks,
+# visibility and remaining capacity. Preserve all holders and existing candidates.
+ca_ai_consider_court_role_effect = {
+	if = {
+		limit = {
+			can_employ_court_position_type = $ROLE$_court_position
+			ca_ai_$ROLE$_position_score > var:ca_ai_best_position_score
+			ca_ai_role_affordable_trigger = { ROLE = $ROLE$ }
+		}
+		court_position_type:$ROLE$_court_position = { save_scope_as = ca_ai_considered_type }
+		if = {
+			limit = {
+				NOT = {
+					any_court_position_candidate = {
+						court_position_type = scope:ca_ai_considered_type
+						NOT = { has_court_position = $ROLE$_court_position }
+						would_be_valid_for_court_position = {
+							court_position = $ROLE$_court_position
+							employer = scope:ca_ai_owner
+						}
+					}
+				}
+			}
+			set_variable = { name = ca_ai_best_position_score value = ca_ai_$ROLE$_position_score }
+			scope:ca_ai_considered_type = { save_scope_as = ca_ai_selected_type }
+		}
+		clear_saved_scope = ca_ai_considered_type
+	}
+}
+
+# Same ordinary random template and native eligibility as Bare Knights, but the
+# annual bound is two regardless of the total deficit. Stop after any failure.
+# The native active-roster count is authoritative. is_potential_knight includes
+# forbidden characters; is_knight_permitted does not inspect that personal
+# Forbid status, so those predicates cannot safely veto help for a real deficit.
+ca_ai_supply_knights_effect = {
+	if = {
+		limit = {
+			number_of_knights < max_number_of_knights
+		}
+		save_scope_as = ca_knight_owner
+		if = {
+			limit = { exists = capital_province }
+			capital_province = { save_scope_as = ca_knight_location }
+		}
+		else = { location = { save_scope_as = ca_knight_location } }
+		while = {
+			count = 2
+			limit = { number_of_knights < max_number_of_knights var:ca_ai_knight_failed = 0 }
+			create_character = {
+				template = ca_bare_knight_character
+				location = scope:ca_knight_location
+				save_scope_as = ca_new_knight
+			}
+			scope:ca_new_knight = {
+				remove_trait = blind
+				remove_trait = incapable
+				if = {
+					limit = {
+						scope:ca_knight_owner.culture = { has_cultural_parameter = minimum_prowess_for_knights }
+						prowess < 12
+					}
+					while = {
+						count = 10
+						limit = { prowess < 12 }
+						add_prowess_skill = { value = 12 subtract = prowess }
+					}
+				}
+			}
+			add_courtier = scope:ca_new_knight
+			change_variable = { name = ca_ai_knights_created add = 1 }
+			if = {
+				limit = {
+					scope:ca_new_knight = {
+						is_courtier_of = scope:ca_knight_owner
+						can_be_knight_trigger = { ARMY_OWNER = scope:ca_knight_owner }
+						is_potential_knight = yes
+					}
+				}
+				scope:ca_new_knight = { set_knight_status = force }
+			}
+			if = {
+				limit = { NOT = { scope:ca_new_knight = { is_knight_of = scope:ca_knight_owner } } }
+				set_variable = { name = ca_ai_knight_failed value = 1 }
+			}
+		}
+		clear_saved_scope = ca_knight_owner
+		clear_saved_scope = ca_knight_location
+		clear_saved_scope = ca_new_knight
+	}
+}
