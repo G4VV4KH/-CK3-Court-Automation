@@ -2,7 +2,7 @@
 
 ## At a glance
 
-- 🟢 **Version 0.2.1** · Targets CK3 **1.20.0.3**.
+- 🟢 **Version 0.2.1** · Targets CK3 **1.20.0.4**.
 - 🟢 **Standalone:** no other mod required.
 - 🟢 One court automation picker, vacant court positions filled on demand, and random knights to fill your roster.
 - 🟢 **Languages:** English, French, German, Japanese, Korean, Polish, Russian, Simplified Chinese and Spanish.
