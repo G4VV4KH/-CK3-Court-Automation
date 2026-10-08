@@ -34,9 +34,10 @@ ca_court_init_decision = {
 		custom_tooltip = ca_court_init_decision_effect
 		hidden_effect = {
 			ca_court_init_effect = yes
+			save_scope_as = ca_result_recipient
 			send_interface_toast = {
 				title = ca_court_init_result_title
-				desc = ca_court_init_result_desc
+				custom_tooltip = ca_court_init_result_desc
 				left_icon = root
 			}
 		}
@@ -65,9 +66,10 @@ ca_bare_knights_decision = {
 		custom_tooltip = ca_bare_knights_decision_effect
 		hidden_effect = {
 			ca_fill_knights_effect = yes
+			save_scope_as = ca_result_recipient
 			send_interface_toast = {
 				title = ca_bare_knights_result_title
-				desc = ca_bare_knights_result_desc
+				custom_tooltip = ca_bare_knights_result_desc
 				left_icon = root
 			}
 		}

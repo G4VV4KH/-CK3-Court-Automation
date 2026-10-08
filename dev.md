@@ -1,6 +1,6 @@
 # Court Automation — developer notes
 
-Version 0.2.1 targets CK3 1.20.0.3. This repository is a portable, reviewed publication projection. Runtime files are at the repository root; canonical player copy is [publishing/description.en.md](publishing/description.en.md). Regenerate README with `python tools/render_readme.py`.
+Version 0.2.2 targets CK3 1.20.0.4. This repository is a portable, reviewed publication projection. Runtime files are at the repository root; canonical player copy is [publishing/description.en.md](publishing/description.en.md). Regenerate README with `python tools/render_readme.py`.
 
 ## Implementation
 
@@ -28,3 +28,9 @@ The author supplied the four English gameplay screenshots in the gallery from GA
 ## Media and provenance
 
 The four gallery images are authentic user-supplied screenshots. Cover artwork was generated with AI using a supplied CK3 court-icon reference, then exported to platform dimensions. [Media provenance](publishing/media/media-provenance.json) records hashes and transformations; original masters and the raw reference are retained in the maintainer's release evidence, outside runtime. Mod-specific code, interface additions, translations and publication text were generated with AI. Court-window integration adapts CK3 interface definitions by Paradox Interactive. No additional third-party license or reuse permission is granted by this record.
+
+## 0.2.2 notification context correction
+
+Court Init and Bare Knights now pass their result message through the native `custom_tooltip` toast field. Both decisions save the recipient as `ca_result_recipient`; their two result descriptions use that named scope in every supported language. This changes delivery and counter resolution, without changing appointment selection, recruitment, salaries, AI budgets or scheduling.
+
+The two descriptions retain the same wording in all nine languages. The other 47 localization values in each language and all unaffected runtime files retain the prior bytes. Unchanged literal and gameplay evidence may be inherited only through its recorded exact-source scope. Candidate-specific notification, salary and physician content evidence and the complete localization acceptance are maintained in release verification records. This portable source copy itself is not a native acceptance receipt; visual coverage remains separate.

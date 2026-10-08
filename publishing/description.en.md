@@ -2,7 +2,7 @@
 
 ## At a glance
 
-- 🟢 **Version 0.2.1** · Targets CK3 **1.20.0.4**.
+- 🟢 **Version 0.2.2** · Targets CK3 **1.20.0.4**.
 - 🟢 **Standalone:** no other mod required.
 - 🟢 One court automation picker, vacant court positions filled on demand, and random knights to fill your roster.
 - 🟢 **Languages:** English, French, German, Japanese, Korean, Polish, Russian, Simplified Chinese and Spanish.
@@ -84,6 +84,7 @@ Email: g4vv4kh@gmail.com
 - [Your Own Hegemony](https://steamcommunity.com/sharedfiles/filedetails/?id=3811201582) — found a custom hegemony.
 - [Vassalization Extended](https://steamcommunity.com/sharedfiles/filedetails/?id=3813943691) — choose Forced Vassalization terms without a county limit.
 - [Nomad Autorefill](https://steamcommunity.com/sharedfiles/filedetails/?id=3814793283) — automatically reinforce nomadic Men-at-Arms using herd or gold.
+- [Tax Collection Automation](https://steamcommunity.com/sharedfiles/filedetails/?id=3815381275) — automatically assign tax collectors and optimize tax jurisdictions.
 
 These mods are optional.
 
