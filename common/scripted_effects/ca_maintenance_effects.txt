@@ -1,0 +1,331 @@
+﻿# Player-owned maintenance. One save-persistent daily chain serves both options.
+# Turning Off deliberately leaves a queued marker until that tick consumes it.
+ca_next_native_policy_epoch_effect = {
+	if = {
+		limit = { has_variable = ca_native_policy_epoch }
+		change_variable = { name = ca_native_policy_epoch add = 1 }
+	}
+	else = { set_variable = { name = ca_native_policy_epoch value = 1 } }
+	remove_variable = ca_native_policy_ready
+}
+
+# A knight reset transaction belongs to this character and epoch. Each new
+# request, cancellation, actual player transfer, or auto-error invalidates old ACKs.
+ca_next_knight_reset_epoch_effect = {
+	if = {
+		limit = { has_variable = ca_knight_reset_epoch }
+		change_variable = { name = ca_knight_reset_epoch add = 1 }
+	}
+	else = { set_variable = { name = ca_knight_reset_epoch value = 1 } }
+	remove_variable = ca_knight_filters_ready
+	remove_variable = ca_knight_reset_pending
+}
+
+# Used by the daily/load/initial paths. An already queued request keeps its epoch
+# until the actual native GUI acknowledges it or the player cancels it.
+ca_request_knight_filter_reset_effect = {
+	if = {
+		limit = {
+			ca_player_maintenance_eligible_trigger = yes
+			has_variable = ca_auto_knights_enabled
+			NOT = { has_variable = ca_knight_filters_ready }
+			OR = {
+				NOT = { has_variable = ca_knight_reset_pending }
+				NOT = { has_variable = ca_knight_reset_epoch }
+			}
+		}
+		ca_next_knight_reset_epoch_effect = yes
+		set_variable = { name = ca_knight_reset_pending value = yes }
+		set_variable = { name = ca_auto_knights_initial_pending value = yes }
+	}
+}
+
+ca_schedule_maintenance_effect = {
+	if = {
+		limit = {
+			is_ai = no
+			is_alive = yes
+			OR = { has_variable = ca_auto_court_enabled has_variable = ca_auto_knights_enabled }
+			NOT = { has_variable = ca_maintenance_pending }
+		}
+		set_variable = { name = ca_maintenance_pending value = yes }
+		trigger_event = { on_action = ca_maintenance_tick days = 1 }
+	}
+}
+
+ca_automation_error_toast_effect = {
+	send_interface_toast = {
+		title = ca_automation_paused_error_title
+		custom_tooltip = ca_automation_paused_error_desc
+		left_icon = root
+	}
+}
+
+ca_player_fill_court_now_effect = {
+	if = {
+		limit = { ca_player_maintenance_eligible_trigger = yes }
+		ca_court_init_effect = yes
+		save_scope_as = ca_result_recipient
+		send_interface_toast = {
+			title = ca_court_init_result_title
+			custom_tooltip = ca_court_init_result_desc
+			left_icon = root
+		}
+	}
+}
+
+ca_auto_court_pass_effect = {
+	if = {
+		limit = {
+			ca_player_maintenance_eligible_trigger = yes
+			has_variable = ca_auto_court_enabled
+			has_variable = ca_native_policy_ready
+			ca_court_init_has_vacancy_trigger = yes
+		}
+		ca_check_native_policy_off_effect = yes
+		if = {
+			limit = { has_variable = ca_native_policy_mismatch }
+			# Never rely solely on the GUI's previous acknowledgment. A native
+			# command may have changed a role since that frame; hand it back.
+			set_variable = { name = ca_auto_court_initial_pending value = yes }
+			ca_next_native_policy_epoch_effect = yes
+		}
+		else = {
+			remove_variable = ca_auto_court_generation_failed
+			ca_court_init_effect = yes
+			if = {
+				limit = { var:ca_court_init_filled > 0 }
+				save_scope_as = ca_result_recipient
+				send_interface_toast = {
+					title = ca_court_init_result_title
+					custom_tooltip = ca_court_init_result_desc
+					left_icon = root
+				}
+			}
+			# An unsupported vacancy with no generated candidate is not an error.
+			# A generated but rejected candidate is: do not create another each day.
+			if = {
+				limit = { has_variable = ca_auto_court_generation_failed }
+				remove_variable = ca_auto_court_enabled
+				remove_variable = ca_auto_court_initial_pending
+				set_variable = { name = ca_native_restore_pending value = yes }
+				ca_next_native_policy_epoch_effect = yes
+				ca_automation_error_toast_effect = yes
+			}
+		}
+	}
+}
+
+ca_auto_knights_pass_effect = {
+	if = {
+		limit = {
+			ca_player_maintenance_eligible_trigger = yes
+			has_variable = ca_auto_knights_enabled
+		}
+		if = {
+			limit = { NOT = { has_variable = ca_knight_filters_ready } }
+			# Never create while the native reset is still awaiting fresh ACK.
+			ca_request_knight_filter_reset_effect = yes
+		}
+		else = {
+			if = {
+				limit = { number_of_knights < max_number_of_knights }
+				ca_fill_knights_effect = yes
+				if = {
+					limit = { var:ca_knights_filled > 0 }
+					save_scope_as = ca_result_recipient
+					send_interface_toast = {
+						title = ca_auto_knights_result_title
+						custom_tooltip = ca_auto_knights_result_desc
+						left_icon = root
+					}
+				}
+				if = {
+					limit = { var:ca_knights_failed > 0 }
+					remove_variable = ca_auto_knights_enabled
+					remove_variable = ca_auto_knights_initial_pending
+					ca_next_knight_reset_epoch_effect = yes
+					ca_automation_error_toast_effect = yes
+				}
+			}
+			# A reset-ready eligible player has processed the attempt, even if full.
+			remove_variable = ca_auto_knights_initial_pending
+		}
+	}
+}
+
+ca_toggle_auto_court_effect = {
+	if = {
+		limit = {
+			ca_player_maintenance_eligible_trigger = yes
+			NOT = { has_variable = ca_native_restore_pending }
+		}
+		if = {
+			limit = { has_variable = ca_auto_court_enabled }
+			# Early cancellation must leave not-yet-snapshotted native types as
+			# they are rather than applying an older bulk preference to them.
+			set_variable = { name = ca_native_preserve_unsaved value = yes }
+			remove_variable = ca_auto_court_enabled
+			remove_variable = ca_auto_court_initial_pending
+			set_variable = { name = ca_native_restore_pending value = yes }
+		}
+		else = {
+			# Snapshot real native policies in the GUI before disabling them.
+			clear_variable_list = ca_native_saved_all
+			clear_variable_list = ca_native_saved_event
+			clear_variable_list = ca_native_saved_best
+			clear_variable_list = ca_native_saved_best_event
+			remove_variable = ca_auto_court_generation_failed
+			set_variable = { name = ca_auto_court_enabled value = yes }
+			set_variable = { name = ca_auto_court_initial_pending value = yes }
+		}
+		ca_next_native_policy_epoch_effect = yes
+		ca_schedule_maintenance_effect = yes
+	}
+}
+
+ca_toggle_auto_knights_effect = {
+	if = {
+		limit = { ca_player_maintenance_eligible_trigger = yes }
+		# Both directions invalidate an in-flight native callback. Off leaves the
+		# personal filters cleared; there is no previous-filter snapshot/restore.
+		ca_next_knight_reset_epoch_effect = yes
+		if = {
+			limit = { has_variable = ca_auto_knights_enabled }
+			remove_variable = ca_auto_knights_enabled
+			remove_variable = ca_auto_knights_initial_pending
+		}
+		else = {
+			set_variable = { name = ca_auto_knights_enabled value = yes }
+			set_variable = { name = ca_knight_reset_pending value = yes }
+			set_variable = { name = ca_auto_knights_initial_pending value = yes }
+			# Only the owner/epoch-bound native ACK may enable the first fill.
+		}
+		ca_schedule_maintenance_effect = yes
+	}
+}
+
+# Called by the global GUI controller after every managed native mode is None
+# and any just-excluded role has acknowledged its one-time policy restoration.
+# This also permits the initial fill while paused, without a calendar advance.
+ca_check_native_policy_off_effect = {
+	remove_variable = ca_native_policy_mismatch
+	save_scope_as = ca_native_check_owner
+	every_court_position_type = {
+		save_scope_as = ca_native_check_type
+		scope:ca_native_check_owner = {
+			if = {
+				limit = {
+					ca_position_is_included_trigger = { POSITION = scope:ca_native_check_type }
+					NOT = { has_player_court_position_automation_none = scope:ca_native_check_type }
+				}
+				set_variable = { name = ca_native_policy_mismatch value = yes }
+			}
+		}
+	}
+	clear_saved_scope = ca_native_check_type
+	clear_saved_scope = ca_native_check_owner
+}
+
+ca_native_policy_ready_effect = {
+	if = {
+		limit = {
+			ca_player_maintenance_eligible_trigger = yes
+			has_variable = ca_auto_court_enabled
+			NOT = { has_variable_list = ca_native_release_pending }
+		}
+		ca_check_native_policy_off_effect = yes
+		if = {
+			limit = { NOT = { has_variable = ca_native_policy_mismatch } }
+			set_variable = { name = ca_native_policy_ready value = yes }
+			if = {
+				limit = { has_variable = ca_auto_court_initial_pending }
+				remove_variable = ca_auto_court_initial_pending
+				ca_auto_court_pass_effect = yes
+			}
+			ca_schedule_maintenance_effect = yes
+		}
+	}
+}
+
+ca_resume_maintenance_effect = {
+	# Same-owner ready state is save-persistent. An older/pending save requests
+	# native reset without waiting for a calendar day or trusting a cached sample.
+	ca_request_knight_filter_reset_effect = yes
+	ca_schedule_maintenance_effect = yes
+}
+
+# LIST holds static court-position-type scopes, not appointees or temporary GUI
+# strings. Copy the list from the previous player into the new root character.
+ca_copy_native_policy_list_effect = {
+	clear_variable_list = $LIST$
+	scope:previous_player_character = {
+		every_in_list = {
+			variable = $LIST$
+			save_scope_as = ca_inherited_position_type
+			scope:ca_new_player = {
+				add_to_variable_list = { name = $LIST$ target = scope:ca_inherited_position_type }
+			}
+		}
+	}
+}
+
+ca_player_changed_effect = {
+	if = {
+		limit = {
+			exists = scope:previous_player_character
+			NOT = { this = scope:previous_player_character }
+		}
+		save_scope_as = ca_new_player
+		# Preferences belong to the continuing player, not the heir's prior AI.
+		remove_variable = ca_auto_court_enabled
+		remove_variable = ca_auto_knights_enabled
+		remove_variable = ca_auto_court_initial_pending
+		remove_variable = ca_auto_knights_initial_pending
+		ca_next_knight_reset_epoch_effect = yes
+		remove_variable = ca_bulk_automation_policy
+		remove_variable = ca_auto_court_generation_failed
+		remove_variable = ca_native_restore_pending
+		remove_variable = ca_native_preserve_unsaved
+		if = {
+			limit = { scope:previous_player_character = { has_variable = ca_native_preserve_unsaved } }
+			set_variable = { name = ca_native_preserve_unsaved value = yes }
+		}
+		if = {
+			limit = { scope:previous_player_character = { has_variable = ca_auto_court_enabled } }
+			set_variable = { name = ca_auto_court_enabled value = yes }
+			set_variable = { name = ca_auto_court_initial_pending value = yes }
+		}
+		if = {
+			limit = { scope:previous_player_character = { has_variable = ca_auto_knights_enabled } }
+			set_variable = { name = ca_auto_knights_enabled value = yes }
+			set_variable = { name = ca_auto_knights_initial_pending value = yes }
+			set_variable = { name = ca_knight_reset_pending value = yes }
+		}
+		if = {
+			limit = { scope:previous_player_character = { has_variable = ca_bulk_automation_policy } }
+			set_variable = { name = ca_bulk_automation_policy value = scope:previous_player_character.var:ca_bulk_automation_policy }
+		}
+		ca_copy_native_policy_list_effect = { LIST = ca_native_saved_all }
+		ca_copy_native_policy_list_effect = { LIST = ca_native_saved_event }
+		ca_copy_native_policy_list_effect = { LIST = ca_native_saved_best }
+		ca_copy_native_policy_list_effect = { LIST = ca_native_saved_best_event }
+		ca_copy_native_policy_list_effect = { LIST = ca_excluded_court_positions }
+		ca_copy_native_policy_list_effect = { LIST = ca_native_release_pending }
+		ca_next_native_policy_epoch_effect = yes
+		scope:previous_player_character = {
+			# Its already queued tick remains bounded and consumes itself.
+			remove_variable = ca_auto_court_enabled
+			remove_variable = ca_auto_knights_enabled
+			remove_variable = ca_auto_court_initial_pending
+			remove_variable = ca_auto_knights_initial_pending
+			ca_next_knight_reset_epoch_effect = yes
+			remove_variable = ca_native_policy_ready
+		}
+		# Succession can still recalculate knight capacity after this on-action.
+		# Keep the first attempt pending for the new owner's native filter reset ACK.
+		ca_schedule_maintenance_effect = yes
+		clear_saved_scope = ca_inherited_position_type
+		clear_saved_scope = ca_new_player
+	}
+}

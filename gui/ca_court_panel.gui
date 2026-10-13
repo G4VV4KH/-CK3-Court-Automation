@@ -1,5 +1,5 @@
-﻿# Court tools entry point. The vanilla court window instantiates only this type;
-# all decision availability, costs, tooltips and confirmation remain native.
+﻿# Direct controls remain in Court positions. Advanced vanilla policies are
+# secondary; native mutation runs in the always-loaded background controller.
 types CourtAutomationPanelTypes {
 	type ca_court_panel = vbox {
 		layoutpolicy_horizontal = expanding
@@ -8,53 +8,173 @@ types CourtAutomationPanelTypes {
 		margin_right = 15
 		margin_top = 10
 		margin_bottom = 5
-		spacing = 5
+		spacing = 6
 		ignoreinvisible = yes
-		oncreate = "[BindFoldOutContext]"
-		oncreate = "[PdxGuiFoldOut.Fold]"
-
-		button_expandable_toggle_field = {
-			size = { 532 32 }
-			minimumsize = { 532 32 }
-			tooltip = "ca_court_panel_tooltip"
-			blockoverride "text" { text = "ca_court_panel_title" }
+		button_standard = {
+			name = ca_court_fill_now_button
+			size = { 532 36 }
+			minimumsize = { 532 36 }
+			text = ca_court_fill_now
+			tooltip = ca_court_fill_now_tt
+			enabled = "[GetScriptedGui('ca_court_fill_now').IsValid( GuiScope.SetRoot( GetPlayer.MakeScope ).End )]"
+			onclick = "[GetScriptedGui('ca_court_fill_now').Execute( GuiScope.SetRoot( GetPlayer.MakeScope ).End )]"
+		}
+		button_checkbox_label = {
+			name = ca_auto_court_toggle
+			layoutpolicy_horizontal = expanding
+			enabled = "[GetScriptedGui('ca_toggle_auto_court').IsValid( GuiScope.SetRoot( GetPlayer.MakeScope ).End )]"
+			onclick = "[GetScriptedGui('ca_toggle_auto_court').Execute( GuiScope.SetRoot( GetPlayer.MakeScope ).End )]"
+			tooltip = ca_auto_court_tt
+			blockoverride "checkbox" { checked = "[GetPlayer.MakeScope.GetVariable('ca_auto_court_enabled').IsSet]" }
+			blockoverride "text" { text = ca_auto_court_label max_width = 492 }
+		}
+		button_checkbox_label = {
+			name = ca_exclude_court_jester_toggle
+			layoutpolicy_horizontal = expanding
+			enabled = "[GetScriptedGui('ca_toggle_exclude_court_jester').IsValid( GuiScope.SetRoot( GetPlayer.MakeScope ).End )]"
+			onclick = "[GetScriptedGui('ca_toggle_exclude_court_jester').Execute( GuiScope.SetRoot( GetPlayer.MakeScope ).End )]"
+			tooltip = ca_exclude_court_jester_tt
+			blockoverride "checkbox" { checked = "[GetScriptedGui('ca_is_court_jester_excluded').IsValid( GuiScope.SetRoot( GetPlayer.MakeScope ).End )]" }
+			blockoverride "text" { text = ca_exclude_court_jester_label max_width = 492 }
+		}
+		hbox = {
+			layoutpolicy_horizontal = expanding
+			spacing = 10
+			button_checkbox_label = {
+				name = ca_auto_knights_toggle
+				layoutpolicy_horizontal = expanding
+				enabled = "[GetScriptedGui('ca_toggle_auto_knights').IsValid( GuiScope.SetRoot( GetPlayer.MakeScope ).End )]"
+				onclick = "[GetScriptedGui('ca_toggle_auto_knights').Execute( GuiScope.SetRoot( GetPlayer.MakeScope ).End )]"
+				tooltip = ca_auto_knights_tt
+				blockoverride "checkbox" { checked = "[GetPlayer.MakeScope.GetVariable('ca_auto_knights_enabled').IsSet]" }
+				blockoverride "text" { text = ca_auto_knights_label max_width = 340 }
+			}
+			text_single = {
+				size = { 132 30 }
+				minimumsize = { 132 30 }
+				maximumsize = { 132 30 }
+				autoresize = no
+				align = right|vcenter
+				fontsize = 15
+				text = ca_auto_knights_count
+				tooltip = ca_auto_knights_tt
+			}
 		}
 		vbox = {
 			layoutpolicy_horizontal = expanding
-			visible = "[PdxGuiFoldOut.IsUnfolded]"
 			spacing = 5
-			button_decision_entry = {
-				name = "ca_automation_decision_court_shortcut"
-				datacontext = "[GetDecisionWithKey('ca_automation_decision')]"
-				layoutpolicy_horizontal = expanding
-				# Keep all three entries discoverable; the full knight roster
-				# disables its shortcut until the decision becomes visible again.
-				enabled = "[Decision.IsShownForPlayer]"
-				using = tooltip_se
-				blockoverride "button_size" { size = { 532 44 } }
-				onclick = "[OpenGameViewData( 'decision_detail', Decision.Self )]"
+			ignoreinvisible = yes
+			oncreate = "[BindFoldOutContext]"
+			oncreate = "[PdxGuiFoldOut.Fold]"
+			button_expandable_toggle_field = {
+				name = ca_advanced_toggle
+				size = { 532 30 }
+				minimumsize = { 532 30 }
+				blockoverride "text" { text = ca_advanced_title }
 			}
-			button_decision_entry = {
-				name = "ca_court_init_decision_court_shortcut"
-				datacontext = "[GetDecisionWithKey('ca_court_init_decision')]"
+			vbox = {
 				layoutpolicy_horizontal = expanding
-				# Keep all three entries discoverable; the full knight roster
-				# disables its shortcut until the decision becomes visible again.
-				enabled = "[Decision.IsShownForPlayer]"
-				using = tooltip_se
-				blockoverride "button_size" { size = { 532 44 } }
-				onclick = "[OpenGameViewData( 'decision_detail', Decision.Self )]"
-			}
-			button_decision_entry = {
-				name = "ca_bare_knights_decision_court_shortcut"
-				datacontext = "[GetDecisionWithKey('ca_bare_knights_decision')]"
-				layoutpolicy_horizontal = expanding
-				# Keep all three entries discoverable; the full knight roster
-				# disables its shortcut until the decision becomes visible again.
-				enabled = "[Decision.IsShownForPlayer]"
-				using = tooltip_se
-				blockoverride "button_size" { size = { 532 44 } }
-				onclick = "[OpenGameViewData( 'decision_detail', Decision.Self )]"
+				visible = "[PdxGuiFoldOut.IsUnfolded]"
+				spacing = 5
+				hbox = {
+					spacing = 5
+					button_standard = {
+						name = ca_bulk_policy_none_button
+						size = { 129 48 }
+						minimumsize = { 129 48 }
+						maximumsize = { 129 48 }
+						text = ca_automation_mode_none
+						tooltip = "[Select_CString( GetPlayer.MakeScope.GetVariable('ca_auto_court_enabled').IsSet, Localize('ca_native_policy_locked_tt'), Localize('ca_automation_mode_none_tt') )]"
+						enabled = "[GetScriptedGui('ca_bulk_policy_none').IsValid( GuiScope.SetRoot( GetPlayer.MakeScope ).End )]"
+						down = "[And( GetPlayer.MakeScope.GetVariable('ca_bulk_automation_policy').IsSet, EqualTo_CFixedPoint(GetPlayer.MakeScope.GetVariable('ca_bulk_automation_policy').GetValue, '(CFixedPoint)0') )]"
+						onclick = "[GetScriptedGui('ca_bulk_policy_none').Execute( GuiScope.SetRoot( GetPlayer.MakeScope ).End )]"
+						buttonText = {
+							text_multi = {
+								text = ca_automation_mode_none
+								size = { 100% 100% }
+								margin = { 8 3 }
+								align = center|vcenter
+								fontsize = 14
+								default_format = "#clickable"
+								alwaystransparent = yes
+							}
+						}
+					}
+					button_standard = {
+						name = ca_bulk_policy_event_button
+						size = { 129 48 }
+						minimumsize = { 129 48 }
+						maximumsize = { 129 48 }
+						text = ca_automation_mode_event
+						tooltip = "[Select_CString( GetPlayer.MakeScope.GetVariable('ca_auto_court_enabled').IsSet, Localize('ca_native_policy_locked_tt'), Localize('ca_automation_mode_event_tt') )]"
+						enabled = "[GetScriptedGui('ca_bulk_policy_event').IsValid( GuiScope.SetRoot( GetPlayer.MakeScope ).End )]"
+						down = "[And( GetPlayer.MakeScope.GetVariable('ca_bulk_automation_policy').IsSet, EqualTo_CFixedPoint(GetPlayer.MakeScope.GetVariable('ca_bulk_automation_policy').GetValue, '(CFixedPoint)1') )]"
+						onclick = "[GetScriptedGui('ca_bulk_policy_event').Execute( GuiScope.SetRoot( GetPlayer.MakeScope ).End )]"
+						buttonText = {
+							text_multi = {
+								text = ca_automation_mode_event
+								size = { 100% 100% }
+								margin = { 8 3 }
+								align = center|vcenter
+								fontsize = 14
+								default_format = "#clickable"
+								alwaystransparent = yes
+							}
+						}
+					}
+					button_standard = {
+						name = ca_bulk_policy_best_button
+						size = { 129 48 }
+						minimumsize = { 129 48 }
+						maximumsize = { 129 48 }
+						text = ca_automation_mode_best
+						tooltip = "[Select_CString( GetPlayer.MakeScope.GetVariable('ca_auto_court_enabled').IsSet, Localize('ca_native_policy_locked_tt'), Localize('ca_automation_mode_best_tt') )]"
+						enabled = "[GetScriptedGui('ca_bulk_policy_best').IsValid( GuiScope.SetRoot( GetPlayer.MakeScope ).End )]"
+						down = "[And( GetPlayer.MakeScope.GetVariable('ca_bulk_automation_policy').IsSet, EqualTo_CFixedPoint(GetPlayer.MakeScope.GetVariable('ca_bulk_automation_policy').GetValue, '(CFixedPoint)2') )]"
+						onclick = "[GetScriptedGui('ca_bulk_policy_best').Execute( GuiScope.SetRoot( GetPlayer.MakeScope ).End )]"
+						buttonText = {
+							text_multi = {
+								text = ca_automation_mode_best
+								size = { 100% 100% }
+								margin = { 8 3 }
+								align = center|vcenter
+								fontsize = 14
+								default_format = "#clickable"
+								alwaystransparent = yes
+							}
+						}
+					}
+					button_standard = {
+						name = ca_bulk_policy_best_event_button
+						size = { 129 48 }
+						minimumsize = { 129 48 }
+						maximumsize = { 129 48 }
+						text = ca_automation_mode_best_event
+						tooltip = "[Select_CString( GetPlayer.MakeScope.GetVariable('ca_auto_court_enabled').IsSet, Localize('ca_native_policy_locked_tt'), Localize('ca_automation_mode_best_event_tt') )]"
+						enabled = "[GetScriptedGui('ca_bulk_policy_best_event').IsValid( GuiScope.SetRoot( GetPlayer.MakeScope ).End )]"
+						down = "[And( GetPlayer.MakeScope.GetVariable('ca_bulk_automation_policy').IsSet, EqualTo_CFixedPoint(GetPlayer.MakeScope.GetVariable('ca_bulk_automation_policy').GetValue, '(CFixedPoint)3') )]"
+						onclick = "[GetScriptedGui('ca_bulk_policy_best_event').Execute( GuiScope.SetRoot( GetPlayer.MakeScope ).End )]"
+						buttonText = {
+							text_multi = {
+								text = ca_automation_mode_best_event
+								size = { 100% 100% }
+								margin = { 8 3 }
+								align = center|vcenter
+								fontsize = 14
+								default_format = "#clickable"
+								alwaystransparent = yes
+							}
+						}
+					}
+				}
+				text_multi = {
+					visible = "[GetPlayer.MakeScope.GetVariable('ca_auto_court_enabled').IsSet]"
+					text = ca_native_policy_locked_tt
+					max_width = 532
+					autoresize = yes
+					fontsize = 14
+					default_format = "#weak"
+				}
 			}
 		}
 	}

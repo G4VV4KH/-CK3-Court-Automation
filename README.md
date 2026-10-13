@@ -2,67 +2,79 @@
 
 ## At a glance
 
-- 🟢 **Version 0.2.2** · Targets CK3 **1.20.0.4**.
+- 🟢 **Version 0.3.0** · Targets CK3 **1.20.1**.
 - 🟢 **Standalone:** no other mod required.
-- 🟢 One court automation picker, vacant court positions filled on demand, and random knights to fill your roster.
+- 🟢 Fill court vacancies now, maintain court and knight rosters, or set native vacancy policies in bulk.
 - 🟢 **Languages:** English, French, German, Japanese, Korean, Polish, Russian, Simplified Chinese and Spanish.
-- 🟢 Conservative AI assistance is enabled by default and can be disabled with a game rule.
-- 🔴 Creates new characters without a recruitment fee. Court positions retain their normal salaries.
-- 🔴 Court Init covers vanilla court positions, including available DLC positions. Adventurer camp offices and positions added by other mods are outside its scope.
+- 🟢 Optional Court Jester exclusion; conservative AI assistance enabled by default.
+- 🔴 Creates characters without a recruitment fee. Court positions retain normal salaries.
+- 🔴 Automatic knight recruitment clears and locks personal knight filters while enabled.
+- 🔴 Covers vanilla court positions, including available DLC positions. Adventurer camp offices and mod-added positions are outside its scope.
 
 ## A court ready to serve
 
-Choose how future court vacancies should be handled, put your current court in order, and bring in fresh faces when there are not enough people to fill the ranks.
+Fill vacancies as your realm changes, and bring in fresh faces when your court runs short.
 
-## Court Automation
+## Fill and maintain your court
 
-Choose one of the game's four existing policies for court positions: no automation, suggest candidates, appoint the best eligible candidate, or appoint the best and notify when nobody is available. The picker shows each position's actual current policy.
+**Fill court now** and **Court Init** fill vacancies with the best eligible candidates, considering specialised positions first. Existing holders keep their jobs.
 
-These policies apply when a position becomes vacant. They do not continuously replace serving courtiers with better candidates.
+If nobody qualifies, a random courtier is created with mandatory qualifications; low aptitude is possible. Positions fill to normal capacity. Favored Minister needs an existing eligible councillor; Garuda needs an actual knight within the knight limit.
 
-## Court Init
+**Keep court filled** suspends native policies, fills vacancies even while paused, then checks daily, including new unlocks, dismissals and deaths. Turning it off restores each included position's previous policy, including mixed settings.
 
-Fill currently available court-position slots. Each vacancy goes to the eligible candidate with the highest aptitude at that point in the assignment order. Specialised positions are considered before general ones. Existing holders keep their jobs.
+## Leave the Court Jester to you
 
-If no eligible candidate exists, the mod creates a courtier with random skills and traits, adding only the qualifications that the position requires. New courtiers can have low aptitude. Positions with several holders are filled to their normal capacity.
+**Exclude the Court Jester**, unchecked by default, skips the position in Court Init, Fill court now, Keep court filled and bulk policy changes. Serving jesters stay in place; manual and native appointments remain available.
 
-The ruler's normal position unlocks still apply. The decision does not replace councillors: Favored Minister needs an eligible existing councillor. Garuda appointments require actual knights and remain subject to the knight limit. The result reports appointments, new courtiers, and any vacancies left unresolved.
+Excluding it while Keep court filled is on restores its pre-automation native policy. The exclusion follows your player character through inheritance.
 
-## Bare Knights
+## Native vacancy policies
 
-Recruit newcomers until your current knight roster reaches its limit. Their skills and personalities are random; weak fighters are possible. Only mandatory requirements, such as martial gender rules or a cultural minimum prowess, are guaranteed.
+The four labelled buttons under **Advanced: native policies** select no automation, suggest candidates, appoint the best, or appoint the best and notify when nobody qualifies. Bulk changes skip excluded positions.
 
-Newcomers join your court and are forced into knight service. The decision is available only while the roster has empty places. For the player, recruitment happens only when this decision is used.
+These policies handle vacancies without replacing holders. Turn off Keep court filled for bulk changes; an excluded jester's native policy remains independently available.
+
+## Keep your knights filled
+
+**Keep knights filled** recruits missing knights and checks daily. It resets minimum prowess to zero, clears house, dynasty and vassal-rank restrictions, and enables all permission checkboxes. These controls stay locked while enabled.
+
+Random newcomers are forced to serve and may be weak. Mandatory cultural, religious and other requirements still apply. Existing individual knight statuses stay unchanged. Recruitment starts after the filter reset, even while paused.
+
+Turning this off unlocks the filters without restoring their old values. **Bare Knights** remains a one-time recruitment decision while places are empty and no filter reset is pending.
 
 ## Plan your court budget
 
-Court Init shows current monthly base salaries and an estimate for a fully staffed court, separated by currency. The estimate respects currently available positions and existing holders. Personal discounts and future changes can affect the final amount; paid court-position tasks are not included in these base salary figures.
+Salary estimates show current monthly base costs and the increase for included vacancies, by currency. An excluded jester vacancy adds nothing; an existing salary remains included. Personal discounts can change the result; paid tasks are excluded.
 
 ## Help for AI courts
 
-A game rule controls conservative assistance for AI rulers. With assistance enabled, an eligible ruler can receive up to two missing knights and one court-position candidate per year. Court recruitment checks the ruler's budget and the position's normal AI priorities. Existing eligible court-position candidates take precedence over creating more people; final court appointments remain with the game's AI. This assistance excludes Favored Minister and Garuda.
+A game rule enables conservative AI help: up to two missing knights and one affordable court candidate yearly. Existing eligible candidates take precedence; normal AI decides appointments. Favored Minister and Garuda are excluded.
 
 ## Getting started
 
-1. Enable Court Automation in your CK3 playset and play a landed ruler.
-2. Open **Court → Court positions → Court tools**, or **Decisions → Court Automation**.
-3. Use **Court Automation** for future vacancy policies, **Court Init** for current court vacancies, or **Bare Knights** for missing knights.
+1. Enable Court Automation and play a landed ruler.
+2. Open **Court → Court positions → Court tools**.
+3. Use **Fill court now**, enable either maintenance option, or check **Exclude the Court Jester** to handle that position separately.
+4. Open **Advanced: native policies** for bulk changes while Keep court filled is off. Court Init and Bare Knights also remain in Decisions.
 
 ## Compatibility and load order
 
-No other mod is required. DLC-specific positions are considered only when the game makes them available to the ruler.
+No other mod is required. Normal ruler and DLC unlocks apply.
 
-The mod adds its own decisions, scripts, and interface. Integrating the collapsible tools group into the Court panel requires one small addition to `gui/window_court.gui`. Another mod replacing that file needs a compatibility patch to retain both interfaces; load order alone cannot combine them. Mods that change court-position eligibility, salaries, capacities, or knight rules can affect the result. There is no general compatibility guarantee for overhauls or custom positions.
+The mod modifies `gui/window_court.gui` and `gui/window_knights.gui`. Other replacements need a compatibility patch; load order alone cannot combine them. Changed eligibility, salaries, capacities or knight rules can affect results. No general overhaul compatibility is guaranteed.
 
 ## Saves and known limits
 
-Created characters, appointments, forced knight preferences, and the game's native automation settings are real campaign changes. Disabling this mod does not reverse them.
+Removing the mod does not undo characters, appointments or native settings. Turn off Keep court filled first to restore saved policies. Turning off Keep knights filled leaves filters reset.
 
-Court Init preserves existing appointees. It chooses the best remaining candidate in a fixed order rather than solving a global assignment problem across mutually exclusive jobs. A candidate required to be a councillor or an active knight must still satisfy that native requirement.
+Preferences and saved court policies follow your player character through inheritance. An error stops the affected automatic action; inspect your court before retrying.
+
+Court filling chooses the best remaining candidate in a fixed order, not a global optimum across mutually exclusive jobs. Mandatory councillor and active-knight requirements still apply.
 
 ## Feedback and support
 
-For a report, include your CK3 version, enabled mods, ruler culture and government, the decision used, and the position or knight requirement involved.
+For a report, include your CK3 version, enabled mods, ruler culture and government, the control or decision used, and the position or knight requirement involved.
 
 [Report an issue on GitHub](https://github.com/G4VV4KH/-CK3-Court-Automation/issues)
 

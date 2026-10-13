@@ -56,6 +56,14 @@ ca_bare_knights_decision = {
 		number_of_knights < max_number_of_knights
 	}
 	is_valid = {
+		OR = {
+			NOT = { has_variable = ca_auto_knights_enabled }
+			AND = {
+				has_variable = ca_knight_filters_ready
+				has_variable = ca_knight_reset_epoch
+				NOT = { has_variable = ca_knight_reset_pending }
+			}
+		}
 		custom_tooltip = {
 			text = ca_bare_knights_vacancy_required
 			number_of_knights < max_number_of_knights
@@ -65,12 +73,25 @@ ca_bare_knights_decision = {
 	effect = {
 		custom_tooltip = ca_bare_knights_decision_effect
 		hidden_effect = {
-			ca_fill_knights_effect = yes
-			save_scope_as = ca_result_recipient
-			send_interface_toast = {
-				title = ca_bare_knights_result_title
-				custom_tooltip = ca_bare_knights_result_desc
-				left_icon = root
+			# The legacy decision must not bypass an active native-filter reset.
+			if = {
+				limit = {
+					OR = {
+						NOT = { has_variable = ca_auto_knights_enabled }
+						AND = {
+							has_variable = ca_knight_filters_ready
+							has_variable = ca_knight_reset_epoch
+							NOT = { has_variable = ca_knight_reset_pending }
+						}
+					}
+				}
+				ca_fill_knights_effect = yes
+				save_scope_as = ca_result_recipient
+				send_interface_toast = {
+					title = ca_bare_knights_result_title
+					custom_tooltip = ca_bare_knights_result_desc
+					left_icon = root
+				}
 			}
 		}
 	}

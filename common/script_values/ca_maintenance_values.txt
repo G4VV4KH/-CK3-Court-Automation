@@ -1,0 +1,2 @@
+﻿ca_current_knight_count = { value = number_of_knights }
+ca_max_knight_count = { value = max_number_of_knights }

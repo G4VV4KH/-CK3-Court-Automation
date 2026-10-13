@@ -1,0 +1,7 @@
+﻿# Owner scope. Static type scopes make this extensible to further exclusions.
+# Missing list means all positions are included; existing saves keep their behavior.
+ca_position_is_included_trigger = {
+	NOT = {
+		is_target_in_variable_list = { name = ca_excluded_court_positions target = $POSITION$ }
+	}
+}

@@ -8,7 +8,10 @@
 # already occupied slot. CAPACITY is a reviewed literal (at most 3 in vanilla).
 ca_court_init_fill_type_effect = {
 	if = {
-		limit = { can_employ_court_position_type = $POSITION$ }
+		limit = {
+			can_employ_court_position_type = $POSITION$
+			ca_position_is_included_trigger = { POSITION = court_position_type:$POSITION$ }
+		}
 		set_variable = { name = ca_court_init_slots_to_fill value = $CAPACITY$ }
 		every_court_position_holder = {
 			type = $POSITION$
@@ -33,8 +36,12 @@ ca_court_init_fill_type_effect = {
 # POSITION is a literal type, needed by aptitude_score's suffix.
 ca_court_init_fill_slot_effect = {
 	if = {
-		limit = { can_employ_court_position_type = $POSITION$ }
+		limit = {
+			can_employ_court_position_type = $POSITION$
+			ca_position_is_included_trigger = { POSITION = court_position_type:$POSITION$ }
+		}
 		clear_saved_scope = ca_court_init_candidate
+		remove_variable = ca_court_init_slot_generated
 		court_position_type:$POSITION$ = { save_scope_as = ca_court_init_type }
 		ordered_court_position_candidate = {
 			court_position_type = scope:ca_court_init_type
@@ -107,6 +114,23 @@ ca_court_init_fill_slot_effect = {
 			else = { change_variable = { name = ca_court_init_unfilled add = 1 } }
 		}
 		else = { change_variable = { name = ca_court_init_unfilled add = 1 } }
+		if = {
+			limit = {
+				has_variable = ca_auto_court_enabled
+				has_variable = ca_court_init_slot_generated
+				OR = {
+					NOT = { exists = scope:ca_court_init_candidate }
+					scope:ca_court_init_candidate ?= {
+						NOT = { is_court_position_employer = {
+							court_position = $POSITION$
+							who = scope:ca_court_init_employer
+						} }
+					}
+				}
+			}
+			set_variable = { name = ca_auto_court_generation_failed value = yes }
+		}
+		remove_variable = ca_court_init_slot_generated
 		clear_saved_scope = ca_court_init_candidate
 	}
 }
@@ -193,6 +217,7 @@ ca_court_init_generate_candidate_effect = {
 		}
 	}
 	change_variable = { name = ca_court_init_generated add = 1 }
+	set_variable = { name = ca_court_init_slot_generated value = yes }
 	clear_saved_scope = ca_court_init_recruit_culture
 	clear_saved_scope = ca_court_init_recruit_faith
 	clear_saved_scope = ca_court_init_recruit_rite
@@ -207,19 +232,6 @@ ca_court_init_prepare_candidate_effect = {
 	remove_trait = devoted
 	remove_trait = eunuch_1
 	remove_trait = beardless_eunuch
-	if = {
-		limit = {
-			OR = {
-				scope:ca_court_init_type = court_position_type:boyan_court_position
-				scope:ca_court_init_type = court_position_type:yurtchi_court_position
-				scope:ca_court_init_type = court_position_type:cherbi_court_position
-				scope:ca_court_init_type = court_position_type:yeke_jarquchi_court_position
-				scope:ca_court_init_type = court_position_type:foreign_emissary_court_position
-				scope:ca_court_init_type = court_position_type:keeper_of_the_horses_court_position
-			}
-		}
-		change_government = nomad_government
-	}
 	if = {
 		limit = { scope:ca_court_init_type = court_position_type:chief_eunuch_court_position }
 		add_trait = eunuch_1

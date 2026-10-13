@@ -1,0 +1,46 @@
+﻿# POSITION is a static court-position-type scope. Incumbents are never touched.
+ca_forget_native_position_policy_effect = {
+	remove_list_variable = { name = ca_native_saved_all target = $POSITION$ }
+	remove_list_variable = { name = ca_native_saved_event target = $POSITION$ }
+	remove_list_variable = { name = ca_native_saved_best target = $POSITION$ }
+	remove_list_variable = { name = ca_native_saved_best_event target = $POSITION$ }
+}
+
+ca_toggle_court_position_exclusion_effect = {
+	if = {
+		limit = {
+			ca_player_maintenance_eligible_trigger = yes
+			NOT = { has_variable = ca_native_restore_pending }
+			NOT = { has_variable_list = ca_native_release_pending }
+			NOT = { has_variable = ca_auto_court_initial_pending }
+			OR = {
+				NOT = { has_variable = ca_auto_court_enabled }
+				has_variable = ca_native_policy_ready
+			}
+		}
+		if = {
+			limit = { ca_position_is_included_trigger = { POSITION = $POSITION$ } }
+			add_to_variable_list = { name = ca_excluded_court_positions target = $POSITION$ }
+			if = {
+				limit = {
+					has_variable = ca_auto_court_enabled
+					is_target_in_variable_list = { name = ca_native_saved_all target = $POSITION$ }
+				}
+				# Retain the old policy until a real native getter confirms release.
+				add_to_variable_list = { name = ca_native_release_pending target = $POSITION$ }
+			}
+			else = { ca_forget_native_position_policy_effect = { POSITION = $POSITION$ } }
+		}
+		else = {
+			remove_list_variable = { name = ca_excluded_court_positions target = $POSITION$ }
+			# Re-inclusion must capture the current native policy afresh.
+			ca_forget_native_position_policy_effect = { POSITION = $POSITION$ }
+		}
+		if = {
+			limit = { has_variable = ca_auto_court_enabled }
+			set_variable = { name = ca_auto_court_initial_pending value = yes }
+		}
+		ca_next_native_policy_epoch_effect = yes
+		ca_schedule_maintenance_effect = yes
+	}
+}

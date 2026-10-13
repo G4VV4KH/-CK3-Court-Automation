@@ -1,9 +1,7 @@
 ﻿# Court Automation picker, instantiated through scripted_widgets.
 # Entry decision: set_variable = { name = ca_automation_window value = 1 }
-# Four native getters drive one acknowledged transition at a time.
-# Each source mode can send at most one command per click. A denied command
-# cannot create a retry loop. Selecting the same button again is a bounded retry.
-# Workers use a full nonvirtual database datamodel, separately from visible rows.
+# Compatibility view only. Native mutation is owned by ca_native_automation.gui;
+# closing this window never cancels a saved policy or background maintenance.
 window = {
 	name = "ca_automation_window"
 	parentanchor = center
@@ -18,82 +16,10 @@ window = {
 	state = {
 		name = _show
 		using = Animation_FadeIn_Quick
-		on_start = "[GetVariableSystem.Clear('ca_automation_target_none')]"
-		on_start = "[GetVariableSystem.Clear('ca_automation_target_event')]"
-		on_start = "[GetVariableSystem.Clear('ca_automation_target_best')]"
-		on_start = "[GetVariableSystem.Clear('ca_automation_target_best_event')]"
 	}
 	state = {
 		name = _hide
 		using = Animation_FadeOut_Quick
-		on_start = "[GetVariableSystem.Clear('ca_automation_target_none')]"
-		on_start = "[GetVariableSystem.Clear('ca_automation_target_event')]"
-		on_start = "[GetVariableSystem.Clear('ca_automation_target_best')]"
-		on_start = "[GetVariableSystem.Clear('ca_automation_target_best_event')]"
-	}
-
-	# Native commands are never issued from a virtualized or filtered list.
-	widget = {
-		name = "ca_automation_all_workers"
-		size = { 1 1 }
-		alwaystransparent = yes
-		datamodel = "[GetAllCourtPositionTypes]"
-		datamodel_reuse_widgets = yes
-		item = {
-			widget = {
-				name = "ca_automation_worker"
-				size = { 1 1 }
-				alwaystransparent = yes
-				state = {
-					name = ca_automation_reset
-					alpha = 1
-					on_start = "[GetVariableSystem.Clear( Concatenate( 'ca_automation_seen_none_', CourtPositionType.GetKey ) )]"
-					on_start = "[GetVariableSystem.Clear( Concatenate( 'ca_automation_seen_event_', CourtPositionType.GetKey ) )]"
-					on_start = "[GetVariableSystem.Clear( Concatenate( 'ca_automation_seen_best_', CourtPositionType.GetKey ) )]"
-					on_start = "[GetVariableSystem.Clear( Concatenate( 'ca_automation_seen_best_event_', CourtPositionType.GetKey ) )]"
-				}
-				state = {
-					name = ca_automation_from_none
-					alpha = 1
-					trigger_when = "[And( And( And( GetPlayer.MakeScope.GetVariable('ca_automation_window').IsSet, And( Or( GetVariableSystem.Exists('ca_automation_target_none'), Or( GetVariableSystem.Exists('ca_automation_target_event'), Or( GetVariableSystem.Exists('ca_automation_target_best'), GetVariableSystem.Exists('ca_automation_target_best_event') ) ) ), Not( Or( And( GetVariableSystem.Exists('ca_automation_target_none'), CourtPositionType.HasAutomationNone( GetPlayer ) ), Or( And( GetVariableSystem.Exists('ca_automation_target_event'), CourtPositionType.HasAutomationShowEvent( GetPlayer ) ), Or( And( GetVariableSystem.Exists('ca_automation_target_best'), CourtPositionType.HasAutomationAssignBest( GetPlayer ) ), And( GetVariableSystem.Exists('ca_automation_target_best_event'), CourtPositionType.HasAutomationAssignBestOrEvent( GetPlayer ) ) ) ) ) ) ) ), And( CourtPositionType.HasAutomationNone( GetPlayer ), And( Not( GetVariableSystem.Exists( Concatenate( 'ca_automation_seen_none_', CourtPositionType.GetKey ) ) ), IsValidCommand( CourtPositionType.ToggleAutomationCmd ) ) ) ), Not( GetVariableSystem.Exists('ca_automation_target_none') ) )]"
-					on_start = "[GetVariableSystem.Set( Concatenate( 'ca_automation_seen_none_', CourtPositionType.GetKey ), 'yes' )]"
-					on_start = "[PostCommand( CourtPositionType.ToggleAutomationCmd )]"
-				}
-				state = {
-					name = ca_automation_from_event
-					alpha = 1
-					trigger_when = "[And( And( And( GetPlayer.MakeScope.GetVariable('ca_automation_window').IsSet, And( Or( GetVariableSystem.Exists('ca_automation_target_none'), Or( GetVariableSystem.Exists('ca_automation_target_event'), Or( GetVariableSystem.Exists('ca_automation_target_best'), GetVariableSystem.Exists('ca_automation_target_best_event') ) ) ), Not( Or( And( GetVariableSystem.Exists('ca_automation_target_none'), CourtPositionType.HasAutomationNone( GetPlayer ) ), Or( And( GetVariableSystem.Exists('ca_automation_target_event'), CourtPositionType.HasAutomationShowEvent( GetPlayer ) ), Or( And( GetVariableSystem.Exists('ca_automation_target_best'), CourtPositionType.HasAutomationAssignBest( GetPlayer ) ), And( GetVariableSystem.Exists('ca_automation_target_best_event'), CourtPositionType.HasAutomationAssignBestOrEvent( GetPlayer ) ) ) ) ) ) ) ), And( CourtPositionType.HasAutomationShowEvent( GetPlayer ), And( Not( GetVariableSystem.Exists( Concatenate( 'ca_automation_seen_event_', CourtPositionType.GetKey ) ) ), IsValidCommand( CourtPositionType.ToggleAutomationCmd ) ) ) ), Not( GetVariableSystem.Exists('ca_automation_target_none') ) )]"
-					on_start = "[GetVariableSystem.Set( Concatenate( 'ca_automation_seen_event_', CourtPositionType.GetKey ), 'yes' )]"
-					on_start = "[PostCommand( CourtPositionType.ToggleAutomationCmd )]"
-				}
-				state = {
-					name = ca_automation_from_best
-					alpha = 1
-					trigger_when = "[And( And( And( GetPlayer.MakeScope.GetVariable('ca_automation_window').IsSet, And( Or( GetVariableSystem.Exists('ca_automation_target_none'), Or( GetVariableSystem.Exists('ca_automation_target_event'), Or( GetVariableSystem.Exists('ca_automation_target_best'), GetVariableSystem.Exists('ca_automation_target_best_event') ) ) ), Not( Or( And( GetVariableSystem.Exists('ca_automation_target_none'), CourtPositionType.HasAutomationNone( GetPlayer ) ), Or( And( GetVariableSystem.Exists('ca_automation_target_event'), CourtPositionType.HasAutomationShowEvent( GetPlayer ) ), Or( And( GetVariableSystem.Exists('ca_automation_target_best'), CourtPositionType.HasAutomationAssignBest( GetPlayer ) ), And( GetVariableSystem.Exists('ca_automation_target_best_event'), CourtPositionType.HasAutomationAssignBestOrEvent( GetPlayer ) ) ) ) ) ) ) ), And( CourtPositionType.HasAutomationAssignBest( GetPlayer ), And( Not( GetVariableSystem.Exists( Concatenate( 'ca_automation_seen_best_', CourtPositionType.GetKey ) ) ), IsValidCommand( CourtPositionType.ToggleAutomationCmd ) ) ) ), Not( GetVariableSystem.Exists('ca_automation_target_none') ) )]"
-					on_start = "[GetVariableSystem.Set( Concatenate( 'ca_automation_seen_best_', CourtPositionType.GetKey ), 'yes' )]"
-					on_start = "[PostCommand( CourtPositionType.ToggleAutomationCmd )]"
-				}
-				state = {
-					name = ca_automation_from_best_event
-					alpha = 1
-					trigger_when = "[And( And( And( GetPlayer.MakeScope.GetVariable('ca_automation_window').IsSet, And( Or( GetVariableSystem.Exists('ca_automation_target_none'), Or( GetVariableSystem.Exists('ca_automation_target_event'), Or( GetVariableSystem.Exists('ca_automation_target_best'), GetVariableSystem.Exists('ca_automation_target_best_event') ) ) ), Not( Or( And( GetVariableSystem.Exists('ca_automation_target_none'), CourtPositionType.HasAutomationNone( GetPlayer ) ), Or( And( GetVariableSystem.Exists('ca_automation_target_event'), CourtPositionType.HasAutomationShowEvent( GetPlayer ) ), Or( And( GetVariableSystem.Exists('ca_automation_target_best'), CourtPositionType.HasAutomationAssignBest( GetPlayer ) ), And( GetVariableSystem.Exists('ca_automation_target_best_event'), CourtPositionType.HasAutomationAssignBestOrEvent( GetPlayer ) ) ) ) ) ) ) ), And( CourtPositionType.HasAutomationAssignBestOrEvent( GetPlayer ), And( Not( GetVariableSystem.Exists( Concatenate( 'ca_automation_seen_best_event_', CourtPositionType.GetKey ) ) ), IsValidCommand( CourtPositionType.ToggleAutomationCmd ) ) ) ), Not( GetVariableSystem.Exists('ca_automation_target_none') ) )]"
-					on_start = "[GetVariableSystem.Set( Concatenate( 'ca_automation_seen_best_event_', CourtPositionType.GetKey ), 'yes' )]"
-					on_start = "[PostCommand( CourtPositionType.ToggleAutomationCmd )]"
-				}
-				state = {
-					name = ca_automation_disable
-					alpha = 1
-					trigger_when = "[And( GetPlayer.MakeScope.GetVariable('ca_automation_window').IsSet, And( GetVariableSystem.Exists('ca_automation_target_none'), And( Not( CourtPositionType.HasAutomationNone( GetPlayer ) ), And( Not( GetVariableSystem.Exists( Concatenate( 'ca_automation_seen_none_', CourtPositionType.GetKey ) ) ), IsValidCommand( CourtPositionType.DisableAutomationCmd ) ) ) ) )]"
-					on_start = "[GetVariableSystem.Set( Concatenate( 'ca_automation_seen_none_', CourtPositionType.GetKey ), 'yes' )]"
-					on_start = "[PostCommand( CourtPositionType.DisableAutomationCmd )]"
-				}
-				state = {
-					name = ca_automation_idle
-					alpha = 1
-					trigger_when = "[Not( And( GetPlayer.MakeScope.GetVariable('ca_automation_window').IsSet, And( Or( GetVariableSystem.Exists('ca_automation_target_none'), Or( GetVariableSystem.Exists('ca_automation_target_event'), Or( GetVariableSystem.Exists('ca_automation_target_best'), GetVariableSystem.Exists('ca_automation_target_best_event') ) ) ), Not( Or( And( GetVariableSystem.Exists('ca_automation_target_none'), CourtPositionType.HasAutomationNone( GetPlayer ) ), Or( And( GetVariableSystem.Exists('ca_automation_target_event'), CourtPositionType.HasAutomationShowEvent( GetPlayer ) ), Or( And( GetVariableSystem.Exists('ca_automation_target_best'), CourtPositionType.HasAutomationAssignBest( GetPlayer ) ), And( GetVariableSystem.Exists('ca_automation_target_best_event'), CourtPositionType.HasAutomationAssignBestOrEvent( GetPlayer ) ) ) ) ) ) ) ) )]"
-				}
-			}
-		}
 	}
 
 	# Content width: 720 - 40 - 40 = 640. Fixed cells prevent localized text
@@ -107,10 +33,6 @@ window = {
 			layoutpolicy_horizontal = expanding
 			blockoverride "header_text" { text = "ca_automation_title" }
 			blockoverride "button_close" {
-				onclick = "[GetVariableSystem.Clear('ca_automation_target_none')]"
-				onclick = "[GetVariableSystem.Clear('ca_automation_target_event')]"
-				onclick = "[GetVariableSystem.Clear('ca_automation_target_best')]"
-				onclick = "[GetVariableSystem.Clear('ca_automation_target_best_event')]"
 				onclick = "[GetScriptedGui('ca_automation_close').Execute( GuiScope.SetRoot( GetPlayer.MakeScope ).End )]"
 			}
 		}
@@ -131,13 +53,9 @@ window = {
 				maximumsize = { 315 44 }
 				text = "ca_automation_mode_none"
 				tooltip = "ca_automation_mode_none_tt"
-				down = "[GetVariableSystem.Exists('ca_automation_target_none')]"
-					onclick = "[GetVariableSystem.Clear('ca_automation_target_none')]"
-					onclick = "[GetVariableSystem.Clear('ca_automation_target_event')]"
-					onclick = "[GetVariableSystem.Clear('ca_automation_target_best')]"
-					onclick = "[GetVariableSystem.Clear('ca_automation_target_best_event')]"
-					onclick = "[PdxGuiTriggerAllAnimations('ca_automation_reset')]"
-					onclick = "[GetVariableSystem.Set('ca_automation_target_none', 'yes')]"
+				down = "[And(GetPlayer.MakeScope.GetVariable('ca_bulk_automation_policy').IsSet, EqualTo_CFixedPoint(GetPlayer.MakeScope.GetVariable('ca_bulk_automation_policy').GetValue, '(CFixedPoint)0'))]"
+					enabled = "[GetScriptedGui('ca_bulk_policy_none').IsValid( GuiScope.SetRoot( GetPlayer.MakeScope ).End )]"
+				onclick = "[GetScriptedGui('ca_bulk_policy_none').Execute( GuiScope.SetRoot( GetPlayer.MakeScope ).End )]"
 			}
 			button_standard = {
 				size = { 315 44 }
@@ -145,13 +63,9 @@ window = {
 				maximumsize = { 315 44 }
 				text = "ca_automation_mode_event"
 				tooltip = "ca_automation_mode_event_tt"
-				down = "[GetVariableSystem.Exists('ca_automation_target_event')]"
-					onclick = "[GetVariableSystem.Clear('ca_automation_target_none')]"
-					onclick = "[GetVariableSystem.Clear('ca_automation_target_event')]"
-					onclick = "[GetVariableSystem.Clear('ca_automation_target_best')]"
-					onclick = "[GetVariableSystem.Clear('ca_automation_target_best_event')]"
-					onclick = "[PdxGuiTriggerAllAnimations('ca_automation_reset')]"
-					onclick = "[GetVariableSystem.Set('ca_automation_target_event', 'yes')]"
+				down = "[And(GetPlayer.MakeScope.GetVariable('ca_bulk_automation_policy').IsSet, EqualTo_CFixedPoint(GetPlayer.MakeScope.GetVariable('ca_bulk_automation_policy').GetValue, '(CFixedPoint)1'))]"
+					enabled = "[GetScriptedGui('ca_bulk_policy_event').IsValid( GuiScope.SetRoot( GetPlayer.MakeScope ).End )]"
+				onclick = "[GetScriptedGui('ca_bulk_policy_event').Execute( GuiScope.SetRoot( GetPlayer.MakeScope ).End )]"
 			}
 		}
 		hbox = {
@@ -163,13 +77,9 @@ window = {
 				maximumsize = { 315 44 }
 				text = "ca_automation_mode_best"
 				tooltip = "ca_automation_mode_best_tt"
-				down = "[GetVariableSystem.Exists('ca_automation_target_best')]"
-					onclick = "[GetVariableSystem.Clear('ca_automation_target_none')]"
-					onclick = "[GetVariableSystem.Clear('ca_automation_target_event')]"
-					onclick = "[GetVariableSystem.Clear('ca_automation_target_best')]"
-					onclick = "[GetVariableSystem.Clear('ca_automation_target_best_event')]"
-					onclick = "[PdxGuiTriggerAllAnimations('ca_automation_reset')]"
-					onclick = "[GetVariableSystem.Set('ca_automation_target_best', 'yes')]"
+				down = "[And(GetPlayer.MakeScope.GetVariable('ca_bulk_automation_policy').IsSet, EqualTo_CFixedPoint(GetPlayer.MakeScope.GetVariable('ca_bulk_automation_policy').GetValue, '(CFixedPoint)2'))]"
+					enabled = "[GetScriptedGui('ca_bulk_policy_best').IsValid( GuiScope.SetRoot( GetPlayer.MakeScope ).End )]"
+				onclick = "[GetScriptedGui('ca_bulk_policy_best').Execute( GuiScope.SetRoot( GetPlayer.MakeScope ).End )]"
 			}
 			button_standard = {
 				size = { 315 44 }
@@ -177,13 +87,9 @@ window = {
 				maximumsize = { 315 44 }
 				text = "ca_automation_mode_best_event"
 				tooltip = "ca_automation_mode_best_event_tt"
-				down = "[GetVariableSystem.Exists('ca_automation_target_best_event')]"
-					onclick = "[GetVariableSystem.Clear('ca_automation_target_none')]"
-					onclick = "[GetVariableSystem.Clear('ca_automation_target_event')]"
-					onclick = "[GetVariableSystem.Clear('ca_automation_target_best')]"
-					onclick = "[GetVariableSystem.Clear('ca_automation_target_best_event')]"
-					onclick = "[PdxGuiTriggerAllAnimations('ca_automation_reset')]"
-					onclick = "[GetVariableSystem.Set('ca_automation_target_best_event', 'yes')]"
+				down = "[And(GetPlayer.MakeScope.GetVariable('ca_bulk_automation_policy').IsSet, EqualTo_CFixedPoint(GetPlayer.MakeScope.GetVariable('ca_bulk_automation_policy').GetValue, '(CFixedPoint)3'))]"
+					enabled = "[GetScriptedGui('ca_bulk_policy_best_event').IsValid( GuiScope.SetRoot( GetPlayer.MakeScope ).End )]"
+				onclick = "[GetScriptedGui('ca_bulk_policy_best_event').Execute( GuiScope.SetRoot( GetPlayer.MakeScope ).End )]"
 			}
 		}
 		text_multi = {
@@ -279,8 +185,8 @@ window = {
 									autoresize = no
 									align = center
 									fontsize = 15
-									text = "[Select_CString( Or( And( GetVariableSystem.Exists('ca_automation_target_none'), CourtPositionType.HasAutomationNone( GetPlayer ) ), Or( And( GetVariableSystem.Exists('ca_automation_target_event'), CourtPositionType.HasAutomationShowEvent( GetPlayer ) ), Or( And( GetVariableSystem.Exists('ca_automation_target_best'), CourtPositionType.HasAutomationAssignBest( GetPlayer ) ), And( GetVariableSystem.Exists('ca_automation_target_best_event'), CourtPositionType.HasAutomationAssignBestOrEvent( GetPlayer ) ) ) ) ), Localize('ca_automation_applied'), Localize('ca_automation_pending') )]"
-									visible = "[Or( GetVariableSystem.Exists('ca_automation_target_none'), Or( GetVariableSystem.Exists('ca_automation_target_event'), Or( GetVariableSystem.Exists('ca_automation_target_best'), GetVariableSystem.Exists('ca_automation_target_best_event') ) ) )]"
+									text = "[Select_CString( Or( And( And(GetPlayer.MakeScope.GetVariable('ca_bulk_automation_policy').IsSet, EqualTo_CFixedPoint(GetPlayer.MakeScope.GetVariable('ca_bulk_automation_policy').GetValue, '(CFixedPoint)0')), CourtPositionType.HasAutomationNone( GetPlayer ) ), Or( And( And(GetPlayer.MakeScope.GetVariable('ca_bulk_automation_policy').IsSet, EqualTo_CFixedPoint(GetPlayer.MakeScope.GetVariable('ca_bulk_automation_policy').GetValue, '(CFixedPoint)1')), CourtPositionType.HasAutomationShowEvent( GetPlayer ) ), Or( And( And(GetPlayer.MakeScope.GetVariable('ca_bulk_automation_policy').IsSet, EqualTo_CFixedPoint(GetPlayer.MakeScope.GetVariable('ca_bulk_automation_policy').GetValue, '(CFixedPoint)2')), CourtPositionType.HasAutomationAssignBest( GetPlayer ) ), And( And(GetPlayer.MakeScope.GetVariable('ca_bulk_automation_policy').IsSet, EqualTo_CFixedPoint(GetPlayer.MakeScope.GetVariable('ca_bulk_automation_policy').GetValue, '(CFixedPoint)3')), CourtPositionType.HasAutomationAssignBestOrEvent( GetPlayer ) ) ) ) ), Localize('ca_automation_applied'), Localize('ca_automation_pending') )]"
+									visible = "[Or( And(GetPlayer.MakeScope.GetVariable('ca_bulk_automation_policy').IsSet, EqualTo_CFixedPoint(GetPlayer.MakeScope.GetVariable('ca_bulk_automation_policy').GetValue, '(CFixedPoint)0')), Or( And(GetPlayer.MakeScope.GetVariable('ca_bulk_automation_policy').IsSet, EqualTo_CFixedPoint(GetPlayer.MakeScope.GetVariable('ca_bulk_automation_policy').GetValue, '(CFixedPoint)1')), Or( And(GetPlayer.MakeScope.GetVariable('ca_bulk_automation_policy').IsSet, EqualTo_CFixedPoint(GetPlayer.MakeScope.GetVariable('ca_bulk_automation_policy').GetValue, '(CFixedPoint)2')), And(GetPlayer.MakeScope.GetVariable('ca_bulk_automation_policy').IsSet, EqualTo_CFixedPoint(GetPlayer.MakeScope.GetVariable('ca_bulk_automation_policy').GetValue, '(CFixedPoint)3')) ) ) )]"
 								}
 							}
 						}
@@ -295,10 +201,6 @@ window = {
 			button_standard = {
 				size = { 220 42 }
 				text = "ca_automation_close"
-				onclick = "[GetVariableSystem.Clear('ca_automation_target_none')]"
-				onclick = "[GetVariableSystem.Clear('ca_automation_target_event')]"
-				onclick = "[GetVariableSystem.Clear('ca_automation_target_best')]"
-				onclick = "[GetVariableSystem.Clear('ca_automation_target_best_event')]"
 				onclick = "[GetScriptedGui('ca_automation_close').Execute( GuiScope.SetRoot( GetPlayer.MakeScope ).End )]"
 			}
 			expand = {}

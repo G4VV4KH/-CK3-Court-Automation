@@ -38,3 +38,9 @@ The two descriptions retain the same wording in all nine languages. The other 47
 ## CAA family metadata revision
 
 The current publication copy includes all seven other maintained mods, with Steam Workshop links. Update only the canonical My other mods block and project that block into the existing README and platform outputs; preserve the rest of each platform description. Parley and Vassalization Extended Steam exports use whitespace-only BBCode compaction to remain within the 8,000-byte UTF-8 CRLF form limit. Recheck the current shared publication contract and scoped release metadata guide before publishing. Runtime, version, archives, media, and prior localization evidence are unchanged.
+
+## Release 0.3.0 — CK3 1.20.1
+
+Updated for CK3 1.20.1. Add continuous court and knight staffing, knight filter reset/locking, and Court Jester exclusion. Preserve automation preferences and saved court policies through succession. Label the four native-policy buttons and update bodyguard prestige salary estimates.
+
+The committed runtime is the current release source. Earlier generator/test notes above retain their historical scope. Gameplay evidence is inherited from the reviewed development candidate; localization uses static coverage and format checks under publication contract 1.8.0. No additional production engine run or blanket multiplayer/visual guarantee is claimed.

@@ -1,0 +1,47 @@
+﻿# Exclusions are player preferences on static position types, never incumbents.
+ca_toggle_exclude_court_jester = {
+	scope = character
+	is_valid = {
+		ca_player_maintenance_eligible_trigger = yes
+		NOT = { has_variable = ca_native_restore_pending }
+		NOT = { has_variable_list = ca_native_release_pending }
+		NOT = { has_variable = ca_auto_court_initial_pending }
+		OR = {
+			NOT = { has_variable = ca_auto_court_enabled }
+			has_variable = ca_native_policy_ready
+		}
+	}
+	effect = {
+		ca_toggle_court_position_exclusion_effect = { POSITION = court_position_type:court_jester_court_position }
+	}
+}
+
+ca_is_court_jester_excluded = {
+	scope = character
+	is_valid = {
+		is_target_in_variable_list = { name = ca_excluded_court_positions target = court_position_type:court_jester_court_position }
+	}
+}
+
+# The bridge has exactly three role states: managed, releasing, and ignored.
+# A releasing role can restore its saved policy once but cannot be snapshotted,
+# suppressed, adopted, or receive a bulk fallback.
+ca_native_type_is_managed = {
+	scope = character
+	is_valid = {
+		ca_player_maintenance_eligible_trigger = yes
+		exists = scope:ca_native_type
+		ca_position_is_included_trigger = { POSITION = scope:ca_native_type }
+	}
+}
+
+ca_native_type_is_releasing = {
+	scope = character
+	is_valid = {
+		ca_player_maintenance_eligible_trigger = yes
+		exists = scope:ca_native_type
+		NOT = { ca_position_is_included_trigger = { POSITION = scope:ca_native_type } }
+		is_target_in_variable_list = { name = ca_native_release_pending target = scope:ca_native_type }
+		is_target_in_variable_list = { name = ca_native_saved_all target = scope:ca_native_type }
+	}
+}

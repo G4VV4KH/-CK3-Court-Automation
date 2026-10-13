@@ -1,0 +1,462 @@
+﻿# PROPOSAL: native filters reset barrier, not yet accepted in the CK3 engine.
+# Always loaded; no Court visibility dependency on the warm path.
+# All native commands run in zero-duration on_finish actions. Timed states
+# only route after a wait; no native command uses on_start.
+# Unsafe UI defers without a native call or Auto OFF; no timer polling.
+# Once started, binding checks and native commands have fixed bounds.
+# Each delayed boundary revalidates owner/epoch/ON/pending/local player.
+window = {
+	name = ca_knight_filters_controller
+	size = { 1 1 }
+	alwaystransparent = yes
+	visible = "[GetPlayer.IsValid]"
+	oncreate = "[GetVariableSystem.Clear('ca_kf_busy')]"
+	oncreate = "[GetVariableSystem.Clear('ca_kf_seen')]"
+	oncreate = "[GetVariableSystem.Clear('ca_kf_owner')]"
+	oncreate = "[GetVariableSystem.Clear('ca_kf_epoch')]"
+	oncreate = "[GetVariableSystem.Clear('ca_kf_owned_view')]"
+	oncreate = "[GetVariableSystem.Clear('ca_kf_hide_owned_view')]"
+	oncreate = "[GetVariableSystem.Clear('ca_kf_prime_sent')]"
+	oncreate = "[GetVariableSystem.Clear('ca_kf_show_sent')]"
+	oncreate = "[GetVariableSystem.Clear('ca_kf_reset_sent')]"
+	oncreate = "[GetVariableSystem.Clear('ca_kf_ack_sent')]"
+	oncreate = "[GetVariableSystem.Clear('ca_kf_failure_sent')]"
+	oncreate = "[GetVariableSystem.Clear('ca_kf_close_sent')]"
+	oncreate = "[GetVariableSystem.Clear('ca_kf_result')]"
+	oncreate = "[GetVariableSystem.Clear('ca_kf_deferred')]"
+	oncreate = "[GetVariableSystem.Clear('ca_kf_upgrade_seen')]"
+	widget = {
+		name = ca_knight_filters_context
+		size = { 1 1 }
+		datacontext = "[AccessKnightsView]"
+		state = {
+			name = ca_kf_noop
+			duration = 0
+			alpha = 1
+		}
+		state = {
+			name = ca_kf_request
+			duration = 0
+			alpha = 1
+			trigger_when = "[And(And(And(GetPlayer.IsValid,And(GetPlayer.IsAlive,And(GetPlayer.IsLocalPlayer,GetPlayer.IsPlayer))),And(GetPlayer.MakeScope.GetVariable('ca_auto_knights_enabled').IsSet,And(GetPlayer.MakeScope.GetVariable('ca_knight_reset_pending').IsSet,GetPlayer.MakeScope.GetVariable('ca_knight_reset_epoch').IsSet))),And(And(And(IsDefaultGUIMode,And(Not(IsPausedByEvent),And(Not(IsPauseMenuShown),And(Not(IsFullScreenWindowOpen),And(Not(IsInteractionConfirmationWindowOpen),Not(IsMapInteractionConfirmationWindowOpen)))))),Or(And(KnightsView.GetMilitaryView.GetCharacter.IsValid,EqualTo_uint32(KnightsView.GetMilitaryView.GetCharacter.GetID,GetPlayer.GetID)),Or(And(And(IsGameViewOpen('court_window'),IsGameViewDataShown('court_window',GetPlayer.GetID)),And(Not(IsLeftWindowOpen),And(Not(IsCenterWindowOpen),Not(IsOverviewWindowOpen)))),And(Not(IsRightWindowOpen),And(Not(IsLeftWindowOpen),And(Not(IsCenterWindowOpen),And(Not(IsOverviewWindowOpen),And(Not(IsBottomWindowOpen),And(Not(IsBottomLeftWindowOpen),And(Not(IsGameViewOpen('court_window')),And(Not(IsGameViewOpen('military')),Not(IsGameViewOpen('knights'))))))))))))),And(Not(GetVariableSystem.Exists('ca_kf_busy')),Not(GetVariableSystem.HasValue('ca_kf_seen',Concatenate(UIntToString(GetPlayer.GetID),Concatenate('_',IntToString(FixedPointToInt(GetPlayer.MakeScope.GetVariable('ca_knight_reset_epoch').GetValue)))))))))]"
+			on_finish = "[PdxGuiWidget.TriggerAnimation(Select_CString(And(And(And(GetPlayer.IsValid,And(GetPlayer.IsAlive,And(GetPlayer.IsLocalPlayer,GetPlayer.IsPlayer))),And(GetPlayer.MakeScope.GetVariable('ca_auto_knights_enabled').IsSet,And(GetPlayer.MakeScope.GetVariable('ca_knight_reset_pending').IsSet,GetPlayer.MakeScope.GetVariable('ca_knight_reset_epoch').IsSet))),And(And(And(IsDefaultGUIMode,And(Not(IsPausedByEvent),And(Not(IsPauseMenuShown),And(Not(IsFullScreenWindowOpen),And(Not(IsInteractionConfirmationWindowOpen),Not(IsMapInteractionConfirmationWindowOpen)))))),Or(And(KnightsView.GetMilitaryView.GetCharacter.IsValid,EqualTo_uint32(KnightsView.GetMilitaryView.GetCharacter.GetID,GetPlayer.GetID)),Or(And(And(IsGameViewOpen('court_window'),IsGameViewDataShown('court_window',GetPlayer.GetID)),And(Not(IsLeftWindowOpen),And(Not(IsCenterWindowOpen),Not(IsOverviewWindowOpen)))),And(Not(IsRightWindowOpen),And(Not(IsLeftWindowOpen),And(Not(IsCenterWindowOpen),And(Not(IsOverviewWindowOpen),And(Not(IsBottomWindowOpen),And(Not(IsBottomLeftWindowOpen),And(Not(IsGameViewOpen('court_window')),And(Not(IsGameViewOpen('military')),Not(IsGameViewOpen('knights'))))))))))))),And(Not(GetVariableSystem.Exists('ca_kf_busy')),Not(GetVariableSystem.HasValue('ca_kf_seen',Concatenate(UIntToString(GetPlayer.GetID),Concatenate('_',IntToString(FixedPointToInt(GetPlayer.MakeScope.GetVariable('ca_knight_reset_epoch').GetValue))))))))),'ca_kf_capture','ca_kf_noop'))]"
+		}
+		state = {
+			name = ca_kf_capture
+			duration = 0
+			alpha = 1
+			on_finish = "[GetVariableSystem.Set('ca_kf_busy','yes')]"
+			on_finish = "[GetVariableSystem.Set('ca_kf_seen',Concatenate(UIntToString(GetPlayer.GetID),Concatenate('_',IntToString(FixedPointToInt(GetPlayer.MakeScope.GetVariable('ca_knight_reset_epoch').GetValue)))))]"
+			on_finish = "[GetVariableSystem.Set('ca_kf_owner',UIntToString(GetPlayer.GetID))]"
+			on_finish = "[GetVariableSystem.Set('ca_kf_epoch',IntToString(FixedPointToInt(GetPlayer.MakeScope.GetVariable('ca_knight_reset_epoch').GetValue)))]"
+			on_finish = "[GetVariableSystem.Set('ca_kf_was_open',Select_CString(IsGameViewOpen('knights'),'yes','no'))]"
+			on_finish = "[GetVariableSystem.Clear('ca_kf_owned_view')]"
+			on_finish = "[GetVariableSystem.Clear('ca_kf_hide_owned_view')]"
+			on_finish = "[GetVariableSystem.Clear('ca_kf_prime_sent')]"
+			on_finish = "[GetVariableSystem.Clear('ca_kf_show_sent')]"
+			on_finish = "[GetVariableSystem.Clear('ca_kf_reset_sent')]"
+			on_finish = "[GetVariableSystem.Clear('ca_kf_ack_sent')]"
+			on_finish = "[GetVariableSystem.Clear('ca_kf_failure_sent')]"
+			on_finish = "[GetVariableSystem.Clear('ca_kf_close_sent')]"
+			on_finish = "[GetVariableSystem.Clear('ca_kf_result')]"
+			on_finish = "[GetVariableSystem.Clear('ca_kf_deferred')]"
+			on_finish = "[PdxGuiWidget.TriggerAnimation('ca_kf_settle')]"
+		}
+		# No work during the initial player-transfer settling interval.
+		state = {
+			name = ca_kf_settle
+			duration = 0.5
+			alpha = 1
+			on_finish = "[PdxGuiWidget.TriggerAnimation(Select_CString(And(And(And(GetPlayer.IsValid,And(GetPlayer.IsAlive,And(GetPlayer.IsLocalPlayer,GetPlayer.IsPlayer))),And(GetPlayer.MakeScope.GetVariable('ca_auto_knights_enabled').IsSet,And(GetPlayer.MakeScope.GetVariable('ca_knight_reset_pending').IsSet,GetPlayer.MakeScope.GetVariable('ca_knight_reset_epoch').IsSet))),And(GetVariableSystem.Exists('ca_kf_busy'),And(GetVariableSystem.HasValue('ca_kf_owner',UIntToString(GetPlayer.GetID)),GetVariableSystem.HasValue('ca_kf_epoch',IntToString(FixedPointToInt(GetPlayer.MakeScope.GetVariable('ca_knight_reset_epoch').GetValue)))))),'ca_kf_bind_check_1','ca_kf_cleanup'))]"
+		}
+		state = {
+			name = ca_kf_bind_check_1
+			duration = 0
+			alpha = 1
+			on_finish = "[PdxGuiWidget.TriggerAnimation(Select_CString(And(And(And(GetPlayer.IsValid,And(GetPlayer.IsAlive,And(GetPlayer.IsLocalPlayer,GetPlayer.IsPlayer))),And(GetPlayer.MakeScope.GetVariable('ca_auto_knights_enabled').IsSet,And(GetPlayer.MakeScope.GetVariable('ca_knight_reset_pending').IsSet,GetPlayer.MakeScope.GetVariable('ca_knight_reset_epoch').IsSet))),And(GetVariableSystem.Exists('ca_kf_busy'),And(GetVariableSystem.HasValue('ca_kf_owner',UIntToString(GetPlayer.GetID)),GetVariableSystem.HasValue('ca_kf_epoch',IntToString(FixedPointToInt(GetPlayer.MakeScope.GetVariable('ca_knight_reset_epoch').GetValue)))))),'ca_kf_bind_owner_1','ca_kf_cleanup'))]"
+		}
+		state = {
+			name = ca_kf_bind_owner_1
+			duration = 0
+			alpha = 1
+			on_finish = "[PdxGuiWidget.TriggerAnimation(Select_CString(And(IsDefaultGUIMode,And(Not(IsPausedByEvent),And(Not(IsPauseMenuShown),And(Not(IsFullScreenWindowOpen),And(Not(IsInteractionConfirmationWindowOpen),Not(IsMapInteractionConfirmationWindowOpen)))))),'ca_kf_bind_safe_1','ca_kf_defer_gate'))]"
+		}
+		state = {
+			name = ca_kf_bind_safe_1
+			duration = 0
+			alpha = 1
+			on_finish = "[PdxGuiWidget.TriggerAnimation(Select_CString(And(KnightsView.GetMilitaryView.GetCharacter.IsValid,EqualTo_uint32(KnightsView.GetMilitaryView.GetCharacter.GetID,GetPlayer.GetID)),'ca_kf_show_route','ca_kf_bind_court_1'))]"
+		}
+		state = {
+			name = ca_kf_bind_court_1
+			duration = 0
+			alpha = 1
+			on_finish = "[PdxGuiWidget.TriggerAnimation(Select_CString(And(And(IsGameViewOpen('court_window'),IsGameViewDataShown('court_window',GetPlayer.GetID)),And(Not(IsLeftWindowOpen),And(Not(IsCenterWindowOpen),Not(IsOverviewWindowOpen)))),'ca_kf_prime_gate','ca_kf_bind_empty_1'))]"
+		}
+		state = {
+			name = ca_kf_bind_empty_1
+			duration = 0
+			alpha = 1
+			on_finish = "[PdxGuiWidget.TriggerAnimation(Select_CString(And(Not(IsRightWindowOpen),And(Not(IsLeftWindowOpen),And(Not(IsCenterWindowOpen),And(Not(IsOverviewWindowOpen),And(Not(IsBottomWindowOpen),And(Not(IsBottomLeftWindowOpen),And(Not(IsGameViewOpen('court_window')),And(Not(IsGameViewOpen('military')),Not(IsGameViewOpen('knights')))))))))),'ca_kf_prime_empty_gate','ca_kf_bind_wait_1'))]"
+		}
+		state = {
+			name = ca_kf_bind_wait_1
+			duration = 0.5
+			alpha = 1
+			on_finish = "[PdxGuiWidget.TriggerAnimation(Select_CString(And(And(And(GetPlayer.IsValid,And(GetPlayer.IsAlive,And(GetPlayer.IsLocalPlayer,GetPlayer.IsPlayer))),And(GetPlayer.MakeScope.GetVariable('ca_auto_knights_enabled').IsSet,And(GetPlayer.MakeScope.GetVariable('ca_knight_reset_pending').IsSet,GetPlayer.MakeScope.GetVariable('ca_knight_reset_epoch').IsSet))),And(GetVariableSystem.Exists('ca_kf_busy'),And(GetVariableSystem.HasValue('ca_kf_owner',UIntToString(GetPlayer.GetID)),GetVariableSystem.HasValue('ca_kf_epoch',IntToString(FixedPointToInt(GetPlayer.MakeScope.GetVariable('ca_knight_reset_epoch').GetValue)))))),'ca_kf_bind_check_2','ca_kf_cleanup'))]"
+		}
+		state = {
+			name = ca_kf_bind_check_2
+			duration = 0
+			alpha = 1
+			on_finish = "[PdxGuiWidget.TriggerAnimation(Select_CString(And(And(And(GetPlayer.IsValid,And(GetPlayer.IsAlive,And(GetPlayer.IsLocalPlayer,GetPlayer.IsPlayer))),And(GetPlayer.MakeScope.GetVariable('ca_auto_knights_enabled').IsSet,And(GetPlayer.MakeScope.GetVariable('ca_knight_reset_pending').IsSet,GetPlayer.MakeScope.GetVariable('ca_knight_reset_epoch').IsSet))),And(GetVariableSystem.Exists('ca_kf_busy'),And(GetVariableSystem.HasValue('ca_kf_owner',UIntToString(GetPlayer.GetID)),GetVariableSystem.HasValue('ca_kf_epoch',IntToString(FixedPointToInt(GetPlayer.MakeScope.GetVariable('ca_knight_reset_epoch').GetValue)))))),'ca_kf_bind_owner_2','ca_kf_cleanup'))]"
+		}
+		state = {
+			name = ca_kf_bind_owner_2
+			duration = 0
+			alpha = 1
+			on_finish = "[PdxGuiWidget.TriggerAnimation(Select_CString(And(IsDefaultGUIMode,And(Not(IsPausedByEvent),And(Not(IsPauseMenuShown),And(Not(IsFullScreenWindowOpen),And(Not(IsInteractionConfirmationWindowOpen),Not(IsMapInteractionConfirmationWindowOpen)))))),'ca_kf_bind_safe_2','ca_kf_defer_gate'))]"
+		}
+		state = {
+			name = ca_kf_bind_safe_2
+			duration = 0
+			alpha = 1
+			on_finish = "[PdxGuiWidget.TriggerAnimation(Select_CString(And(KnightsView.GetMilitaryView.GetCharacter.IsValid,EqualTo_uint32(KnightsView.GetMilitaryView.GetCharacter.GetID,GetPlayer.GetID)),'ca_kf_show_route','ca_kf_bind_court_2'))]"
+		}
+		state = {
+			name = ca_kf_bind_court_2
+			duration = 0
+			alpha = 1
+			on_finish = "[PdxGuiWidget.TriggerAnimation(Select_CString(And(And(IsGameViewOpen('court_window'),IsGameViewDataShown('court_window',GetPlayer.GetID)),And(Not(IsLeftWindowOpen),And(Not(IsCenterWindowOpen),Not(IsOverviewWindowOpen)))),'ca_kf_prime_gate','ca_kf_bind_empty_2'))]"
+		}
+		state = {
+			name = ca_kf_bind_empty_2
+			duration = 0
+			alpha = 1
+			on_finish = "[PdxGuiWidget.TriggerAnimation(Select_CString(And(Not(IsRightWindowOpen),And(Not(IsLeftWindowOpen),And(Not(IsCenterWindowOpen),And(Not(IsOverviewWindowOpen),And(Not(IsBottomWindowOpen),And(Not(IsBottomLeftWindowOpen),And(Not(IsGameViewOpen('court_window')),And(Not(IsGameViewOpen('military')),Not(IsGameViewOpen('knights')))))))))),'ca_kf_prime_empty_gate','ca_kf_bind_wait_2'))]"
+		}
+		state = {
+			name = ca_kf_bind_wait_2
+			duration = 0.5
+			alpha = 1
+			on_finish = "[PdxGuiWidget.TriggerAnimation(Select_CString(And(And(And(GetPlayer.IsValid,And(GetPlayer.IsAlive,And(GetPlayer.IsLocalPlayer,GetPlayer.IsPlayer))),And(GetPlayer.MakeScope.GetVariable('ca_auto_knights_enabled').IsSet,And(GetPlayer.MakeScope.GetVariable('ca_knight_reset_pending').IsSet,GetPlayer.MakeScope.GetVariable('ca_knight_reset_epoch').IsSet))),And(GetVariableSystem.Exists('ca_kf_busy'),And(GetVariableSystem.HasValue('ca_kf_owner',UIntToString(GetPlayer.GetID)),GetVariableSystem.HasValue('ca_kf_epoch',IntToString(FixedPointToInt(GetPlayer.MakeScope.GetVariable('ca_knight_reset_epoch').GetValue)))))),'ca_kf_bind_check_3','ca_kf_cleanup'))]"
+		}
+		state = {
+			name = ca_kf_bind_check_3
+			duration = 0
+			alpha = 1
+			on_finish = "[PdxGuiWidget.TriggerAnimation(Select_CString(And(And(And(GetPlayer.IsValid,And(GetPlayer.IsAlive,And(GetPlayer.IsLocalPlayer,GetPlayer.IsPlayer))),And(GetPlayer.MakeScope.GetVariable('ca_auto_knights_enabled').IsSet,And(GetPlayer.MakeScope.GetVariable('ca_knight_reset_pending').IsSet,GetPlayer.MakeScope.GetVariable('ca_knight_reset_epoch').IsSet))),And(GetVariableSystem.Exists('ca_kf_busy'),And(GetVariableSystem.HasValue('ca_kf_owner',UIntToString(GetPlayer.GetID)),GetVariableSystem.HasValue('ca_kf_epoch',IntToString(FixedPointToInt(GetPlayer.MakeScope.GetVariable('ca_knight_reset_epoch').GetValue)))))),'ca_kf_bind_owner_3','ca_kf_cleanup'))]"
+		}
+		state = {
+			name = ca_kf_bind_owner_3
+			duration = 0
+			alpha = 1
+			on_finish = "[PdxGuiWidget.TriggerAnimation(Select_CString(And(IsDefaultGUIMode,And(Not(IsPausedByEvent),And(Not(IsPauseMenuShown),And(Not(IsFullScreenWindowOpen),And(Not(IsInteractionConfirmationWindowOpen),Not(IsMapInteractionConfirmationWindowOpen)))))),'ca_kf_bind_safe_3','ca_kf_defer_gate'))]"
+		}
+		state = {
+			name = ca_kf_bind_safe_3
+			duration = 0
+			alpha = 1
+			on_finish = "[PdxGuiWidget.TriggerAnimation(Select_CString(And(KnightsView.GetMilitaryView.GetCharacter.IsValid,EqualTo_uint32(KnightsView.GetMilitaryView.GetCharacter.GetID,GetPlayer.GetID)),'ca_kf_show_route','ca_kf_bind_court_3'))]"
+		}
+		state = {
+			name = ca_kf_bind_court_3
+			duration = 0
+			alpha = 1
+			on_finish = "[PdxGuiWidget.TriggerAnimation(Select_CString(And(And(IsGameViewOpen('court_window'),IsGameViewDataShown('court_window',GetPlayer.GetID)),And(Not(IsLeftWindowOpen),And(Not(IsCenterWindowOpen),Not(IsOverviewWindowOpen)))),'ca_kf_prime_gate','ca_kf_bind_empty_3'))]"
+		}
+		state = {
+			name = ca_kf_bind_empty_3
+			duration = 0
+			alpha = 1
+			on_finish = "[PdxGuiWidget.TriggerAnimation(Select_CString(And(Not(IsRightWindowOpen),And(Not(IsLeftWindowOpen),And(Not(IsCenterWindowOpen),And(Not(IsOverviewWindowOpen),And(Not(IsBottomWindowOpen),And(Not(IsBottomLeftWindowOpen),And(Not(IsGameViewOpen('court_window')),And(Not(IsGameViewOpen('military')),Not(IsGameViewOpen('knights')))))))))),'ca_kf_prime_empty_gate','ca_kf_bind_wait_3'))]"
+		}
+		state = {
+			name = ca_kf_bind_wait_3
+			duration = 0.5
+			alpha = 1
+			on_finish = "[PdxGuiWidget.TriggerAnimation(Select_CString(And(And(And(GetPlayer.IsValid,And(GetPlayer.IsAlive,And(GetPlayer.IsLocalPlayer,GetPlayer.IsPlayer))),And(GetPlayer.MakeScope.GetVariable('ca_auto_knights_enabled').IsSet,And(GetPlayer.MakeScope.GetVariable('ca_knight_reset_pending').IsSet,GetPlayer.MakeScope.GetVariable('ca_knight_reset_epoch').IsSet))),And(GetVariableSystem.Exists('ca_kf_busy'),And(GetVariableSystem.HasValue('ca_kf_owner',UIntToString(GetPlayer.GetID)),GetVariableSystem.HasValue('ca_kf_epoch',IntToString(FixedPointToInt(GetPlayer.MakeScope.GetVariable('ca_knight_reset_epoch').GetValue)))))),'ca_kf_bind_check_4','ca_kf_cleanup'))]"
+		}
+		state = {
+			name = ca_kf_bind_check_4
+			duration = 0
+			alpha = 1
+			on_finish = "[PdxGuiWidget.TriggerAnimation(Select_CString(And(And(And(GetPlayer.IsValid,And(GetPlayer.IsAlive,And(GetPlayer.IsLocalPlayer,GetPlayer.IsPlayer))),And(GetPlayer.MakeScope.GetVariable('ca_auto_knights_enabled').IsSet,And(GetPlayer.MakeScope.GetVariable('ca_knight_reset_pending').IsSet,GetPlayer.MakeScope.GetVariable('ca_knight_reset_epoch').IsSet))),And(GetVariableSystem.Exists('ca_kf_busy'),And(GetVariableSystem.HasValue('ca_kf_owner',UIntToString(GetPlayer.GetID)),GetVariableSystem.HasValue('ca_kf_epoch',IntToString(FixedPointToInt(GetPlayer.MakeScope.GetVariable('ca_knight_reset_epoch').GetValue)))))),'ca_kf_bind_owner_4','ca_kf_cleanup'))]"
+		}
+		state = {
+			name = ca_kf_bind_owner_4
+			duration = 0
+			alpha = 1
+			on_finish = "[PdxGuiWidget.TriggerAnimation(Select_CString(And(IsDefaultGUIMode,And(Not(IsPausedByEvent),And(Not(IsPauseMenuShown),And(Not(IsFullScreenWindowOpen),And(Not(IsInteractionConfirmationWindowOpen),Not(IsMapInteractionConfirmationWindowOpen)))))),'ca_kf_bind_safe_4','ca_kf_defer_gate'))]"
+		}
+		state = {
+			name = ca_kf_bind_safe_4
+			duration = 0
+			alpha = 1
+			on_finish = "[PdxGuiWidget.TriggerAnimation(Select_CString(And(KnightsView.GetMilitaryView.GetCharacter.IsValid,EqualTo_uint32(KnightsView.GetMilitaryView.GetCharacter.GetID,GetPlayer.GetID)),'ca_kf_show_route','ca_kf_bind_court_4'))]"
+		}
+		state = {
+			name = ca_kf_bind_court_4
+			duration = 0
+			alpha = 1
+			on_finish = "[PdxGuiWidget.TriggerAnimation(Select_CString(And(And(IsGameViewOpen('court_window'),IsGameViewDataShown('court_window',GetPlayer.GetID)),And(Not(IsLeftWindowOpen),And(Not(IsCenterWindowOpen),Not(IsOverviewWindowOpen)))),'ca_kf_prime_gate','ca_kf_bind_empty_4'))]"
+		}
+		state = {
+			name = ca_kf_bind_empty_4
+			duration = 0
+			alpha = 1
+			on_finish = "[PdxGuiWidget.TriggerAnimation(Select_CString(And(Not(IsRightWindowOpen),And(Not(IsLeftWindowOpen),And(Not(IsCenterWindowOpen),And(Not(IsOverviewWindowOpen),And(Not(IsBottomWindowOpen),And(Not(IsBottomLeftWindowOpen),And(Not(IsGameViewOpen('court_window')),And(Not(IsGameViewOpen('military')),Not(IsGameViewOpen('knights')))))))))),'ca_kf_prime_empty_gate','ca_kf_defer_gate'))]"
+		}
+		state = {
+			name = ca_kf_prime_gate
+			duration = 0
+			alpha = 1
+			on_finish = "[PdxGuiWidget.TriggerAnimation(Select_CString(And(And(And(And(GetPlayer.IsValid,And(GetPlayer.IsAlive,And(GetPlayer.IsLocalPlayer,GetPlayer.IsPlayer))),And(GetPlayer.MakeScope.GetVariable('ca_auto_knights_enabled').IsSet,And(GetPlayer.MakeScope.GetVariable('ca_knight_reset_pending').IsSet,GetPlayer.MakeScope.GetVariable('ca_knight_reset_epoch').IsSet))),And(GetVariableSystem.Exists('ca_kf_busy'),And(GetVariableSystem.HasValue('ca_kf_owner',UIntToString(GetPlayer.GetID)),GetVariableSystem.HasValue('ca_kf_epoch',IntToString(FixedPointToInt(GetPlayer.MakeScope.GetVariable('ca_knight_reset_epoch').GetValue)))))),And(And(IsDefaultGUIMode,And(Not(IsPausedByEvent),And(Not(IsPauseMenuShown),And(Not(IsFullScreenWindowOpen),And(Not(IsInteractionConfirmationWindowOpen),Not(IsMapInteractionConfirmationWindowOpen)))))),And(And(And(IsGameViewOpen('court_window'),IsGameViewDataShown('court_window',GetPlayer.GetID)),And(Not(IsLeftWindowOpen),And(Not(IsCenterWindowOpen),Not(IsOverviewWindowOpen)))),Not(GetVariableSystem.Exists('ca_kf_prime_sent'))))),'ca_kf_prime_action','ca_kf_defer_gate'))]"
+		}
+		state = {
+			name = ca_kf_prime_action
+			duration = 0
+			alpha = 1
+			on_finish = "[GetVariableSystem.Set('ca_kf_prime_sent','yes')]"
+			on_finish = "[OpenGameViewData('military',GetPlayer.GetID)]"
+			on_finish = "[CloseGameView('military')]"
+			on_finish = "[OpenGameViewData('court_window',GetPlayer.GetID)]"
+			on_finish = "[PdxGuiWidget.TriggerAnimation('ca_kf_prime_wait')]"
+		}
+		state = {
+			name = ca_kf_prime_empty_gate
+			duration = 0
+			alpha = 1
+			on_finish = "[PdxGuiWidget.TriggerAnimation(Select_CString(And(And(And(And(GetPlayer.IsValid,And(GetPlayer.IsAlive,And(GetPlayer.IsLocalPlayer,GetPlayer.IsPlayer))),And(GetPlayer.MakeScope.GetVariable('ca_auto_knights_enabled').IsSet,And(GetPlayer.MakeScope.GetVariable('ca_knight_reset_pending').IsSet,GetPlayer.MakeScope.GetVariable('ca_knight_reset_epoch').IsSet))),And(GetVariableSystem.Exists('ca_kf_busy'),And(GetVariableSystem.HasValue('ca_kf_owner',UIntToString(GetPlayer.GetID)),GetVariableSystem.HasValue('ca_kf_epoch',IntToString(FixedPointToInt(GetPlayer.MakeScope.GetVariable('ca_knight_reset_epoch').GetValue)))))),And(And(IsDefaultGUIMode,And(Not(IsPausedByEvent),And(Not(IsPauseMenuShown),And(Not(IsFullScreenWindowOpen),And(Not(IsInteractionConfirmationWindowOpen),Not(IsMapInteractionConfirmationWindowOpen)))))),And(And(Not(IsRightWindowOpen),And(Not(IsLeftWindowOpen),And(Not(IsCenterWindowOpen),And(Not(IsOverviewWindowOpen),And(Not(IsBottomWindowOpen),And(Not(IsBottomLeftWindowOpen),And(Not(IsGameViewOpen('court_window')),And(Not(IsGameViewOpen('military')),Not(IsGameViewOpen('knights')))))))))),Not(GetVariableSystem.Exists('ca_kf_prime_sent'))))),'ca_kf_prime_empty_action','ca_kf_defer_gate'))]"
+		}
+		# Empty-main-pane rebind: no OpenCourt and no guessed restoration.
+		state = {
+			name = ca_kf_prime_empty_action
+			duration = 0
+			alpha = 1
+			on_finish = "[GetVariableSystem.Set('ca_kf_prime_sent','yes')]"
+			on_finish = "[OpenGameViewData('military',GetPlayer.GetID)]"
+			on_finish = "[CloseGameView('military')]"
+			on_finish = "[PdxGuiWidget.TriggerAnimation('ca_kf_prime_wait')]"
+		}
+		state = {
+			name = ca_kf_prime_wait
+			duration = 0.3
+			alpha = 1
+			on_finish = "[PdxGuiWidget.TriggerAnimation(Select_CString(And(And(And(And(GetPlayer.IsValid,And(GetPlayer.IsAlive,And(GetPlayer.IsLocalPlayer,GetPlayer.IsPlayer))),And(GetPlayer.MakeScope.GetVariable('ca_auto_knights_enabled').IsSet,And(GetPlayer.MakeScope.GetVariable('ca_knight_reset_pending').IsSet,GetPlayer.MakeScope.GetVariable('ca_knight_reset_epoch').IsSet))),And(GetVariableSystem.Exists('ca_kf_busy'),And(GetVariableSystem.HasValue('ca_kf_owner',UIntToString(GetPlayer.GetID)),GetVariableSystem.HasValue('ca_kf_epoch',IntToString(FixedPointToInt(GetPlayer.MakeScope.GetVariable('ca_knight_reset_epoch').GetValue)))))),And(KnightsView.GetMilitaryView.GetCharacter.IsValid,EqualTo_uint32(KnightsView.GetMilitaryView.GetCharacter.GetID,GetPlayer.GetID))),'ca_kf_show_route','ca_kf_fail_gate'))]"
+		}
+		state = {
+			name = ca_kf_show_route
+			duration = 0
+			alpha = 1
+			on_finish = "[PdxGuiWidget.TriggerAnimation(Select_CString(And(IsDefaultGUIMode,And(Not(IsPausedByEvent),And(Not(IsPauseMenuShown),And(Not(IsFullScreenWindowOpen),And(Not(IsInteractionConfirmationWindowOpen),Not(IsMapInteractionConfirmationWindowOpen)))))),'ca_kf_show_owner_gate','ca_kf_defer_gate'))]"
+		}
+		state = {
+			name = ca_kf_show_owner_gate
+			duration = 0
+			alpha = 1
+			on_finish = "[PdxGuiWidget.TriggerAnimation(Select_CString(And(And(And(And(GetPlayer.IsValid,And(GetPlayer.IsAlive,And(GetPlayer.IsLocalPlayer,GetPlayer.IsPlayer))),And(GetPlayer.MakeScope.GetVariable('ca_auto_knights_enabled').IsSet,And(GetPlayer.MakeScope.GetVariable('ca_knight_reset_pending').IsSet,GetPlayer.MakeScope.GetVariable('ca_knight_reset_epoch').IsSet))),And(GetVariableSystem.Exists('ca_kf_busy'),And(GetVariableSystem.HasValue('ca_kf_owner',UIntToString(GetPlayer.GetID)),GetVariableSystem.HasValue('ca_kf_epoch',IntToString(FixedPointToInt(GetPlayer.MakeScope.GetVariable('ca_knight_reset_epoch').GetValue)))))),And(KnightsView.GetMilitaryView.GetCharacter.IsValid,EqualTo_uint32(KnightsView.GetMilitaryView.GetCharacter.GetID,GetPlayer.GetID))),'ca_kf_show_open_gate','ca_kf_fail_gate'))]"
+		}
+		state = {
+			name = ca_kf_show_open_gate
+			duration = 0
+			alpha = 1
+			on_finish = "[PdxGuiWidget.TriggerAnimation(Select_CString(IsGameViewOpen('knights'),'ca_kf_show_wait','ca_kf_show_command_gate'))]"
+		}
+		state = {
+			name = ca_kf_show_command_gate
+			duration = 0
+			alpha = 1
+			on_finish = "[PdxGuiWidget.TriggerAnimation(Select_CString(And(And(And(And(GetPlayer.IsValid,And(GetPlayer.IsAlive,And(GetPlayer.IsLocalPlayer,GetPlayer.IsPlayer))),And(GetPlayer.MakeScope.GetVariable('ca_auto_knights_enabled').IsSet,And(GetPlayer.MakeScope.GetVariable('ca_knight_reset_pending').IsSet,GetPlayer.MakeScope.GetVariable('ca_knight_reset_epoch').IsSet))),And(GetVariableSystem.Exists('ca_kf_busy'),And(GetVariableSystem.HasValue('ca_kf_owner',UIntToString(GetPlayer.GetID)),GetVariableSystem.HasValue('ca_kf_epoch',IntToString(FixedPointToInt(GetPlayer.MakeScope.GetVariable('ca_knight_reset_epoch').GetValue)))))),And(And(KnightsView.GetMilitaryView.GetCharacter.IsValid,EqualTo_uint32(KnightsView.GetMilitaryView.GetCharacter.GetID,GetPlayer.GetID)),And(Not(IsGameViewOpen('knights')),Not(GetVariableSystem.Exists('ca_kf_show_sent'))))),'ca_kf_show_action','ca_kf_fail_gate'))]"
+		}
+		state = {
+			name = ca_kf_show_action
+			duration = 0
+			alpha = 1
+			on_finish = "[GetVariableSystem.Set('ca_kf_show_sent','yes')]"
+			on_finish = "[GetVariableSystem.Set('ca_kf_owned_view','yes')]"
+			on_finish = "[GetVariableSystem.Set('ca_kf_hide_owned_view','yes')]"
+			on_finish = "[KnightsView.GetMilitaryView.ShowKnights]"
+			on_finish = "[PdxGuiWidget.TriggerAnimation('ca_kf_show_wait')]"
+		}
+		state = {
+			name = ca_kf_show_wait
+			duration = 0.3
+			alpha = 1
+			on_finish = "[PdxGuiWidget.TriggerAnimation(Select_CString(And(IsDefaultGUIMode,And(Not(IsPausedByEvent),And(Not(IsPauseMenuShown),And(Not(IsFullScreenWindowOpen),And(Not(IsInteractionConfirmationWindowOpen),Not(IsMapInteractionConfirmationWindowOpen)))))),'ca_kf_show_observe','ca_kf_defer_gate'))]"
+		}
+		state = {
+			name = ca_kf_show_observe
+			duration = 0
+			alpha = 1
+			on_finish = "[PdxGuiWidget.TriggerAnimation(Select_CString(And(And(And(And(GetPlayer.IsValid,And(GetPlayer.IsAlive,And(GetPlayer.IsLocalPlayer,GetPlayer.IsPlayer))),And(GetPlayer.MakeScope.GetVariable('ca_auto_knights_enabled').IsSet,And(GetPlayer.MakeScope.GetVariable('ca_knight_reset_pending').IsSet,GetPlayer.MakeScope.GetVariable('ca_knight_reset_epoch').IsSet))),And(GetVariableSystem.Exists('ca_kf_busy'),And(GetVariableSystem.HasValue('ca_kf_owner',UIntToString(GetPlayer.GetID)),GetVariableSystem.HasValue('ca_kf_epoch',IntToString(FixedPointToInt(GetPlayer.MakeScope.GetVariable('ca_knight_reset_epoch').GetValue)))))),And(And(KnightsView.GetMilitaryView.GetCharacter.IsValid,EqualTo_uint32(KnightsView.GetMilitaryView.GetCharacter.GetID,GetPlayer.GetID)),And(IsGameViewOpen('knights'),KnightsView.GetMilitaryView.AreKnightsShown))),'ca_kf_reset_route','ca_kf_fail_gate'))]"
+		}
+		state = {
+			name = ca_kf_reset_route
+			duration = 0
+			alpha = 1
+			on_finish = "[PdxGuiWidget.TriggerAnimation(Select_CString(KnightsView.GetKnightPermissions.IsDefault,'ca_kf_reset_wait','ca_kf_reset_command_gate'))]"
+		}
+		state = {
+			name = ca_kf_reset_command_gate
+			duration = 0
+			alpha = 1
+			on_finish = "[PdxGuiWidget.TriggerAnimation(Select_CString(And(And(And(And(And(GetPlayer.IsValid,And(GetPlayer.IsAlive,And(GetPlayer.IsLocalPlayer,GetPlayer.IsPlayer))),And(GetPlayer.MakeScope.GetVariable('ca_auto_knights_enabled').IsSet,And(GetPlayer.MakeScope.GetVariable('ca_knight_reset_pending').IsSet,GetPlayer.MakeScope.GetVariable('ca_knight_reset_epoch').IsSet))),And(GetVariableSystem.Exists('ca_kf_busy'),And(GetVariableSystem.HasValue('ca_kf_owner',UIntToString(GetPlayer.GetID)),GetVariableSystem.HasValue('ca_kf_epoch',IntToString(FixedPointToInt(GetPlayer.MakeScope.GetVariable('ca_knight_reset_epoch').GetValue)))))),And(And(KnightsView.GetMilitaryView.GetCharacter.IsValid,EqualTo_uint32(KnightsView.GetMilitaryView.GetCharacter.GetID,GetPlayer.GetID)),And(IsGameViewOpen('knights'),KnightsView.GetMilitaryView.AreKnightsShown))),And(Not(KnightsView.GetKnightPermissions.IsDefault),Not(GetVariableSystem.Exists('ca_kf_reset_sent')))),'ca_kf_reset_action','ca_kf_fail_gate'))]"
+		}
+		state = {
+			name = ca_kf_reset_action
+			duration = 0
+			alpha = 1
+			on_finish = "[GetVariableSystem.Set('ca_kf_reset_sent','yes')]"
+			on_finish = "[KnightsView.GetKnightPermissions.ResetToDefault]"
+			on_finish = "[PdxGuiWidget.TriggerAnimation('ca_kf_reset_wait')]"
+		}
+		# Fresh native getters while the genuine Knights model is still open.
+		state = {
+			name = ca_kf_reset_wait
+			duration = 0.3
+			alpha = 1
+			on_finish = "[PdxGuiWidget.TriggerAnimation(Select_CString(And(IsDefaultGUIMode,And(Not(IsPausedByEvent),And(Not(IsPauseMenuShown),And(Not(IsFullScreenWindowOpen),And(Not(IsInteractionConfirmationWindowOpen),Not(IsMapInteractionConfirmationWindowOpen)))))),'ca_kf_reset_observe','ca_kf_defer_gate'))]"
+		}
+		state = {
+			name = ca_kf_reset_observe
+			duration = 0
+			alpha = 1
+			on_finish = "[PdxGuiWidget.TriggerAnimation(Select_CString(And(And(And(And(And(GetPlayer.IsValid,And(GetPlayer.IsAlive,And(GetPlayer.IsLocalPlayer,GetPlayer.IsPlayer))),And(GetPlayer.MakeScope.GetVariable('ca_auto_knights_enabled').IsSet,And(GetPlayer.MakeScope.GetVariable('ca_knight_reset_pending').IsSet,GetPlayer.MakeScope.GetVariable('ca_knight_reset_epoch').IsSet))),And(GetVariableSystem.Exists('ca_kf_busy'),And(GetVariableSystem.HasValue('ca_kf_owner',UIntToString(GetPlayer.GetID)),GetVariableSystem.HasValue('ca_kf_epoch',IntToString(FixedPointToInt(GetPlayer.MakeScope.GetVariable('ca_knight_reset_epoch').GetValue)))))),And(And(KnightsView.GetMilitaryView.GetCharacter.IsValid,EqualTo_uint32(KnightsView.GetMilitaryView.GetCharacter.GetID,GetPlayer.GetID)),And(IsGameViewOpen('knights'),KnightsView.GetMilitaryView.AreKnightsShown))),And(KnightsView.GetKnightPermissions.IsDefault,And(And(KnightsView.GetKnightPermissions.GetAllowPlayerHeir,And(KnightsView.GetKnightPermissions.GetAllowSpouses,And(KnightsView.GetKnightPermissions.GetAllowOtherChildren,And(KnightsView.GetKnightPermissions.GetAllowConcubines,And(KnightsView.GetKnightPermissions.GetAllowSpousesOfChildren,And(KnightsView.GetKnightPermissions.GetAllowCouncillors,And(KnightsView.GetKnightPermissions.GetAllowInspiredCourtiers,And(KnightsView.GetKnightPermissions.GetAllowNonCombatCourtPositions,And(KnightsView.GetKnightPermissions.GetAllowWithTraitWounded,And(KnightsView.GetKnightPermissions.GetAllowPregnant,KnightsView.GetKnightPermissions.GetAllowLovers)))))))))),And(EqualTo_int32(KnightsView.GetKnightPermissions.GetMinProwess,'(int32)0'),And(EqualTo_int32(KnightsView.GetKnightPermissions.GetHouseFilterIndex,'(int32)0'),EqualTo_int32(KnightsView.GetKnightPermissions.GetVassalFilterIndex,'(int32)0')))))),'ca_kf_ack_gate','ca_kf_fail_gate'))]"
+		}
+		state = {
+			name = ca_kf_ack_gate
+			duration = 0
+			alpha = 1
+			on_finish = "[PdxGuiWidget.TriggerAnimation(Select_CString(And(And(And(And(And(And(GetPlayer.IsValid,And(GetPlayer.IsAlive,And(GetPlayer.IsLocalPlayer,GetPlayer.IsPlayer))),And(GetPlayer.MakeScope.GetVariable('ca_auto_knights_enabled').IsSet,And(GetPlayer.MakeScope.GetVariable('ca_knight_reset_pending').IsSet,GetPlayer.MakeScope.GetVariable('ca_knight_reset_epoch').IsSet))),And(GetVariableSystem.Exists('ca_kf_busy'),And(GetVariableSystem.HasValue('ca_kf_owner',UIntToString(GetPlayer.GetID)),GetVariableSystem.HasValue('ca_kf_epoch',IntToString(FixedPointToInt(GetPlayer.MakeScope.GetVariable('ca_knight_reset_epoch').GetValue)))))),And(And(KnightsView.GetMilitaryView.GetCharacter.IsValid,EqualTo_uint32(KnightsView.GetMilitaryView.GetCharacter.GetID,GetPlayer.GetID)),And(IsGameViewOpen('knights'),KnightsView.GetMilitaryView.AreKnightsShown))),And(KnightsView.GetKnightPermissions.IsDefault,And(And(KnightsView.GetKnightPermissions.GetAllowPlayerHeir,And(KnightsView.GetKnightPermissions.GetAllowSpouses,And(KnightsView.GetKnightPermissions.GetAllowOtherChildren,And(KnightsView.GetKnightPermissions.GetAllowConcubines,And(KnightsView.GetKnightPermissions.GetAllowSpousesOfChildren,And(KnightsView.GetKnightPermissions.GetAllowCouncillors,And(KnightsView.GetKnightPermissions.GetAllowInspiredCourtiers,And(KnightsView.GetKnightPermissions.GetAllowNonCombatCourtPositions,And(KnightsView.GetKnightPermissions.GetAllowWithTraitWounded,And(KnightsView.GetKnightPermissions.GetAllowPregnant,KnightsView.GetKnightPermissions.GetAllowLovers)))))))))),And(EqualTo_int32(KnightsView.GetKnightPermissions.GetMinProwess,'(int32)0'),And(EqualTo_int32(KnightsView.GetKnightPermissions.GetHouseFilterIndex,'(int32)0'),EqualTo_int32(KnightsView.GetKnightPermissions.GetVassalFilterIndex,'(int32)0')))))),Not(GetVariableSystem.Exists('ca_kf_ack_sent'))),'ca_kf_ack_action','ca_kf_fail_gate'))]"
+		}
+		# CURRENT requires exact captured owner/epoch equality before numeric transport.
+		state = {
+			name = ca_kf_ack_action
+			duration = 0
+			alpha = 1
+			on_finish = "[GetVariableSystem.Set('ca_kf_ack_sent','yes')]"
+			on_finish = "[GetScriptedGui('ca_knight_filters_reset_ack').Execute(GuiScope.SetRoot(GetPlayer.MakeScope).AddScope('ca_knight_ack_owner',KnightsView.GetMilitaryView.GetCharacter.MakeScope).AddScope('ca_knight_ack_epoch',MakeScopeValue(GetPlayer.MakeScope.GetVariable('ca_knight_reset_epoch').GetValue)).AddScope('ca_knight_ack_local_player',MakeScopeBool(And(GetPlayer.IsValid,And(GetPlayer.IsAlive,And(GetPlayer.IsLocalPlayer,GetPlayer.IsPlayer))))).AddScope('ca_knight_ack_is_default',MakeScopeBool(KnightsView.GetKnightPermissions.IsDefault)).AddScope('ca_knight_ack_all_allowed',MakeScopeBool(And(KnightsView.GetKnightPermissions.GetAllowPlayerHeir,And(KnightsView.GetKnightPermissions.GetAllowSpouses,And(KnightsView.GetKnightPermissions.GetAllowOtherChildren,And(KnightsView.GetKnightPermissions.GetAllowConcubines,And(KnightsView.GetKnightPermissions.GetAllowSpousesOfChildren,And(KnightsView.GetKnightPermissions.GetAllowCouncillors,And(KnightsView.GetKnightPermissions.GetAllowInspiredCourtiers,And(KnightsView.GetKnightPermissions.GetAllowNonCombatCourtPositions,And(KnightsView.GetKnightPermissions.GetAllowWithTraitWounded,And(KnightsView.GetKnightPermissions.GetAllowPregnant,KnightsView.GetKnightPermissions.GetAllowLovers)))))))))))).AddScope('ca_knight_ack_minimum',MakeScopeValue(IntToFixedPoint(KnightsView.GetKnightPermissions.GetMinProwess))).AddScope('ca_knight_ack_house',MakeScopeValue(IntToFixedPoint(KnightsView.GetKnightPermissions.GetHouseFilterIndex))).AddScope('ca_knight_ack_vassal',MakeScopeValue(IntToFixedPoint(KnightsView.GetKnightPermissions.GetVassalFilterIndex))).End)]"
+			on_finish = "[PdxGuiWidget.TriggerAnimation('ca_kf_ack_wait')]"
+		}
+		state = {
+			name = ca_kf_ack_wait
+			duration = 0.3
+			alpha = 1
+			on_finish = "[PdxGuiWidget.TriggerAnimation(Select_CString(And(And(GetPlayer.IsValid,And(GetPlayer.IsAlive,And(GetPlayer.IsLocalPlayer,GetPlayer.IsPlayer))),And(And(GetVariableSystem.Exists('ca_kf_busy'),And(GetVariableSystem.HasValue('ca_kf_owner',UIntToString(GetPlayer.GetID)),GetVariableSystem.HasValue('ca_kf_epoch',IntToString(FixedPointToInt(GetPlayer.MakeScope.GetVariable('ca_knight_reset_epoch').GetValue))))),And(GetPlayer.MakeScope.GetVariable('ca_auto_knights_enabled').IsSet,And(GetPlayer.MakeScope.GetVariable('ca_knight_filters_ready').IsSet,Not(GetPlayer.MakeScope.GetVariable('ca_knight_reset_pending').IsSet))))),'ca_kf_success','ca_kf_fail_gate'))]"
+		}
+		state = {
+			name = ca_kf_success
+			duration = 0
+			alpha = 1
+			on_finish = "[GetVariableSystem.Set('ca_kf_result','acknowledged')]"
+			on_finish = "[PdxGuiWidget.TriggerAnimation('ca_kf_cleanup')]"
+		}
+		state = {
+			name = ca_kf_fail_gate
+			duration = 0
+			alpha = 1
+			on_finish = "[PdxGuiWidget.TriggerAnimation(Select_CString(And(IsDefaultGUIMode,And(Not(IsPausedByEvent),And(Not(IsPauseMenuShown),And(Not(IsFullScreenWindowOpen),And(Not(IsInteractionConfirmationWindowOpen),Not(IsMapInteractionConfirmationWindowOpen)))))),'ca_kf_fail_owner_gate','ca_kf_defer_gate'))]"
+		}
+		state = {
+			name = ca_kf_fail_owner_gate
+			duration = 0
+			alpha = 1
+			on_finish = "[PdxGuiWidget.TriggerAnimation(Select_CString(And(And(And(And(GetPlayer.IsValid,And(GetPlayer.IsAlive,And(GetPlayer.IsLocalPlayer,GetPlayer.IsPlayer))),And(GetPlayer.MakeScope.GetVariable('ca_auto_knights_enabled').IsSet,And(GetPlayer.MakeScope.GetVariable('ca_knight_reset_pending').IsSet,GetPlayer.MakeScope.GetVariable('ca_knight_reset_epoch').IsSet))),And(GetVariableSystem.Exists('ca_kf_busy'),And(GetVariableSystem.HasValue('ca_kf_owner',UIntToString(GetPlayer.GetID)),GetVariableSystem.HasValue('ca_kf_epoch',IntToString(FixedPointToInt(GetPlayer.MakeScope.GetVariable('ca_knight_reset_epoch').GetValue)))))),Not(GetVariableSystem.Exists('ca_kf_failure_sent'))),'ca_kf_fail_action','ca_kf_cleanup'))]"
+		}
+		# Backend failure must validate the same epoch, disable Auto Knights and notify.
+		state = {
+			name = ca_kf_fail_action
+			duration = 0
+			alpha = 1
+			on_finish = "[GetVariableSystem.Set('ca_kf_failure_sent','yes')]"
+			on_finish = "[GetVariableSystem.Set('ca_kf_result','failed')]"
+			on_finish = "[GetScriptedGui('ca_knight_filters_reset_failed').Execute(GuiScope.SetRoot(GetPlayer.MakeScope).AddScope('ca_knight_ack_owner',GetPlayer.MakeScope).AddScope('ca_knight_ack_epoch',MakeScopeValue(GetPlayer.MakeScope.GetVariable('ca_knight_reset_epoch').GetValue)).AddScope('ca_knight_ack_local_player',MakeScopeBool(And(GetPlayer.IsValid,And(GetPlayer.IsAlive,And(GetPlayer.IsLocalPlayer,GetPlayer.IsPlayer))))).End)]"
+			on_finish = "[PdxGuiWidget.TriggerAnimation('ca_kf_cleanup')]"
+		}
+		state = {
+			name = ca_kf_defer_gate
+			duration = 0
+			alpha = 1
+			on_finish = "[PdxGuiWidget.TriggerAnimation(Select_CString(And(And(And(GetPlayer.IsValid,And(GetPlayer.IsAlive,And(GetPlayer.IsLocalPlayer,GetPlayer.IsPlayer))),And(GetPlayer.MakeScope.GetVariable('ca_auto_knights_enabled').IsSet,And(GetPlayer.MakeScope.GetVariable('ca_knight_reset_pending').IsSet,GetPlayer.MakeScope.GetVariable('ca_knight_reset_epoch').IsSet))),And(GetVariableSystem.Exists('ca_kf_busy'),And(GetVariableSystem.HasValue('ca_kf_owner',UIntToString(GetPlayer.GetID)),GetVariableSystem.HasValue('ca_kf_epoch',IntToString(FixedPointToInt(GetPlayer.MakeScope.GetVariable('ca_knight_reset_epoch').GetValue)))))),'ca_kf_defer_action','ca_kf_cleanup'))]"
+		}
+		# A modal/unknown panel is not a failed reset. Backend stays ON and pending.
+		state = {
+			name = ca_kf_defer_action
+			duration = 0
+			alpha = 1
+			on_finish = "[GetVariableSystem.Set('ca_kf_deferred','yes')]"
+			on_finish = "[GetVariableSystem.Set('ca_kf_result','deferred_ui')]"
+			on_finish = "[PdxGuiWidget.TriggerAnimation('ca_kf_cleanup')]"
+		}
+		state = {
+			name = ca_kf_cleanup
+			duration = 0
+			alpha = 1
+			on_finish = "[PdxGuiWidget.TriggerAnimation(Select_CString(And(GetVariableSystem.Exists('ca_kf_owned_view'),And(Not(GetVariableSystem.Exists('ca_kf_close_sent')),And(IsGameViewOpen('knights'),And(KnightsView.GetMilitaryView.GetCharacter.IsValid,GetVariableSystem.HasValue('ca_kf_owner',UIntToString(KnightsView.GetMilitaryView.GetCharacter.GetID)))))),'ca_kf_close_action','ca_kf_finish'))]"
+		}
+		state = {
+			name = ca_kf_close_action
+			duration = 0
+			alpha = 1
+			on_finish = "[GetVariableSystem.Set('ca_kf_close_sent','yes')]"
+			on_finish = "[KnightsView.Close]"
+			on_finish = "[PdxGuiWidget.TriggerAnimation('ca_kf_finish')]"
+		}
+		state = {
+			name = ca_kf_finish
+			duration = 0
+			alpha = 1
+			on_finish = "[GetVariableSystem.Clear('ca_kf_hide_owned_view')]"
+			on_finish = "[GetVariableSystem.Clear('ca_kf_owned_view')]"
+			on_finish = "[PdxGuiWidget.TriggerAnimation(Select_CString(GetVariableSystem.Exists('ca_kf_deferred'),'ca_kf_finish_deferred','ca_kf_finish_done'))]"
+		}
+		# CAN_BIND is false for blocked UI: no callback retry until that UI changes.
+		state = {
+			name = ca_kf_finish_deferred
+			duration = 0
+			alpha = 1
+			on_finish = "[GetVariableSystem.Clear('ca_kf_seen')]"
+			on_finish = "[GetVariableSystem.Clear('ca_kf_busy')]"
+		}
+		# Completed/failed session stays recorded: a rejected failure cannot hot-loop.
+		state = {
+			name = ca_kf_finish_done
+			duration = 0
+			alpha = 1
+			on_finish = "[GetVariableSystem.Clear('ca_kf_busy')]"
+		}
+	}
+	widget = {
+		name = ca_knight_filters_upgrade_context
+		size = { 1 1 }
+		state = {
+			name = ca_kf_upgrade_noop
+			duration = 0
+			alpha = 1
+		}
+		state = {
+			name = ca_kf_upgrade_watch
+			duration = 0
+			alpha = 1
+			trigger_when = "[And(And(And(GetPlayer.IsValid,And(GetPlayer.IsAlive,And(GetPlayer.IsLocalPlayer,GetPlayer.IsPlayer))),And(GetPlayer.MakeScope.GetVariable('ca_auto_knights_enabled').IsSet,And(Not(GetPlayer.MakeScope.GetVariable('ca_knight_filters_ready').IsSet),Or(Not(GetPlayer.MakeScope.GetVariable('ca_knight_reset_pending').IsSet),Not(GetPlayer.MakeScope.GetVariable('ca_knight_reset_epoch').IsSet))))),And(Not(GetVariableSystem.Exists('ca_kf_busy')),And(Not(GetVariableSystem.HasValue('ca_kf_upgrade_seen',Concatenate(UIntToString(GetPlayer.GetID),Concatenate('_',IntToString(FixedPointToInt(GetPlayer.MakeScope.GetVariable('ca_knight_reset_epoch').GetValue)))))),GetScriptedGui('ca_request_initial_knight_filters').IsValid(GuiScope.SetRoot(GetPlayer.MakeScope).End))))]"
+			on_finish = "[PdxGuiWidget.TriggerAnimation(Select_CString(And(And(And(GetPlayer.IsValid,And(GetPlayer.IsAlive,And(GetPlayer.IsLocalPlayer,GetPlayer.IsPlayer))),And(GetPlayer.MakeScope.GetVariable('ca_auto_knights_enabled').IsSet,And(Not(GetPlayer.MakeScope.GetVariable('ca_knight_filters_ready').IsSet),Or(Not(GetPlayer.MakeScope.GetVariable('ca_knight_reset_pending').IsSet),Not(GetPlayer.MakeScope.GetVariable('ca_knight_reset_epoch').IsSet))))),And(Not(GetVariableSystem.Exists('ca_kf_busy')),And(Not(GetVariableSystem.HasValue('ca_kf_upgrade_seen',Concatenate(UIntToString(GetPlayer.GetID),Concatenate('_',IntToString(FixedPointToInt(GetPlayer.MakeScope.GetVariable('ca_knight_reset_epoch').GetValue)))))),GetScriptedGui('ca_request_initial_knight_filters').IsValid(GuiScope.SetRoot(GetPlayer.MakeScope).End)))),'ca_kf_upgrade_action','ca_kf_upgrade_noop'))]"
+		}
+		# One guarded request per missing-state owner/epoch; never readiness or recruits.
+		state = {
+			name = ca_kf_upgrade_action
+			duration = 0
+			alpha = 1
+			on_finish = "[GetVariableSystem.Set('ca_kf_upgrade_seen',Concatenate(UIntToString(GetPlayer.GetID),Concatenate('_',IntToString(FixedPointToInt(GetPlayer.MakeScope.GetVariable('ca_knight_reset_epoch').GetValue)))))]"
+			on_finish = "[GetScriptedGui('ca_request_initial_knight_filters').Execute(GuiScope.SetRoot(GetPlayer.MakeScope).End)]"
+		}
+		# After request acceptance/Off, a later in-process load of the same old save can upgrade again.
+		state = {
+			name = ca_kf_upgrade_rearm
+			duration = 0
+			alpha = 1
+			trigger_when = "[And(GetPlayer.IsValid,And(GetVariableSystem.Exists('ca_kf_upgrade_seen'),Or(Not(GetPlayer.MakeScope.GetVariable('ca_auto_knights_enabled').IsSet),Or(GetPlayer.MakeScope.GetVariable('ca_knight_filters_ready').IsSet,And(GetPlayer.MakeScope.GetVariable('ca_knight_reset_pending').IsSet,GetPlayer.MakeScope.GetVariable('ca_knight_reset_epoch').IsSet)))))]"
+			on_finish = "[GetVariableSystem.Clear('ca_kf_upgrade_seen')]"
+		}
+	}
+}

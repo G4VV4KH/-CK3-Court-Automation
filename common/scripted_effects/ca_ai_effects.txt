@@ -24,7 +24,10 @@ ca_ai_yearly_support_effect = {
 # already checked native desire, vacancy, affordability and missing candidates.
 ca_ai_generate_selected_court_candidate_effect = {
 	if = {
-		limit = { exists = scope:ca_ai_selected_type }
+		limit = {
+			exists = scope:ca_ai_selected_type
+			ca_position_is_included_trigger = { POSITION = scope:ca_ai_selected_type }
+		}
 		save_scope_as = ca_court_init_employer
 		scope:ca_ai_selected_type = { save_scope_as = ca_court_init_type }
 		set_variable = { name = ca_court_init_generated value = 0 }
@@ -45,6 +48,7 @@ ca_ai_consider_court_role_effect = {
 	if = {
 		limit = {
 			can_employ_court_position_type = $ROLE$_court_position
+			ca_position_is_included_trigger = { POSITION = court_position_type:$ROLE$_court_position }
 			ca_ai_$ROLE$_position_score > var:ca_ai_best_position_score
 			ca_ai_role_affordable_trigger = { ROLE = $ROLE$ }
 		}

@@ -1,0 +1,30 @@
+﻿# One queued callback per opted-in player; no scan of the world's AI rulers.
+ca_maintenance_tick = {
+	effect = {
+		remove_variable = ca_maintenance_pending
+		if = {
+			limit = { ca_player_maintenance_eligible_trigger = yes }
+			ca_auto_court_pass_effect = yes
+			ca_auto_knights_pass_effect = yes
+		}
+		# Keep the opted-in player's single timer through temporary landlessness.
+		# No appointments or recruitment occur until eligibility returns.
+		ca_schedule_maintenance_effect = yes
+	}
+}
+
+on_player_character_change = {
+	on_actions = { ca_inherit_player_maintenance }
+}
+
+ca_inherit_player_maintenance = {
+	effect = { ca_player_changed_effect = yes }
+}
+
+on_game_start_after_lobby = {
+	on_actions = { ca_resume_player_maintenance }
+}
+
+ca_resume_player_maintenance = {
+	effect = { every_player = { ca_resume_maintenance_effect = yes } }
+}

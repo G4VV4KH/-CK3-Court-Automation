@@ -1,0 +1,6 @@
+﻿ca_player_maintenance_eligible_trigger = {
+	is_ai = no
+	is_alive = yes
+	is_landed = yes
+	exists = location
+}

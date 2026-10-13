@@ -1,0 +1,796 @@
+﻿# Direct player controls and native-policy bridge. The bridge is the only
+# writer of native ACK lists; acknowledgements originate in actual GUI getters.
+
+# An older ON save may load while paused without firing the startup on-action.
+# This only requests the ordinary native handshake; it cannot acknowledge it.
+ca_request_initial_knight_filters = {
+	scope = character
+	is_valid = {
+		ca_player_maintenance_eligible_trigger = yes
+		has_variable = ca_auto_knights_enabled
+		NOT = { has_variable = ca_knight_filters_ready }
+		OR = {
+			NOT = { has_variable = ca_knight_reset_pending }
+			NOT = { has_variable = ca_knight_reset_epoch }
+		}
+	}
+	effect = {
+		if = {
+			limit = {
+				ca_player_maintenance_eligible_trigger = yes
+				has_variable = ca_auto_knights_enabled
+				NOT = { has_variable = ca_knight_filters_ready }
+				OR = {
+					NOT = { has_variable = ca_knight_reset_pending }
+					NOT = { has_variable = ca_knight_reset_epoch }
+				}
+			}
+			ca_request_knight_filter_reset_effect = yes
+			ca_schedule_maintenance_effect = yes
+		}
+	}
+}
+
+# The native worker supplies the captured transaction identity after its bounded
+# timeout. A stale callback cannot disable a later request or another character.
+ca_knight_filters_reset_failed = {
+	scope = character
+	is_valid = {
+		ca_player_maintenance_eligible_trigger = yes
+		has_variable = ca_auto_knights_enabled
+		has_variable = ca_knight_reset_pending
+		has_variable = ca_knight_reset_epoch
+		exists = scope:ca_knight_ack_owner
+		exists = scope:ca_knight_ack_epoch
+		exists = scope:ca_knight_ack_local_player
+		this = scope:ca_knight_ack_owner
+		scope:ca_knight_ack_epoch = var:ca_knight_reset_epoch
+		scope:ca_knight_ack_local_player = yes
+	}
+	effect = {
+		if = {
+			limit = {
+				ca_player_maintenance_eligible_trigger = yes
+				has_variable = ca_auto_knights_enabled
+				has_variable = ca_knight_reset_pending
+				has_variable = ca_knight_reset_epoch
+				exists = scope:ca_knight_ack_owner
+				exists = scope:ca_knight_ack_epoch
+				exists = scope:ca_knight_ack_local_player
+				this = scope:ca_knight_ack_owner
+				scope:ca_knight_ack_epoch = var:ca_knight_reset_epoch
+				scope:ca_knight_ack_local_player = yes
+			}
+			remove_variable = ca_auto_knights_enabled
+			remove_variable = ca_auto_knights_initial_pending
+			ca_next_knight_reset_epoch_effect = yes
+			ca_automation_error_toast_effect = yes
+		}
+	}
+}
+
+ca_native_player_available = {
+	scope = character
+	is_valid = {
+		is_ai = no
+			is_landed = yes
+			is_alive = yes
+	}
+}
+
+ca_court_fill_now = {
+	scope = character
+	is_valid = {
+		is_ai = no
+			is_landed = yes
+			is_alive = yes
+		ca_court_init_has_vacancy_trigger = yes
+	}
+	effect = {
+		if = {
+			limit = {
+				is_ai = no
+					is_landed = yes
+					is_alive = yes
+				ca_court_init_has_vacancy_trigger = yes
+			}
+			ca_player_fill_court_now_effect = yes
+		}
+	}
+}
+
+ca_toggle_auto_court = {
+	scope = character
+	is_valid = {
+		is_ai = no
+			is_landed = yes
+			is_alive = yes
+		NOT = { has_variable = ca_native_restore_pending }
+	}
+	effect = {
+		if = {
+			limit = {
+				is_ai = no
+					is_landed = yes
+					is_alive = yes
+				NOT = { has_variable = ca_native_restore_pending }
+			}
+			# Off remains available during the first native-policy handshake.
+			# The backend preserves unsnapshotted positions on early cancellation.
+			ca_toggle_auto_court_effect = yes
+		}
+	}
+}
+
+ca_toggle_auto_knights = {
+	scope = character
+	is_valid = {
+		is_ai = no
+			is_landed = yes
+			is_alive = yes
+	}
+	effect = {
+		if = {
+			limit = {
+				is_ai = no
+					is_landed = yes
+					is_alive = yes
+			}
+			ca_toggle_auto_knights_effect = yes
+		}
+	}
+}
+
+# The native player transition can precede stable human/landed/location state.
+# This one-shot retry is independent of the court's native-policy ACK barrier.
+ca_resume_initial_knights = {
+	scope = character
+	is_valid = {
+		ca_player_maintenance_eligible_trigger = yes
+		has_variable = ca_auto_knights_enabled
+		has_variable = ca_auto_knights_initial_pending
+		has_variable = ca_knight_filters_ready
+	}
+	effect = {
+		if = {
+			limit = {
+				ca_player_maintenance_eligible_trigger = yes
+				has_variable = ca_auto_knights_enabled
+				has_variable = ca_auto_knights_initial_pending
+				has_variable = ca_knight_filters_ready
+			}
+			ca_auto_knights_pass_effect = yes
+			ca_schedule_maintenance_effect = yes
+		}
+	}
+}
+
+# The native GUI supplies fresh owner-bound getters after ResetToDefault.
+# Presence, owner, request epoch and every required native field are revalidated
+# in the mutation, not only IsValid. This is independent of court-policy ACKs.
+ca_knight_filters_reset_ack = {
+	scope = character
+	is_valid = {
+		ca_player_maintenance_eligible_trigger = yes
+		has_variable = ca_auto_knights_enabled
+		has_variable = ca_knight_reset_pending
+		has_variable = ca_knight_reset_epoch
+		exists = scope:ca_knight_ack_owner
+		exists = scope:ca_knight_ack_epoch
+		exists = scope:ca_knight_ack_local_player
+		exists = scope:ca_knight_ack_is_default
+		exists = scope:ca_knight_ack_all_allowed
+		exists = scope:ca_knight_ack_minimum
+		exists = scope:ca_knight_ack_house
+		exists = scope:ca_knight_ack_vassal
+		this = scope:ca_knight_ack_owner
+		scope:ca_knight_ack_epoch = var:ca_knight_reset_epoch
+		scope:ca_knight_ack_local_player = yes
+		scope:ca_knight_ack_is_default = yes
+		scope:ca_knight_ack_all_allowed = yes
+		scope:ca_knight_ack_minimum = 0
+		scope:ca_knight_ack_house = 0
+		scope:ca_knight_ack_vassal = 0
+	}
+	effect = {
+		if = {
+			limit = {
+				ca_player_maintenance_eligible_trigger = yes
+				has_variable = ca_auto_knights_enabled
+				has_variable = ca_knight_reset_pending
+				has_variable = ca_knight_reset_epoch
+				exists = scope:ca_knight_ack_owner
+				exists = scope:ca_knight_ack_epoch
+				exists = scope:ca_knight_ack_local_player
+				exists = scope:ca_knight_ack_is_default
+				exists = scope:ca_knight_ack_all_allowed
+				exists = scope:ca_knight_ack_minimum
+				exists = scope:ca_knight_ack_house
+				exists = scope:ca_knight_ack_vassal
+				this = scope:ca_knight_ack_owner
+				scope:ca_knight_ack_epoch = var:ca_knight_reset_epoch
+				scope:ca_knight_ack_local_player = yes
+				scope:ca_knight_ack_is_default = yes
+				scope:ca_knight_ack_all_allowed = yes
+				scope:ca_knight_ack_minimum = 0
+				scope:ca_knight_ack_house = 0
+				scope:ca_knight_ack_vassal = 0
+			}
+			set_variable = { name = ca_knight_filters_ready value = yes }
+			remove_variable = ca_knight_reset_pending
+			ca_auto_knights_pass_effect = yes
+			ca_schedule_maintenance_effect = yes
+		}
+	}
+}
+
+ca_bulk_policy_none = {
+	scope = character
+	is_valid = {
+		is_ai = no
+			is_landed = yes
+			is_alive = yes
+		NOT = { has_variable = ca_auto_court_enabled }
+		NOT = { has_variable_list = ca_native_release_pending }
+	}
+	effect = {
+		if = {
+			limit = {
+				is_ai = no
+					is_landed = yes
+					is_alive = yes
+				NOT = { has_variable = ca_auto_court_enabled }
+				NOT = { has_variable_list = ca_native_release_pending }
+			}
+			remove_variable = ca_native_preserve_unsaved
+			set_variable = { name = ca_bulk_automation_policy value = 0 }
+			clear_variable_list = ca_native_saved_all
+			clear_variable_list = ca_native_saved_event
+			clear_variable_list = ca_native_saved_best
+			clear_variable_list = ca_native_saved_best_event
+			set_variable = { name = ca_native_restore_pending value = yes }
+			ca_next_native_policy_epoch_effect = yes
+		}
+	}
+}
+
+ca_bulk_policy_event = {
+	scope = character
+	is_valid = {
+		is_ai = no
+			is_landed = yes
+			is_alive = yes
+		NOT = { has_variable = ca_auto_court_enabled }
+		NOT = { has_variable_list = ca_native_release_pending }
+	}
+	effect = {
+		if = {
+			limit = {
+				is_ai = no
+					is_landed = yes
+					is_alive = yes
+				NOT = { has_variable = ca_auto_court_enabled }
+				NOT = { has_variable_list = ca_native_release_pending }
+			}
+			remove_variable = ca_native_preserve_unsaved
+			set_variable = { name = ca_bulk_automation_policy value = 1 }
+			clear_variable_list = ca_native_saved_all
+			clear_variable_list = ca_native_saved_event
+			clear_variable_list = ca_native_saved_best
+			clear_variable_list = ca_native_saved_best_event
+			set_variable = { name = ca_native_restore_pending value = yes }
+			ca_next_native_policy_epoch_effect = yes
+		}
+	}
+}
+
+ca_bulk_policy_best = {
+	scope = character
+	is_valid = {
+		is_ai = no
+			is_landed = yes
+			is_alive = yes
+		NOT = { has_variable = ca_auto_court_enabled }
+		NOT = { has_variable_list = ca_native_release_pending }
+	}
+	effect = {
+		if = {
+			limit = {
+				is_ai = no
+					is_landed = yes
+					is_alive = yes
+				NOT = { has_variable = ca_auto_court_enabled }
+				NOT = { has_variable_list = ca_native_release_pending }
+			}
+			remove_variable = ca_native_preserve_unsaved
+			set_variable = { name = ca_bulk_automation_policy value = 2 }
+			clear_variable_list = ca_native_saved_all
+			clear_variable_list = ca_native_saved_event
+			clear_variable_list = ca_native_saved_best
+			clear_variable_list = ca_native_saved_best_event
+			set_variable = { name = ca_native_restore_pending value = yes }
+			ca_next_native_policy_epoch_effect = yes
+		}
+	}
+}
+
+ca_bulk_policy_best_event = {
+	scope = character
+	is_valid = {
+		is_ai = no
+			is_landed = yes
+			is_alive = yes
+		NOT = { has_variable = ca_auto_court_enabled }
+		NOT = { has_variable_list = ca_native_release_pending }
+	}
+	effect = {
+		if = {
+			limit = {
+				is_ai = no
+					is_landed = yes
+					is_alive = yes
+				NOT = { has_variable = ca_auto_court_enabled }
+				NOT = { has_variable_list = ca_native_release_pending }
+			}
+			remove_variable = ca_native_preserve_unsaved
+			set_variable = { name = ca_bulk_automation_policy value = 3 }
+			clear_variable_list = ca_native_saved_all
+			clear_variable_list = ca_native_saved_event
+			clear_variable_list = ca_native_saved_best
+			clear_variable_list = ca_native_saved_best_event
+			set_variable = { name = ca_native_restore_pending value = yes }
+			ca_next_native_policy_epoch_effect = yes
+		}
+	}
+}
+
+ca_native_has_saved = {
+	scope = character
+	is_valid = {
+		is_ai = no
+			is_landed = yes
+			is_alive = yes
+		exists = scope:ca_native_type
+		is_target_in_variable_list = { name = ca_native_saved_all target = scope:ca_native_type }
+	}
+}
+
+ca_native_saved_none = {
+	scope = character
+	is_valid = {
+		is_ai = no
+			is_landed = yes
+			is_alive = yes
+		exists = scope:ca_native_type
+		is_target_in_variable_list = { name = ca_native_saved_all target = scope:ca_native_type }
+		NOR = {
+			is_target_in_variable_list = { name = ca_native_saved_event target = scope:ca_native_type }
+			is_target_in_variable_list = { name = ca_native_saved_best target = scope:ca_native_type }
+			is_target_in_variable_list = { name = ca_native_saved_best_event target = scope:ca_native_type }
+		}
+	}
+}
+
+ca_native_record_none = {
+	scope = character
+	is_valid = {
+		is_ai = no
+			is_landed = yes
+			is_alive = yes
+		exists = scope:ca_native_type
+		ca_position_is_included_trigger = { POSITION = scope:ca_native_type }
+		OR = {
+			NOT = { has_variable = ca_auto_court_enabled }
+			NOT = { is_target_in_variable_list = { name = ca_native_saved_all target = scope:ca_native_type } }
+		}
+	}
+	effect = {
+		if = {
+			limit = {
+				is_ai = no
+					is_landed = yes
+					is_alive = yes
+				exists = scope:ca_native_type
+				ca_position_is_included_trigger = { POSITION = scope:ca_native_type }
+				OR = {
+					NOT = { has_variable = ca_auto_court_enabled }
+					NOT = { is_target_in_variable_list = { name = ca_native_saved_all target = scope:ca_native_type } }
+				}
+			}
+			if = {
+				limit = { NOT = { is_target_in_variable_list = { name = ca_native_saved_all target = scope:ca_native_type } } }
+				add_to_variable_list = { name = ca_native_saved_all target = scope:ca_native_type }
+			}
+			remove_list_variable = { name = ca_native_saved_event target = scope:ca_native_type }
+			remove_list_variable = { name = ca_native_saved_best target = scope:ca_native_type }
+			remove_list_variable = { name = ca_native_saved_best_event target = scope:ca_native_type }
+		}
+	}
+}
+
+ca_native_saved_event = {
+	scope = character
+	is_valid = {
+		is_ai = no
+			is_landed = yes
+			is_alive = yes
+		exists = scope:ca_native_type
+		is_target_in_variable_list = { name = ca_native_saved_event target = scope:ca_native_type }
+	}
+}
+
+ca_native_record_event = {
+	scope = character
+	is_valid = {
+		is_ai = no
+			is_landed = yes
+			is_alive = yes
+		exists = scope:ca_native_type
+		ca_position_is_included_trigger = { POSITION = scope:ca_native_type }
+		OR = {
+			NOT = { has_variable = ca_auto_court_enabled }
+			NOT = { is_target_in_variable_list = { name = ca_native_saved_all target = scope:ca_native_type } }
+		}
+	}
+	effect = {
+		if = {
+			limit = {
+				is_ai = no
+					is_landed = yes
+					is_alive = yes
+				exists = scope:ca_native_type
+				ca_position_is_included_trigger = { POSITION = scope:ca_native_type }
+				OR = {
+					NOT = { has_variable = ca_auto_court_enabled }
+					NOT = { is_target_in_variable_list = { name = ca_native_saved_all target = scope:ca_native_type } }
+				}
+			}
+			if = {
+				limit = { NOT = { is_target_in_variable_list = { name = ca_native_saved_all target = scope:ca_native_type } } }
+				add_to_variable_list = { name = ca_native_saved_all target = scope:ca_native_type }
+			}
+			remove_list_variable = { name = ca_native_saved_event target = scope:ca_native_type }
+			remove_list_variable = { name = ca_native_saved_best target = scope:ca_native_type }
+			remove_list_variable = { name = ca_native_saved_best_event target = scope:ca_native_type }
+			add_to_variable_list = { name = ca_native_saved_event target = scope:ca_native_type }
+		}
+	}
+}
+
+ca_native_saved_best = {
+	scope = character
+	is_valid = {
+		is_ai = no
+			is_landed = yes
+			is_alive = yes
+		exists = scope:ca_native_type
+		is_target_in_variable_list = { name = ca_native_saved_best target = scope:ca_native_type }
+	}
+}
+
+ca_native_record_best = {
+	scope = character
+	is_valid = {
+		is_ai = no
+			is_landed = yes
+			is_alive = yes
+		exists = scope:ca_native_type
+		ca_position_is_included_trigger = { POSITION = scope:ca_native_type }
+		OR = {
+			NOT = { has_variable = ca_auto_court_enabled }
+			NOT = { is_target_in_variable_list = { name = ca_native_saved_all target = scope:ca_native_type } }
+		}
+	}
+	effect = {
+		if = {
+			limit = {
+				is_ai = no
+					is_landed = yes
+					is_alive = yes
+				exists = scope:ca_native_type
+				ca_position_is_included_trigger = { POSITION = scope:ca_native_type }
+				OR = {
+					NOT = { has_variable = ca_auto_court_enabled }
+					NOT = { is_target_in_variable_list = { name = ca_native_saved_all target = scope:ca_native_type } }
+				}
+			}
+			if = {
+				limit = { NOT = { is_target_in_variable_list = { name = ca_native_saved_all target = scope:ca_native_type } } }
+				add_to_variable_list = { name = ca_native_saved_all target = scope:ca_native_type }
+			}
+			remove_list_variable = { name = ca_native_saved_event target = scope:ca_native_type }
+			remove_list_variable = { name = ca_native_saved_best target = scope:ca_native_type }
+			remove_list_variable = { name = ca_native_saved_best_event target = scope:ca_native_type }
+			add_to_variable_list = { name = ca_native_saved_best target = scope:ca_native_type }
+		}
+	}
+}
+
+ca_native_saved_best_event = {
+	scope = character
+	is_valid = {
+		is_ai = no
+			is_landed = yes
+			is_alive = yes
+		exists = scope:ca_native_type
+		is_target_in_variable_list = { name = ca_native_saved_best_event target = scope:ca_native_type }
+	}
+}
+
+ca_native_record_best_event = {
+	scope = character
+	is_valid = {
+		is_ai = no
+			is_landed = yes
+			is_alive = yes
+		exists = scope:ca_native_type
+		ca_position_is_included_trigger = { POSITION = scope:ca_native_type }
+		OR = {
+			NOT = { has_variable = ca_auto_court_enabled }
+			NOT = { is_target_in_variable_list = { name = ca_native_saved_all target = scope:ca_native_type } }
+		}
+	}
+	effect = {
+		if = {
+			limit = {
+				is_ai = no
+					is_landed = yes
+					is_alive = yes
+				exists = scope:ca_native_type
+				ca_position_is_included_trigger = { POSITION = scope:ca_native_type }
+				OR = {
+					NOT = { has_variable = ca_auto_court_enabled }
+					NOT = { is_target_in_variable_list = { name = ca_native_saved_all target = scope:ca_native_type } }
+				}
+			}
+			if = {
+				limit = { NOT = { is_target_in_variable_list = { name = ca_native_saved_all target = scope:ca_native_type } } }
+				add_to_variable_list = { name = ca_native_saved_all target = scope:ca_native_type }
+			}
+			remove_list_variable = { name = ca_native_saved_event target = scope:ca_native_type }
+			remove_list_variable = { name = ca_native_saved_best target = scope:ca_native_type }
+			remove_list_variable = { name = ca_native_saved_best_event target = scope:ca_native_type }
+			add_to_variable_list = { name = ca_native_saved_best_event target = scope:ca_native_type }
+		}
+	}
+}
+
+ca_native_policy_begin = {
+	scope = character
+	is_valid = {
+		is_ai = no
+			is_landed = yes
+			is_alive = yes
+	}
+	effect = {
+		if = {
+			limit = {
+				is_ai = no
+					is_landed = yes
+					is_alive = yes
+			}
+			remove_variable = ca_native_policy_ready
+			clear_variable_list = ca_native_off_confirmed
+			clear_variable_list = ca_native_applied_confirmed
+			set_variable = { name = ca_native_off_count value = 0 }
+			set_variable = { name = ca_native_applied_count value = 0 }
+			# Fixed counts for this owner/epoch: ignored roles contribute to neither.
+			# Release ACKs shrink the pending list, but never this expected total.
+			set_variable = { name = ca_native_type_count value = 0 }
+			set_variable = { name = ca_native_apply_type_count value = 0 }
+			every_court_position_type = {
+				save_scope_as = ca_native_count_type
+				root = {
+					if = {
+						limit = { ca_position_is_included_trigger = { POSITION = scope:ca_native_count_type } }
+						change_variable = { name = ca_native_type_count add = 1 }
+						if = {
+							limit = { NOT = { has_variable = ca_auto_court_enabled } }
+							change_variable = { name = ca_native_apply_type_count add = 1 }
+						}
+					}
+					else_if = {
+						limit = {
+							is_target_in_variable_list = { name = ca_native_release_pending target = scope:ca_native_count_type }
+							is_target_in_variable_list = { name = ca_native_saved_all target = scope:ca_native_count_type }
+						}
+						change_variable = { name = ca_native_apply_type_count add = 1 }
+					}
+				}
+			}
+			clear_saved_scope = ca_native_count_type
+			if = {
+				limit = { has_variable = ca_native_bridge_generation }
+				change_variable = { name = ca_native_bridge_generation add = 1 }
+			}
+			else = { set_variable = { name = ca_native_bridge_generation value = 1 } }
+			if = {
+				limit = {
+					NOT = { has_variable = ca_auto_court_enabled }
+					OR = { has_variable = ca_bulk_automation_policy has_variable_list = ca_native_saved_all }
+				}
+				set_variable = { name = ca_native_restore_pending value = yes }
+			}
+		}
+	}
+}
+
+ca_native_confirm_off = {
+	scope = character
+	is_valid = {
+		is_ai = no
+			is_landed = yes
+			is_alive = yes
+		exists = scope:ca_native_type
+		ca_position_is_included_trigger = { POSITION = scope:ca_native_type }
+		has_variable = ca_auto_court_enabled
+		is_target_in_variable_list = { name = ca_native_saved_all target = scope:ca_native_type }
+		NOT = { is_target_in_variable_list = { name = ca_native_off_confirmed target = scope:ca_native_type } }
+	}
+	effect = {
+		if = {
+			limit = {
+				is_ai = no
+					is_landed = yes
+					is_alive = yes
+				exists = scope:ca_native_type
+				ca_position_is_included_trigger = { POSITION = scope:ca_native_type }
+				has_variable = ca_auto_court_enabled
+				is_target_in_variable_list = { name = ca_native_saved_all target = scope:ca_native_type }
+				NOT = { is_target_in_variable_list = { name = ca_native_off_confirmed target = scope:ca_native_type } }
+			}
+			add_to_variable_list = { name = ca_native_off_confirmed target = scope:ca_native_type }
+			change_variable = { name = ca_native_off_count add = 1 }
+		}
+	}
+}
+
+ca_native_not_off = {
+	scope = character
+	is_valid = {
+		is_ai = no
+			is_landed = yes
+			is_alive = yes
+		exists = scope:ca_native_type
+		ca_position_is_included_trigger = { POSITION = scope:ca_native_type }
+		has_variable = ca_auto_court_enabled
+		OR = {
+			has_variable = ca_native_policy_ready
+			is_target_in_variable_list = { name = ca_native_off_confirmed target = scope:ca_native_type }
+		}
+	}
+	effect = {
+		if = {
+			limit = {
+				is_ai = no
+					is_landed = yes
+					is_alive = yes
+				exists = scope:ca_native_type
+				ca_position_is_included_trigger = { POSITION = scope:ca_native_type }
+				has_variable = ca_auto_court_enabled
+				OR = {
+					has_variable = ca_native_policy_ready
+					is_target_in_variable_list = { name = ca_native_off_confirmed target = scope:ca_native_type }
+				}
+			}
+			remove_variable = ca_native_policy_ready
+			if = {
+				limit = { is_target_in_variable_list = { name = ca_native_off_confirmed target = scope:ca_native_type } }
+				remove_list_variable = { name = ca_native_off_confirmed target = scope:ca_native_type }
+				change_variable = { name = ca_native_off_count subtract = 1 }
+			}
+		}
+	}
+}
+
+ca_native_confirm_applied = {
+	scope = character
+	is_valid = {
+		is_ai = no
+			is_landed = yes
+			is_alive = yes
+		exists = scope:ca_native_type
+		OR = {
+			AND = {
+				NOT = { has_variable = ca_auto_court_enabled }
+				ca_position_is_included_trigger = { POSITION = scope:ca_native_type }
+			}
+			AND = {
+				NOT = { ca_position_is_included_trigger = { POSITION = scope:ca_native_type } }
+				is_target_in_variable_list = { name = ca_native_release_pending target = scope:ca_native_type }
+				is_target_in_variable_list = { name = ca_native_saved_all target = scope:ca_native_type }
+			}
+		}
+		NOT = { is_target_in_variable_list = { name = ca_native_applied_confirmed target = scope:ca_native_type } }
+	}
+	effect = {
+		if = {
+			limit = {
+				is_ai = no
+					is_landed = yes
+					is_alive = yes
+				exists = scope:ca_native_type
+				OR = {
+					AND = {
+						NOT = { has_variable = ca_auto_court_enabled }
+						ca_position_is_included_trigger = { POSITION = scope:ca_native_type }
+					}
+					AND = {
+						NOT = { ca_position_is_included_trigger = { POSITION = scope:ca_native_type } }
+						is_target_in_variable_list = { name = ca_native_release_pending target = scope:ca_native_type }
+						is_target_in_variable_list = { name = ca_native_saved_all target = scope:ca_native_type }
+					}
+				}
+				NOT = { is_target_in_variable_list = { name = ca_native_applied_confirmed target = scope:ca_native_type } }
+			}
+			add_to_variable_list = { name = ca_native_applied_confirmed target = scope:ca_native_type }
+			change_variable = { name = ca_native_applied_count add = 1 }
+			if = {
+				limit = { is_target_in_variable_list = { name = ca_native_release_pending target = scope:ca_native_type } }
+				# Only the actual native getter's ACK relinquishes ownership.
+				remove_list_variable = { name = ca_native_release_pending target = scope:ca_native_type }
+				ca_forget_native_position_policy_effect = { POSITION = scope:ca_native_type }
+			}
+		}
+	}
+}
+
+ca_native_policy_ready = {
+	scope = character
+	is_valid = {
+		is_ai = no
+			is_landed = yes
+			is_alive = yes
+		has_variable = ca_auto_court_enabled
+		has_variable = ca_native_type_count
+		var:ca_native_off_count = var:ca_native_type_count
+		has_variable = ca_native_apply_type_count
+		var:ca_native_applied_count = var:ca_native_apply_type_count
+		NOT = { has_variable_list = ca_native_release_pending }
+	}
+	effect = {
+		if = {
+			limit = {
+				is_ai = no
+					is_landed = yes
+					is_alive = yes
+				has_variable = ca_auto_court_enabled
+				has_variable = ca_native_type_count
+				var:ca_native_off_count = var:ca_native_type_count
+				has_variable = ca_native_apply_type_count
+				var:ca_native_applied_count = var:ca_native_apply_type_count
+				NOT = { has_variable_list = ca_native_release_pending }
+			}
+			ca_native_policy_ready_effect = yes
+		}
+	}
+}
+
+ca_native_policy_restored = {
+	scope = character
+	is_valid = {
+		is_ai = no
+			is_landed = yes
+			is_alive = yes
+		NOT = { has_variable = ca_auto_court_enabled }
+		has_variable = ca_native_apply_type_count
+		var:ca_native_applied_count = var:ca_native_apply_type_count
+		NOT = { has_variable_list = ca_native_release_pending }
+	}
+	effect = {
+		if = {
+			limit = {
+				is_ai = no
+					is_landed = yes
+					is_alive = yes
+				NOT = { has_variable = ca_auto_court_enabled }
+				has_variable = ca_native_apply_type_count
+				var:ca_native_applied_count = var:ca_native_apply_type_count
+				NOT = { has_variable_list = ca_native_release_pending }
+			}
+			remove_variable = ca_native_restore_pending
+			remove_variable = ca_native_preserve_unsaved
+		}
+	}
+}
+

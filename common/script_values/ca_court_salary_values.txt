@@ -2,7 +2,7 @@
 # Owner/character scope API: ca_court_salary_<short_role>_<currency>.
 # Values set temporary scope:liege to the owner, as native salaries require.
 # Base salaries only: active court-position task costs are separate.
-# Full estimates keep current conditions and price all current vacancies.
+# Full estimates keep current conditions and price included vacancies.
 # Family/hooks/event terms can change after appointments; this is not a quote.
 
 ca_court_salary_favored_minister_gold = 0
@@ -20,7 +20,7 @@ ca_court_salary_favored_minister_piety = 0
 ca_court_salary_favored_minister_vacancies = {
 	value = 0
 	if = {
-		limit = { can_employ_court_position_type = favored_minister_court_position }
+		limit = { can_employ_court_position_type = favored_minister_court_position ca_position_is_included_trigger = { POSITION = court_position_type:favored_minister_court_position } }
 		value = 1
 		every_court_position_holder = { type = favored_minister_court_position subtract = 1 }
 		min = 0
@@ -63,7 +63,7 @@ ca_court_salary_garuda_piety = 0
 ca_court_salary_garuda_vacancies = {
 	value = 0
 	if = {
-		limit = { can_employ_court_position_type = garuda_court_position }
+		limit = { can_employ_court_position_type = garuda_court_position ca_position_is_included_trigger = { POSITION = court_position_type:garuda_court_position } }
 		value = 2
 		every_court_position_holder = { type = garuda_court_position subtract = 1 }
 		min = 0
@@ -106,7 +106,7 @@ ca_court_salary_chief_eunuch_piety = 0
 ca_court_salary_chief_eunuch_vacancies = {
 	value = 0
 	if = {
-		limit = { can_employ_court_position_type = chief_eunuch_court_position }
+		limit = { can_employ_court_position_type = chief_eunuch_court_position ca_position_is_included_trigger = { POSITION = court_position_type:chief_eunuch_court_position } }
 		value = 1
 		every_court_position_holder = { type = chief_eunuch_court_position subtract = 1 }
 		min = 0
@@ -146,7 +146,7 @@ ca_court_salary_cave_hermit_piety = 0
 ca_court_salary_cave_hermit_vacancies = {
 	value = 0
 	if = {
-		limit = { can_employ_court_position_type = cave_hermit_court_position }
+		limit = { can_employ_court_position_type = cave_hermit_court_position ca_position_is_included_trigger = { POSITION = court_position_type:cave_hermit_court_position } }
 		value = 1
 		every_court_position_holder = { type = cave_hermit_court_position subtract = 1 }
 		min = 0
@@ -167,7 +167,7 @@ ca_court_salary_court_guru_piety = 0
 ca_court_salary_court_guru_vacancies = {
 	value = 0
 	if = {
-		limit = { can_employ_court_position_type = court_guru_court_position }
+		limit = { can_employ_court_position_type = court_guru_court_position ca_position_is_included_trigger = { POSITION = court_position_type:court_guru_court_position } }
 		value = 1
 		every_court_position_holder = { type = court_guru_court_position subtract = 1 }
 		min = 0
@@ -210,7 +210,7 @@ ca_court_salary_court_brahmin_piety = 0
 ca_court_salary_court_brahmin_vacancies = {
 	value = 0
 	if = {
-		limit = { can_employ_court_position_type = court_brahmin_court_position }
+		limit = { can_employ_court_position_type = court_brahmin_court_position ca_position_is_included_trigger = { POSITION = court_position_type:court_brahmin_court_position } }
 		value = 1
 		every_court_position_holder = { type = court_brahmin_court_position subtract = 1 }
 		min = 0
@@ -253,7 +253,7 @@ ca_court_salary_chief_qadi_piety = 0
 ca_court_salary_chief_qadi_vacancies = {
 	value = 0
 	if = {
-		limit = { can_employ_court_position_type = chief_qadi_court_position }
+		limit = { can_employ_court_position_type = chief_qadi_court_position ca_position_is_included_trigger = { POSITION = court_position_type:chief_qadi_court_position } }
 		value = 1
 		every_court_position_holder = { type = chief_qadi_court_position subtract = 1 }
 		min = 0
@@ -296,7 +296,7 @@ ca_court_salary_master_assassin_piety = 0
 ca_court_salary_master_assassin_vacancies = {
 	value = 0
 	if = {
-		limit = { can_employ_court_position_type = master_assassin_court_position }
+		limit = { can_employ_court_position_type = master_assassin_court_position ca_position_is_included_trigger = { POSITION = court_position_type:master_assassin_court_position } }
 		value = 1
 		every_court_position_holder = { type = master_assassin_court_position subtract = 1 }
 		min = 0
@@ -339,7 +339,7 @@ ca_court_salary_court_artificer_piety = 0
 ca_court_salary_court_artificer_vacancies = {
 	value = 0
 	if = {
-		limit = { can_employ_court_position_type = court_artificer_court_position }
+		limit = { can_employ_court_position_type = court_artificer_court_position ca_position_is_included_trigger = { POSITION = court_position_type:court_artificer_court_position } }
 		value = 3
 		every_court_position_holder = { type = court_artificer_court_position subtract = 1 }
 		min = 0
@@ -382,7 +382,7 @@ ca_court_salary_akolouthos_piety = 0
 ca_court_salary_akolouthos_vacancies = {
 	value = 0
 	if = {
-		limit = { can_employ_court_position_type = akolouthos_court_position }
+		limit = { can_employ_court_position_type = akolouthos_court_position ca_position_is_included_trigger = { POSITION = court_position_type:akolouthos_court_position } }
 		value = 1
 		every_court_position_holder = { type = akolouthos_court_position subtract = 1 }
 		min = 0
@@ -425,7 +425,7 @@ ca_court_salary_khlon_glan_piety = 0
 ca_court_salary_khlon_glan_vacancies = {
 	value = 0
 	if = {
-		limit = { can_employ_court_position_type = khlon_glan_court_position }
+		limit = { can_employ_court_position_type = khlon_glan_court_position ca_position_is_included_trigger = { POSITION = court_position_type:khlon_glan_court_position } }
 		value = 1
 		every_court_position_holder = { type = khlon_glan_court_position subtract = 1 }
 		min = 0
@@ -468,7 +468,7 @@ ca_court_salary_wet_nurse_piety = 0
 ca_court_salary_wet_nurse_vacancies = {
 	value = 0
 	if = {
-		limit = { can_employ_court_position_type = wet_nurse_court_position }
+		limit = { can_employ_court_position_type = wet_nurse_court_position ca_position_is_included_trigger = { POSITION = court_position_type:wet_nurse_court_position } }
 		value = 1
 		every_court_position_holder = { type = wet_nurse_court_position subtract = 1 }
 		min = 0
@@ -511,7 +511,7 @@ ca_court_salary_lady_in_waiting_piety = 0
 ca_court_salary_lady_in_waiting_vacancies = {
 	value = 0
 	if = {
-		limit = { can_employ_court_position_type = lady_in_waiting_court_position }
+		limit = { can_employ_court_position_type = lady_in_waiting_court_position ca_position_is_included_trigger = { POSITION = court_position_type:lady_in_waiting_court_position } }
 		value = 2
 		every_court_position_holder = { type = lady_in_waiting_court_position subtract = 1 }
 		min = 0
@@ -554,7 +554,7 @@ ca_court_salary_keeper_of_the_harem_piety = 0
 ca_court_salary_keeper_of_the_harem_vacancies = {
 	value = 0
 	if = {
-		limit = { can_employ_court_position_type = keeper_of_the_harem_court_position }
+		limit = { can_employ_court_position_type = keeper_of_the_harem_court_position ca_position_is_included_trigger = { POSITION = court_position_type:keeper_of_the_harem_court_position } }
 		value = 1
 		every_court_position_holder = { type = keeper_of_the_harem_court_position subtract = 1 }
 		min = 0
@@ -575,7 +575,7 @@ ca_court_salary_court_astrologer_piety = 0
 ca_court_salary_court_astrologer_vacancies = {
 	value = 0
 	if = {
-		limit = { can_employ_court_position_type = court_astrologer_court_position }
+		limit = { can_employ_court_position_type = court_astrologer_court_position ca_position_is_included_trigger = { POSITION = court_position_type:court_astrologer_court_position } }
 		value = 1
 		every_court_position_holder = { type = court_astrologer_court_position subtract = 1 }
 		min = 0
@@ -618,7 +618,7 @@ ca_court_salary_boyan_piety = 0
 ca_court_salary_boyan_vacancies = {
 	value = 0
 	if = {
-		limit = { can_employ_court_position_type = boyan_court_position }
+		limit = { can_employ_court_position_type = boyan_court_position ca_position_is_included_trigger = { POSITION = court_position_type:boyan_court_position } }
 		value = 1
 		every_court_position_holder = { type = boyan_court_position subtract = 1 }
 		min = 0
@@ -661,7 +661,7 @@ ca_court_salary_siege_engineer_piety = 0
 ca_court_salary_siege_engineer_vacancies = {
 	value = 0
 	if = {
-		limit = { can_employ_court_position_type = siege_engineer_court_position }
+		limit = { can_employ_court_position_type = siege_engineer_court_position ca_position_is_included_trigger = { POSITION = court_position_type:siege_engineer_court_position } }
 		value = 1
 		every_court_position_holder = { type = siege_engineer_court_position subtract = 1 }
 		min = 0
@@ -704,7 +704,7 @@ ca_court_salary_yurtchi_piety = 0
 ca_court_salary_yurtchi_vacancies = {
 	value = 0
 	if = {
-		limit = { can_employ_court_position_type = yurtchi_court_position }
+		limit = { can_employ_court_position_type = yurtchi_court_position ca_position_is_included_trigger = { POSITION = court_position_type:yurtchi_court_position } }
 		value = 1
 		every_court_position_holder = { type = yurtchi_court_position subtract = 1 }
 		min = 0
@@ -747,7 +747,7 @@ ca_court_salary_cherbi_piety = 0
 ca_court_salary_cherbi_vacancies = {
 	value = 0
 	if = {
-		limit = { can_employ_court_position_type = cherbi_court_position }
+		limit = { can_employ_court_position_type = cherbi_court_position ca_position_is_included_trigger = { POSITION = court_position_type:cherbi_court_position } }
 		value = 1
 		every_court_position_holder = { type = cherbi_court_position subtract = 1 }
 		min = 0
@@ -790,7 +790,7 @@ ca_court_salary_yeke_jarquchi_piety = 0
 ca_court_salary_yeke_jarquchi_vacancies = {
 	value = 0
 	if = {
-		limit = { can_employ_court_position_type = yeke_jarquchi_court_position }
+		limit = { can_employ_court_position_type = yeke_jarquchi_court_position ca_position_is_included_trigger = { POSITION = court_position_type:yeke_jarquchi_court_position } }
 		value = 1
 		every_court_position_holder = { type = yeke_jarquchi_court_position subtract = 1 }
 		min = 0
@@ -830,7 +830,7 @@ ca_court_salary_foreign_emissary_piety = 0
 ca_court_salary_foreign_emissary_vacancies = {
 	value = 0
 	if = {
-		limit = { can_employ_court_position_type = foreign_emissary_court_position }
+		limit = { can_employ_court_position_type = foreign_emissary_court_position ca_position_is_included_trigger = { POSITION = court_position_type:foreign_emissary_court_position } }
 		value = 1
 		every_court_position_holder = { type = foreign_emissary_court_position subtract = 1 }
 		min = 0
@@ -873,7 +873,7 @@ ca_court_salary_keeper_of_the_horses_piety = 0
 ca_court_salary_keeper_of_the_horses_vacancies = {
 	value = 0
 	if = {
-		limit = { can_employ_court_position_type = keeper_of_the_horses_court_position }
+		limit = { can_employ_court_position_type = keeper_of_the_horses_court_position ca_position_is_included_trigger = { POSITION = court_position_type:keeper_of_the_horses_court_position } }
 		value = 1
 		every_court_position_holder = { type = keeper_of_the_horses_court_position subtract = 1 }
 		min = 0
@@ -916,7 +916,7 @@ ca_court_salary_charioteer_piety = 0
 ca_court_salary_charioteer_vacancies = {
 	value = 0
 	if = {
-		limit = { can_employ_court_position_type = charioteer_court_position }
+		limit = { can_employ_court_position_type = charioteer_court_position ca_position_is_included_trigger = { POSITION = court_position_type:charioteer_court_position } }
 		value = 1
 		every_court_position_holder = { type = charioteer_court_position subtract = 1 }
 		min = 0
@@ -937,7 +937,7 @@ ca_court_salary_bookmaker_piety = 0
 ca_court_salary_bookmaker_vacancies = {
 	value = 0
 	if = {
-		limit = { can_employ_court_position_type = bookmaker_court_position }
+		limit = { can_employ_court_position_type = bookmaker_court_position ca_position_is_included_trigger = { POSITION = court_position_type:bookmaker_court_position } }
 		value = 1
 		every_court_position_holder = { type = bookmaker_court_position subtract = 1 }
 		min = 0
@@ -980,7 +980,7 @@ ca_court_salary_court_brewmaster_piety = 0
 ca_court_salary_court_brewmaster_vacancies = {
 	value = 0
 	if = {
-		limit = { can_employ_court_position_type = court_brewmaster_court_position }
+		limit = { can_employ_court_position_type = court_brewmaster_court_position ca_position_is_included_trigger = { POSITION = court_position_type:court_brewmaster_court_position } }
 		value = 1
 		every_court_position_holder = { type = court_brewmaster_court_position subtract = 1 }
 		min = 0
@@ -1001,7 +1001,7 @@ ca_court_salary_executioner_piety = 0
 ca_court_salary_executioner_vacancies = {
 	value = 0
 	if = {
-		limit = { can_employ_court_position_type = executioner_court_position }
+		limit = { can_employ_court_position_type = executioner_court_position ca_position_is_included_trigger = { POSITION = court_position_type:executioner_court_position } }
 		value = 1
 		every_court_position_holder = { type = executioner_court_position subtract = 1 }
 		min = 0
@@ -1041,7 +1041,7 @@ ca_court_salary_court_physician_piety = 0
 ca_court_salary_court_physician_vacancies = {
 	value = 0
 	if = {
-		limit = { can_employ_court_position_type = court_physician_court_position }
+		limit = { can_employ_court_position_type = court_physician_court_position ca_position_is_included_trigger = { POSITION = court_position_type:court_physician_court_position } }
 		value = 1
 		every_court_position_holder = { type = court_physician_court_position subtract = 1 }
 		min = 0
@@ -1081,7 +1081,7 @@ ca_court_salary_travel_leader_piety = 0
 ca_court_salary_travel_leader_vacancies = {
 	value = 0
 	if = {
-		limit = { can_employ_court_position_type = travel_leader_court_position }
+		limit = { can_employ_court_position_type = travel_leader_court_position ca_position_is_included_trigger = { POSITION = court_position_type:travel_leader_court_position } }
 		value = 1
 		every_court_position_holder = { type = travel_leader_court_position subtract = 1 }
 		min = 0
@@ -1124,7 +1124,7 @@ ca_court_salary_court_tutor_piety = 0
 ca_court_salary_court_tutor_vacancies = {
 	value = 0
 	if = {
-		limit = { can_employ_court_position_type = court_tutor_court_position }
+		limit = { can_employ_court_position_type = court_tutor_court_position ca_position_is_included_trigger = { POSITION = court_position_type:court_tutor_court_position } }
 		value = 1
 		every_court_position_holder = { type = court_tutor_court_position subtract = 1 }
 		min = 0
@@ -1159,7 +1159,7 @@ ca_court_salary_bodyguard_treasury = {
 
 ca_court_salary_bodyguard_prestige = {
 	save_temporary_scope_as = liege
-	value = major_court_position_prestige_salary
+	value = bodyguard_prestige_salary_value
 }
 
 ca_court_salary_bodyguard_piety = 0
@@ -1167,7 +1167,7 @@ ca_court_salary_bodyguard_piety = 0
 ca_court_salary_bodyguard_vacancies = {
 	value = 0
 	if = {
-		limit = { can_employ_court_position_type = bodyguard_court_position }
+		limit = { can_employ_court_position_type = bodyguard_court_position ca_position_is_included_trigger = { POSITION = court_position_type:bodyguard_court_position } }
 		value = 2
 		every_court_position_holder = { type = bodyguard_court_position subtract = 1 }
 		min = 0
@@ -1210,7 +1210,7 @@ ca_court_salary_food_taster_piety = 0
 ca_court_salary_food_taster_vacancies = {
 	value = 0
 	if = {
-		limit = { can_employ_court_position_type = food_taster_court_position }
+		limit = { can_employ_court_position_type = food_taster_court_position ca_position_is_included_trigger = { POSITION = court_position_type:food_taster_court_position } }
 		value = 1
 		every_court_position_holder = { type = food_taster_court_position subtract = 1 }
 		min = 0
@@ -1253,7 +1253,7 @@ ca_court_salary_seneschal_piety = 0
 ca_court_salary_seneschal_vacancies = {
 	value = 0
 	if = {
-		limit = { can_employ_court_position_type = seneschal_court_position }
+		limit = { can_employ_court_position_type = seneschal_court_position ca_position_is_included_trigger = { POSITION = court_position_type:seneschal_court_position } }
 		value = 1
 		every_court_position_holder = { type = seneschal_court_position subtract = 1 }
 		min = 0
@@ -1293,7 +1293,7 @@ ca_court_salary_antiquarian_piety = 0
 ca_court_salary_antiquarian_vacancies = {
 	value = 0
 	if = {
-		limit = { can_employ_court_position_type = antiquarian_court_position }
+		limit = { can_employ_court_position_type = antiquarian_court_position ca_position_is_included_trigger = { POSITION = court_position_type:antiquarian_court_position } }
 		value = 1
 		every_court_position_holder = { type = antiquarian_court_position subtract = 1 }
 		min = 0
@@ -1336,7 +1336,7 @@ ca_court_salary_court_scholar_piety = 0
 ca_court_salary_court_scholar_vacancies = {
 	value = 0
 	if = {
-		limit = { can_employ_court_position_type = court_scholar_court_position }
+		limit = { can_employ_court_position_type = court_scholar_court_position ca_position_is_included_trigger = { POSITION = court_position_type:court_scholar_court_position } }
 		value = 1
 		every_court_position_holder = { type = court_scholar_court_position subtract = 1 }
 		min = 0
@@ -1379,7 +1379,7 @@ ca_court_salary_court_gardener_piety = 0
 ca_court_salary_court_gardener_vacancies = {
 	value = 0
 	if = {
-		limit = { can_employ_court_position_type = court_gardener_court_position }
+		limit = { can_employ_court_position_type = court_gardener_court_position ca_position_is_included_trigger = { POSITION = court_position_type:court_gardener_court_position } }
 		value = 1
 		every_court_position_holder = { type = court_gardener_court_position subtract = 1 }
 		min = 0
@@ -1422,7 +1422,7 @@ ca_court_salary_court_poet_piety = 0
 ca_court_salary_court_poet_vacancies = {
 	value = 0
 	if = {
-		limit = { can_employ_court_position_type = court_poet_court_position }
+		limit = { can_employ_court_position_type = court_poet_court_position ca_position_is_included_trigger = { POSITION = court_position_type:court_poet_court_position } }
 		value = 1
 		every_court_position_holder = { type = court_poet_court_position subtract = 1 }
 		min = 0
@@ -1465,7 +1465,7 @@ ca_court_salary_court_musician_piety = 0
 ca_court_salary_court_musician_vacancies = {
 	value = 0
 	if = {
-		limit = { can_employ_court_position_type = court_musician_court_position }
+		limit = { can_employ_court_position_type = court_musician_court_position ca_position_is_included_trigger = { POSITION = court_position_type:court_musician_court_position } }
 		value = 1
 		every_court_position_holder = { type = court_musician_court_position subtract = 1 }
 		min = 0
@@ -1508,7 +1508,7 @@ ca_court_salary_court_jester_piety = 0
 ca_court_salary_court_jester_vacancies = {
 	value = 0
 	if = {
-		limit = { can_employ_court_position_type = court_jester_court_position }
+		limit = { can_employ_court_position_type = court_jester_court_position ca_position_is_included_trigger = { POSITION = court_position_type:court_jester_court_position } }
 		value = 1
 		every_court_position_holder = { type = court_jester_court_position subtract = 1 }
 		min = 0
@@ -1529,7 +1529,7 @@ ca_court_salary_cupbearer_piety = 0
 ca_court_salary_cupbearer_vacancies = {
 	value = 0
 	if = {
-		limit = { can_employ_court_position_type = cupbearer_court_position }
+		limit = { can_employ_court_position_type = cupbearer_court_position ca_position_is_included_trigger = { POSITION = court_position_type:cupbearer_court_position } }
 		value = 1
 		every_court_position_holder = { type = cupbearer_court_position subtract = 1 }
 		min = 0
@@ -1572,7 +1572,7 @@ ca_court_salary_grand_preceptor_piety = 0
 ca_court_salary_grand_preceptor_vacancies = {
 	value = 0
 	if = {
-		limit = { can_employ_court_position_type = grand_preceptor_court_position }
+		limit = { can_employ_court_position_type = grand_preceptor_court_position ca_position_is_included_trigger = { POSITION = court_position_type:grand_preceptor_court_position } }
 		value = 1
 		every_court_position_holder = { type = grand_preceptor_court_position subtract = 1 }
 		min = 0
@@ -1615,7 +1615,7 @@ ca_court_salary_grand_mentor_piety = 0
 ca_court_salary_grand_mentor_vacancies = {
 	value = 0
 	if = {
-		limit = { can_employ_court_position_type = grand_mentor_court_position }
+		limit = { can_employ_court_position_type = grand_mentor_court_position ca_position_is_included_trigger = { POSITION = court_position_type:grand_mentor_court_position } }
 		value = 1
 		every_court_position_holder = { type = grand_mentor_court_position subtract = 1 }
 		min = 0
@@ -1658,7 +1658,7 @@ ca_court_salary_grand_guardian_piety = 0
 ca_court_salary_grand_guardian_vacancies = {
 	value = 0
 	if = {
-		limit = { can_employ_court_position_type = grand_guardian_court_position }
+		limit = { can_employ_court_position_type = grand_guardian_court_position ca_position_is_included_trigger = { POSITION = court_position_type:grand_guardian_court_position } }
 		value = 1
 		every_court_position_holder = { type = grand_guardian_court_position subtract = 1 }
 		min = 0
@@ -1701,7 +1701,7 @@ ca_court_salary_fire_dragon_engineer_piety = 0
 ca_court_salary_fire_dragon_engineer_vacancies = {
 	value = 0
 	if = {
-		limit = { can_employ_court_position_type = fire_dragon_engineer_court_position }
+		limit = { can_employ_court_position_type = fire_dragon_engineer_court_position ca_position_is_included_trigger = { POSITION = court_position_type:fire_dragon_engineer_court_position } }
 		value = 1
 		every_court_position_holder = { type = fire_dragon_engineer_court_position subtract = 1 }
 		min = 0
@@ -1741,7 +1741,7 @@ ca_court_salary_eparch_piety = 0
 ca_court_salary_eparch_vacancies = {
 	value = 0
 	if = {
-		limit = { can_employ_court_position_type = eparch_court_position }
+		limit = { can_employ_court_position_type = eparch_court_position ca_position_is_included_trigger = { POSITION = court_position_type:eparch_court_position } }
 		value = 1
 		every_court_position_holder = { type = eparch_court_position subtract = 1 }
 		min = 0
@@ -1784,7 +1784,7 @@ ca_court_salary_minister_bureaucrat_piety = 0
 ca_court_salary_minister_bureaucrat_vacancies = {
 	value = 0
 	if = {
-		limit = { can_employ_court_position_type = minister_bureaucrat_court_position }
+		limit = { can_employ_court_position_type = minister_bureaucrat_court_position ca_position_is_included_trigger = { POSITION = court_position_type:minister_bureaucrat_court_position } }
 		value = 2
 		every_court_position_holder = { type = minister_bureaucrat_court_position subtract = 1 }
 		min = 0
@@ -1824,7 +1824,7 @@ ca_court_salary_champion_piety = 0
 ca_court_salary_champion_vacancies = {
 	value = 0
 	if = {
-		limit = { can_employ_court_position_type = champion_court_position }
+		limit = { can_employ_court_position_type = champion_court_position ca_position_is_included_trigger = { POSITION = court_position_type:champion_court_position } }
 		value = 1
 		every_court_position_holder = { type = champion_court_position subtract = 1 }
 		min = 0
@@ -1867,7 +1867,7 @@ ca_court_salary_master_of_hunt_piety = 0
 ca_court_salary_master_of_hunt_vacancies = {
 	value = 0
 	if = {
-		limit = { can_employ_court_position_type = master_of_hunt_court_position }
+		limit = { can_employ_court_position_type = master_of_hunt_court_position ca_position_is_included_trigger = { POSITION = court_position_type:master_of_hunt_court_position } }
 		value = 1
 		every_court_position_holder = { type = master_of_hunt_court_position subtract = 1 }
 		min = 0
@@ -1910,7 +1910,7 @@ ca_court_salary_master_of_horse_piety = 0
 ca_court_salary_master_of_horse_vacancies = {
 	value = 0
 	if = {
-		limit = { can_employ_court_position_type = master_of_horse_court_position }
+		limit = { can_employ_court_position_type = master_of_horse_court_position ca_position_is_included_trigger = { POSITION = court_position_type:master_of_horse_court_position } }
 		value = 1
 		every_court_position_holder = { type = master_of_horse_court_position subtract = 1 }
 		min = 0
@@ -1953,7 +1953,7 @@ ca_court_salary_royal_architect_piety = 0
 ca_court_salary_royal_architect_vacancies = {
 	value = 0
 	if = {
-		limit = { can_employ_court_position_type = royal_architect_court_position }
+		limit = { can_employ_court_position_type = royal_architect_court_position ca_position_is_included_trigger = { POSITION = court_position_type:royal_architect_court_position } }
 		value = 1
 		every_court_position_holder = { type = royal_architect_court_position subtract = 1 }
 		min = 0
@@ -1996,7 +1996,7 @@ ca_court_salary_cultural_emissary_piety = 0
 ca_court_salary_cultural_emissary_vacancies = {
 	value = 0
 	if = {
-		limit = { can_employ_court_position_type = cultural_emissary_court_position }
+		limit = { can_employ_court_position_type = cultural_emissary_court_position ca_position_is_included_trigger = { POSITION = court_position_type:cultural_emissary_court_position } }
 		value = 1
 		every_court_position_holder = { type = cultural_emissary_court_position subtract = 1 }
 		min = 0
@@ -2039,7 +2039,7 @@ ca_court_salary_chronicler_piety = 0
 ca_court_salary_chronicler_vacancies = {
 	value = 0
 	if = {
-		limit = { can_employ_court_position_type = chronicler_court_position }
+		limit = { can_employ_court_position_type = chronicler_court_position ca_position_is_included_trigger = { POSITION = court_position_type:chronicler_court_position } }
 		value = 1
 		every_court_position_holder = { type = chronicler_court_position subtract = 1 }
 		min = 0
@@ -2079,7 +2079,7 @@ ca_court_salary_high_almoner_piety = 0
 ca_court_salary_high_almoner_vacancies = {
 	value = 0
 	if = {
-		limit = { can_employ_court_position_type = high_almoner_court_position }
+		limit = { can_employ_court_position_type = high_almoner_court_position ca_position_is_included_trigger = { POSITION = court_position_type:high_almoner_court_position } }
 		value = 1
 		every_court_position_holder = { type = high_almoner_court_position subtract = 1 }
 		min = 0
@@ -2122,7 +2122,7 @@ ca_court_salary_keeper_of_swans_piety = 0
 ca_court_salary_keeper_of_swans_vacancies = {
 	value = 0
 	if = {
-		limit = { can_employ_court_position_type = keeper_of_swans_court_position }
+		limit = { can_employ_court_position_type = keeper_of_swans_court_position ca_position_is_included_trigger = { POSITION = court_position_type:keeper_of_swans_court_position } }
 		value = 1
 		every_court_position_holder = { type = keeper_of_swans_court_position subtract = 1 }
 		min = 0
