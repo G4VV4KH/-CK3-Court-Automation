@@ -2,7 +2,7 @@
 
 ## At a glance
 
-- 🟢 **Version 0.3.0** · Targets CK3 **1.20.1**.
+- 🟢 **Version 0.3.0** · Targets CK3 **1.20.1.1**.
 - 🟢 **Standalone:** no other mod required.
 - 🟢 Fill court vacancies now, maintain court and knight rosters, or set native vacancy policies in bulk.
 - 🟢 **Languages:** English, French, German, Japanese, Korean, Polish, Russian, Simplified Chinese and Spanish.
