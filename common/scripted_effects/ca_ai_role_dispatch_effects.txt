@@ -51,4 +51,10 @@ ca_ai_select_court_role_effect = {
 	ca_ai_consider_court_role_effect = { ROLE = chronicler }
 	ca_ai_consider_court_role_effect = { ROLE = high_almoner }
 	ca_ai_consider_court_role_effect = { ROLE = keeper_of_swans }
+	ca_ai_consider_court_role_effect = { ROLE = roman_censor }
+	ca_ai_consider_court_role_effect = { ROLE = partner }
+	ca_ai_consider_court_role_effect = { ROLE = fixer }
+	ca_ai_consider_court_role_effect = { ROLE = translator }
+	ca_ai_consider_court_role_effect = { ROLE = market_agent }
+	ca_ai_consider_court_role_effect = { ROLE = bailiff }
 }

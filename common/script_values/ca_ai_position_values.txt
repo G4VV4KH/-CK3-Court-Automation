@@ -343,31 +343,40 @@ ca_ai_court_physician_position_score = {
 		limit = {
 			scope:liege = {
 				any_held_county = {
-					has_province_with_epidemic = { intensity = minor }
+					has_province_with_epidemic = { intensity = any }
 				}
 			}
 		}
-		add = 50
-	}
-	if = {
-		limit = {
-			scope:liege = {
-				any_held_county = {
-					has_province_with_epidemic = { intensity = major }
+		if = {
+			limit = {
+				scope:liege = {
+					any_held_county = {
+						has_province_with_epidemic = { intensity = minor }
+					}
 				}
 			}
+			add = 50
 		}
-		add = 100
-	}
-	if = {
-		limit = {
-			scope:liege = {
-				any_held_county = {
-					has_province_with_epidemic = { intensity = apocalyptic }
+		if = {
+			limit = {
+				scope:liege = {
+					any_held_county = {
+						has_province_with_epidemic = { intensity = major }
+					}
 				}
 			}
+			add = 100
 		}
-		add = 150
+		if = {
+			limit = {
+				scope:liege = {
+					any_held_county = {
+						has_province_with_epidemic = { intensity = apocalyptic }
+					}
+				}
+			}
+			add = 150
+		}
 	}
 }
 
@@ -755,5 +764,125 @@ ca_ai_high_almoner_position_score = {
 ca_ai_keeper_of_swans_position_score = {
 	save_temporary_scope_as = liege
 	value = 25
+	add = court_position_debt_considerations_value
+}
+
+ca_ai_roman_censor_position_score = {
+	save_temporary_scope_as = liege
+	value = 100
+	scope:liege = {
+		# More likely if you have a lot of gold and can afford it
+		if = {
+			limit = {
+				monthly_character_income > monthly_character_expenses_plus_fourty_percent
+			}
+			add = 50
+		}
+
+		# More likely if you are a builder
+		if = {
+			limit = {
+				ai_has_economical_boom_personality = yes
+			}
+			add = 50
+		}
+	}
+	add = court_position_debt_considerations_value
+}
+
+ca_ai_partner_position_score = {
+	save_temporary_scope_as = liege
+	value = 150
+}
+
+ca_ai_fixer_position_score = {
+	save_temporary_scope_as = liege
+	value = 50
+	scope:liege = {
+		# More likely for very generous characters
+		if = {
+			limit = {
+				ai_greed <= -75
+			}
+			add = 25
+		}
+		# Lots of gold to spend!
+		if = {
+			limit = {
+				gold >= 500
+				monthly_character_income > monthly_character_expenses_plus_fourty_percent
+			}
+			add = 50
+		}
+	}
+	add = court_position_debt_considerations_value
+}
+
+ca_ai_translator_position_score = {
+	save_temporary_scope_as = liege
+	value = 50
+	scope:liege = {
+		# More likely for very generous characters
+		if = {
+			limit = {
+				ai_greed <= -75
+			}
+			add = 25
+		}
+		# Lots of gold to spend!
+		if = {
+			limit = {
+				gold >= 500
+				monthly_character_income > monthly_character_expenses_plus_fourty_percent
+			}
+			add = 50
+		}
+	}
+	add = court_position_debt_considerations_value
+}
+
+ca_ai_market_agent_position_score = {
+	save_temporary_scope_as = liege
+	value = 50
+	scope:liege = {
+		# More likely for very generous characters
+		if = {
+			limit = {
+				ai_greed <= -75
+			}
+			add = 25
+		}
+		# Lots of gold to spend!
+		if = {
+			limit = {
+				gold >= 500
+				monthly_character_income > monthly_character_expenses_plus_fourty_percent
+			}
+			add = 50
+		}
+	}
+	add = court_position_debt_considerations_value
+}
+
+ca_ai_bailiff_position_score = {
+	save_temporary_scope_as = liege
+	value = 50
+	scope:liege = {
+		# More likely for very generous characters
+		if = {
+			limit = {
+				ai_greed <= -75
+			}
+			add = 25
+		}
+		# Lots of gold to spend!
+		if = {
+			limit = {
+				gold >= 500
+				monthly_character_income > monthly_character_expenses_plus_fourty_percent
+			}
+			add = 50
+		}
+	}
 	add = court_position_debt_considerations_value
 }

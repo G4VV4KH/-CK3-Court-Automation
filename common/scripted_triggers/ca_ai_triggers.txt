@@ -5,7 +5,7 @@ ca_ai_support_eligible_trigger = {
 	is_ai = yes
 	is_alive = yes
 	is_adult = yes
-	is_landed = yes
+	ca_supported_court_employer_trigger = yes
 	highest_held_title_tier >= tier_county
 	exists = location
 	NOT = { has_character_flag = ca_ai_annual_support_cooldown }

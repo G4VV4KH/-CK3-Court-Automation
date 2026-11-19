@@ -73,7 +73,7 @@ ca_native_player_available = {
 	scope = character
 	is_valid = {
 		is_ai = no
-			is_landed = yes
+			ca_supported_court_employer_trigger = yes
 			is_alive = yes
 	}
 }
@@ -82,7 +82,7 @@ ca_court_fill_now = {
 	scope = character
 	is_valid = {
 		is_ai = no
-			is_landed = yes
+			ca_supported_court_employer_trigger = yes
 			is_alive = yes
 		ca_court_init_has_vacancy_trigger = yes
 	}
@@ -90,7 +90,7 @@ ca_court_fill_now = {
 		if = {
 			limit = {
 				is_ai = no
-					is_landed = yes
+					ca_supported_court_employer_trigger = yes
 					is_alive = yes
 				ca_court_init_has_vacancy_trigger = yes
 			}
@@ -103,7 +103,7 @@ ca_toggle_auto_court = {
 	scope = character
 	is_valid = {
 		is_ai = no
-			is_landed = yes
+			ca_supported_court_employer_trigger = yes
 			is_alive = yes
 		NOT = { has_variable = ca_native_restore_pending }
 	}
@@ -111,7 +111,7 @@ ca_toggle_auto_court = {
 		if = {
 			limit = {
 				is_ai = no
-					is_landed = yes
+					ca_supported_court_employer_trigger = yes
 					is_alive = yes
 				NOT = { has_variable = ca_native_restore_pending }
 			}
@@ -228,7 +228,7 @@ ca_bulk_policy_none = {
 	scope = character
 	is_valid = {
 		is_ai = no
-			is_landed = yes
+			ca_supported_court_employer_trigger = yes
 			is_alive = yes
 		NOT = { has_variable = ca_auto_court_enabled }
 		NOT = { has_variable_list = ca_native_release_pending }
@@ -237,7 +237,7 @@ ca_bulk_policy_none = {
 		if = {
 			limit = {
 				is_ai = no
-					is_landed = yes
+					ca_supported_court_employer_trigger = yes
 					is_alive = yes
 				NOT = { has_variable = ca_auto_court_enabled }
 				NOT = { has_variable_list = ca_native_release_pending }
@@ -258,7 +258,7 @@ ca_bulk_policy_event = {
 	scope = character
 	is_valid = {
 		is_ai = no
-			is_landed = yes
+			ca_supported_court_employer_trigger = yes
 			is_alive = yes
 		NOT = { has_variable = ca_auto_court_enabled }
 		NOT = { has_variable_list = ca_native_release_pending }
@@ -267,7 +267,7 @@ ca_bulk_policy_event = {
 		if = {
 			limit = {
 				is_ai = no
-					is_landed = yes
+					ca_supported_court_employer_trigger = yes
 					is_alive = yes
 				NOT = { has_variable = ca_auto_court_enabled }
 				NOT = { has_variable_list = ca_native_release_pending }
@@ -288,7 +288,7 @@ ca_bulk_policy_best = {
 	scope = character
 	is_valid = {
 		is_ai = no
-			is_landed = yes
+			ca_supported_court_employer_trigger = yes
 			is_alive = yes
 		NOT = { has_variable = ca_auto_court_enabled }
 		NOT = { has_variable_list = ca_native_release_pending }
@@ -297,7 +297,7 @@ ca_bulk_policy_best = {
 		if = {
 			limit = {
 				is_ai = no
-					is_landed = yes
+					ca_supported_court_employer_trigger = yes
 					is_alive = yes
 				NOT = { has_variable = ca_auto_court_enabled }
 				NOT = { has_variable_list = ca_native_release_pending }
@@ -318,7 +318,7 @@ ca_bulk_policy_best_event = {
 	scope = character
 	is_valid = {
 		is_ai = no
-			is_landed = yes
+			ca_supported_court_employer_trigger = yes
 			is_alive = yes
 		NOT = { has_variable = ca_auto_court_enabled }
 		NOT = { has_variable_list = ca_native_release_pending }
@@ -327,7 +327,7 @@ ca_bulk_policy_best_event = {
 		if = {
 			limit = {
 				is_ai = no
-					is_landed = yes
+					ca_supported_court_employer_trigger = yes
 					is_alive = yes
 				NOT = { has_variable = ca_auto_court_enabled }
 				NOT = { has_variable_list = ca_native_release_pending }
@@ -348,7 +348,7 @@ ca_native_has_saved = {
 	scope = character
 	is_valid = {
 		is_ai = no
-			is_landed = yes
+			ca_supported_court_employer_trigger = yes
 			is_alive = yes
 		exists = scope:ca_native_type
 		is_target_in_variable_list = { name = ca_native_saved_all target = scope:ca_native_type }
@@ -359,7 +359,7 @@ ca_native_saved_none = {
 	scope = character
 	is_valid = {
 		is_ai = no
-			is_landed = yes
+			ca_supported_court_employer_trigger = yes
 			is_alive = yes
 		exists = scope:ca_native_type
 		is_target_in_variable_list = { name = ca_native_saved_all target = scope:ca_native_type }
@@ -375,7 +375,7 @@ ca_native_record_none = {
 	scope = character
 	is_valid = {
 		is_ai = no
-			is_landed = yes
+			ca_supported_court_employer_trigger = yes
 			is_alive = yes
 		exists = scope:ca_native_type
 		ca_position_is_included_trigger = { POSITION = scope:ca_native_type }
@@ -388,7 +388,7 @@ ca_native_record_none = {
 		if = {
 			limit = {
 				is_ai = no
-					is_landed = yes
+					ca_supported_court_employer_trigger = yes
 					is_alive = yes
 				exists = scope:ca_native_type
 				ca_position_is_included_trigger = { POSITION = scope:ca_native_type }
@@ -412,7 +412,7 @@ ca_native_saved_event = {
 	scope = character
 	is_valid = {
 		is_ai = no
-			is_landed = yes
+			ca_supported_court_employer_trigger = yes
 			is_alive = yes
 		exists = scope:ca_native_type
 		is_target_in_variable_list = { name = ca_native_saved_event target = scope:ca_native_type }
@@ -423,7 +423,7 @@ ca_native_record_event = {
 	scope = character
 	is_valid = {
 		is_ai = no
-			is_landed = yes
+			ca_supported_court_employer_trigger = yes
 			is_alive = yes
 		exists = scope:ca_native_type
 		ca_position_is_included_trigger = { POSITION = scope:ca_native_type }
@@ -436,7 +436,7 @@ ca_native_record_event = {
 		if = {
 			limit = {
 				is_ai = no
-					is_landed = yes
+					ca_supported_court_employer_trigger = yes
 					is_alive = yes
 				exists = scope:ca_native_type
 				ca_position_is_included_trigger = { POSITION = scope:ca_native_type }
@@ -461,7 +461,7 @@ ca_native_saved_best = {
 	scope = character
 	is_valid = {
 		is_ai = no
-			is_landed = yes
+			ca_supported_court_employer_trigger = yes
 			is_alive = yes
 		exists = scope:ca_native_type
 		is_target_in_variable_list = { name = ca_native_saved_best target = scope:ca_native_type }
@@ -472,7 +472,7 @@ ca_native_record_best = {
 	scope = character
 	is_valid = {
 		is_ai = no
-			is_landed = yes
+			ca_supported_court_employer_trigger = yes
 			is_alive = yes
 		exists = scope:ca_native_type
 		ca_position_is_included_trigger = { POSITION = scope:ca_native_type }
@@ -485,7 +485,7 @@ ca_native_record_best = {
 		if = {
 			limit = {
 				is_ai = no
-					is_landed = yes
+					ca_supported_court_employer_trigger = yes
 					is_alive = yes
 				exists = scope:ca_native_type
 				ca_position_is_included_trigger = { POSITION = scope:ca_native_type }
@@ -510,7 +510,7 @@ ca_native_saved_best_event = {
 	scope = character
 	is_valid = {
 		is_ai = no
-			is_landed = yes
+			ca_supported_court_employer_trigger = yes
 			is_alive = yes
 		exists = scope:ca_native_type
 		is_target_in_variable_list = { name = ca_native_saved_best_event target = scope:ca_native_type }
@@ -521,7 +521,7 @@ ca_native_record_best_event = {
 	scope = character
 	is_valid = {
 		is_ai = no
-			is_landed = yes
+			ca_supported_court_employer_trigger = yes
 			is_alive = yes
 		exists = scope:ca_native_type
 		ca_position_is_included_trigger = { POSITION = scope:ca_native_type }
@@ -534,7 +534,7 @@ ca_native_record_best_event = {
 		if = {
 			limit = {
 				is_ai = no
-					is_landed = yes
+					ca_supported_court_employer_trigger = yes
 					is_alive = yes
 				exists = scope:ca_native_type
 				ca_position_is_included_trigger = { POSITION = scope:ca_native_type }
@@ -559,14 +559,14 @@ ca_native_policy_begin = {
 	scope = character
 	is_valid = {
 		is_ai = no
-			is_landed = yes
+			ca_supported_court_employer_trigger = yes
 			is_alive = yes
 	}
 	effect = {
 		if = {
 			limit = {
 				is_ai = no
-					is_landed = yes
+					ca_supported_court_employer_trigger = yes
 					is_alive = yes
 			}
 			remove_variable = ca_native_policy_ready
@@ -619,7 +619,7 @@ ca_native_confirm_off = {
 	scope = character
 	is_valid = {
 		is_ai = no
-			is_landed = yes
+			ca_supported_court_employer_trigger = yes
 			is_alive = yes
 		exists = scope:ca_native_type
 		ca_position_is_included_trigger = { POSITION = scope:ca_native_type }
@@ -631,7 +631,7 @@ ca_native_confirm_off = {
 		if = {
 			limit = {
 				is_ai = no
-					is_landed = yes
+					ca_supported_court_employer_trigger = yes
 					is_alive = yes
 				exists = scope:ca_native_type
 				ca_position_is_included_trigger = { POSITION = scope:ca_native_type }
@@ -649,7 +649,7 @@ ca_native_not_off = {
 	scope = character
 	is_valid = {
 		is_ai = no
-			is_landed = yes
+			ca_supported_court_employer_trigger = yes
 			is_alive = yes
 		exists = scope:ca_native_type
 		ca_position_is_included_trigger = { POSITION = scope:ca_native_type }
@@ -663,7 +663,7 @@ ca_native_not_off = {
 		if = {
 			limit = {
 				is_ai = no
-					is_landed = yes
+					ca_supported_court_employer_trigger = yes
 					is_alive = yes
 				exists = scope:ca_native_type
 				ca_position_is_included_trigger = { POSITION = scope:ca_native_type }
@@ -687,7 +687,7 @@ ca_native_confirm_applied = {
 	scope = character
 	is_valid = {
 		is_ai = no
-			is_landed = yes
+			ca_supported_court_employer_trigger = yes
 			is_alive = yes
 		exists = scope:ca_native_type
 		OR = {
@@ -707,7 +707,7 @@ ca_native_confirm_applied = {
 		if = {
 			limit = {
 				is_ai = no
-					is_landed = yes
+					ca_supported_court_employer_trigger = yes
 					is_alive = yes
 				exists = scope:ca_native_type
 				OR = {
@@ -739,7 +739,7 @@ ca_native_policy_ready = {
 	scope = character
 	is_valid = {
 		is_ai = no
-			is_landed = yes
+			ca_supported_court_employer_trigger = yes
 			is_alive = yes
 		has_variable = ca_auto_court_enabled
 		has_variable = ca_native_type_count
@@ -752,7 +752,7 @@ ca_native_policy_ready = {
 		if = {
 			limit = {
 				is_ai = no
-					is_landed = yes
+					ca_supported_court_employer_trigger = yes
 					is_alive = yes
 				has_variable = ca_auto_court_enabled
 				has_variable = ca_native_type_count
@@ -770,7 +770,7 @@ ca_native_policy_restored = {
 	scope = character
 	is_valid = {
 		is_ai = no
-			is_landed = yes
+			ca_supported_court_employer_trigger = yes
 			is_alive = yes
 		NOT = { has_variable = ca_auto_court_enabled }
 		has_variable = ca_native_apply_type_count
@@ -781,7 +781,7 @@ ca_native_policy_restored = {
 		if = {
 			limit = {
 				is_ai = no
-					is_landed = yes
+					ca_supported_court_employer_trigger = yes
 					is_alive = yes
 				NOT = { has_variable = ca_auto_court_enabled }
 				has_variable = ca_native_apply_type_count

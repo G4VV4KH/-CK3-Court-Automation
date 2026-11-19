@@ -13,7 +13,7 @@ from build_court_roles import MOD, ROLES, installed_roles
 from build_court_salaries import block, indent
 
 
-def artifacts(game: Path) -> dict[Path, str]:
+def artifacts(game: Path, mod: Path = MOD) -> dict[Path, str]:
     if installed_roles(game) != ROLES:
         raise ValueError("Review changed native role coverage/capacities first")
     scores = {}
@@ -45,24 +45,25 @@ def artifacts(game: Path) -> dict[Path, str]:
             dispatch += f"\tca_ai_consider_court_role_effect = {{ ROLE = {role} }}\n"
     dispatch += "}\n"
     return {
-        MOD / "script_values/ca_ai_position_values.txt": values,
-        MOD / "scripted_effects/ca_ai_role_dispatch_effects.txt": dispatch,
+        mod / "script_values/ca_ai_position_values.txt": values,
+        mod / "scripted_effects/ca_ai_role_dispatch_effects.txt": dispatch,
     }
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--game-root", required=True, type=Path)
+    parser.add_argument("--mod-root", type=Path, default=MOD.parent)
     parser.add_argument("--check", action="store_true")
     args = parser.parse_args()
-    for path, content in artifacts(args.game_root).items():
+    for path, content in artifacts(args.game_root, args.mod_root / "common").items():
         if args.check:
             if not path.exists() or path.read_text(encoding="utf-8-sig") != content:
                 raise SystemExit(f"Generated AI adapter differs: {path}")
         else:
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_text(content, encoding="utf-8-sig", newline="\n")
-    print("AI support: 53 native position priorities checked; 51 supported recruitment roles.")
+    print(f"AI support checked all {len(ROLES)} native position priorities.")
 
 
 if __name__ == "__main__":

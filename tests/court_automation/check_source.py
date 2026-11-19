@@ -1,6 +1,6 @@
 """Read-only integration checks for Court Automation's source package.
 
-Run with Python 3: check_source.py --game-root PATH_TO_CK3_GAME
+Run with Python 3: check_source.py [--game-root PATH_TO_CK3_GAME] [--mod-root PATH]
 This complements native probes; it does not claim to validate engine behavior.
 """
 
@@ -21,7 +21,8 @@ MOD = ROOT
 RUNTIME_DIRS = {"common", "gui", "localization", "events"}
 LANGUAGES = ("english", "french", "german", "japanese", "korean", "polish", "russian", "simp_chinese", "spanish")
 REVIEWED_OVERRIDES = {
-    "gui/window_court.gui": "e730078c5f671e7e564c6e7799215d9fabda0546d38ba615f26302b122ad5135",
+    "gui/window_court.gui": "94b885edab74b678022a1f123b4e874baf8fb8dd924de71fe0d52b71dd666669",
+    "gui/window_knights.gui": "11a23ecb6c7d53b87751ec62b0a6a4f440564b10d515327661ab5a73adc42ca4",
 }
 
 
@@ -97,7 +98,7 @@ def read_localization(language: str) -> dict[str, str]:
 
 def check(game: Path) -> None:
     require((game / "common" / "court_positions" / "types").is_dir(), f"Not a CK3 game directory: {game}")
-    unexpected = {p.name for p in MOD.iterdir() if p.is_dir()} - RUNTIME_DIRS - {"publishing", "tools", "tests", "docs", ".git"}
+    unexpected = {p.name for p in MOD.iterdir() if p.is_dir()} - RUNTIME_DIRS - {"publishing","tools","tests","docs",".git"}
     require(not unexpected, f"Unexpected top-level mod folders: {sorted(unexpected)}")
     files = sorted(p for p in MOD.rglob("*") if p.is_file() and p.relative_to(MOD).parts[0] in RUNTIME_DIRS)
     require(bool(files), "No runtime files found")
@@ -108,9 +109,37 @@ def check(game: Path) -> None:
         require(hashlib.sha256(vanilla.read_bytes()).hexdigest() == REVIEWED_OVERRIDES[relative],
                 f"Vanilla changed; review and rebase the court panel insertion: {relative}")
         edited = (MOD / relative).read_text(encoding="utf-8-sig")
-        stripped, count = re.subn(r"^[\t ]*# CA_COURT_PANEL_BEGIN\n.*?^[\t ]*# CA_COURT_PANEL_END\n", "", edited, flags=re.M | re.S)
-        require(count == 1 and stripped == vanilla.read_text(encoding="utf-8-sig"),
-                f"Override differs outside the reviewed insertion: {relative}")
+        if relative == "gui/window_court.gui":
+            stripped, count = re.subn(r"^[\t ]*# CA_COURT_PANEL_BEGIN\n.*?^[\t ]*# CA_COURT_PANEL_END\n", "", edited, flags=re.M | re.S)
+            require(count == 1 and stripped == vanilla.read_text(encoding="utf-8-sig"),
+                    f"Override differs outside the reviewed insertion: {relative}")
+        else:
+            # Reverse only the named filter locks and visual child wrapper.
+            # Root geometry, native visibility and window lifecycle stay native.
+            stripped = edited
+            for marker in ("NOTICE", "CONTROLS"):
+                stripped, count = re.subn(
+                    rf"^[\t ]*# CA_KNIGHT_FILTER_LOCK_{marker}_BEGIN\n.*?^[\t ]*# CA_KNIGHT_FILTER_LOCK_{marker}_END\n",
+                    "", stripped, flags=re.M | re.S)
+                require(count == 1, f"Missing/duplicate knight {marker} insertion")
+            stripped, count = re.subn(
+                r"^[\t ]*# CA_KNIGHT_FILTER_LOCK_RESET_BEGIN\n.*?^[\t ]*# CA_KNIGHT_FILTER_LOCK_RESET_END\n",
+                '\t\t\t\t\tenabled = "[Not( KnightsView.GetKnightPermissions.IsDefault )]"\n',
+                stripped, flags=re.M | re.S)
+            require(count == 1, "Missing/duplicate knight reset lock")
+            stripped, count = re.subn(
+                r"\t# CA_KNIGHT_FILTER_VISUAL_WRAPPER_BEGIN\n.*?\t# CA_KNIGHT_FILTER_VISUAL_WRAPPER_CONTENTS\n",
+                "", stripped, flags=re.S)
+            require(count == 1, "Missing/duplicate knight visual wrapper")
+            ending = '\t}\n\t# CA_KNIGHT_FILTER_VISUAL_WRAPPER_END\n'
+            require(stripped.count(ending) == 1, "Missing/duplicate knight wrapper end")
+            stripped = stripped.replace(ending, '')
+            anchor = '\tallow_outside = yes\n'
+            stripped = stripped.replace(anchor, anchor + '\n\tusing = Window_Background_Subwindow\n', 1)
+            # Insertions add blank lines, but no native token may change.
+            normalize = lambda text: '\n'.join(line for line in text.splitlines() if line.strip())
+            require(normalize(stripped) == normalize(vanilla.read_text(encoding="utf-8-sig")),
+                    "Knight override differs outside the reviewed insertions")
 
     texts: dict[Path, str] = {}
     for path in files:
@@ -154,9 +183,11 @@ def check(game: Path) -> None:
         "README differs from canonical publishing/description.en.md",
     )
 
+    # Validate the selected source directly, including isolated candidates;
+    # generator defaults must not accidentally validate a different active tree.
     for generator in ("build_court_roles.py", "build_court_salaries.py", "build_court_ai.py"):
         completed = subprocess.run(
-            [sys.executable, str(ROOT / "tools" / generator), "--game-root", str(game), "--check"],
+            [sys.executable, str(ROOT / "tools" / generator), "--game-root", str(game), "--mod-root", str(MOD), "--check"],
             cwd=ROOT, text=True, encoding="utf-8", capture_output=True, check=False,
         )
         require(completed.returncode == 0, f"Generator drift check failed ({generator}):\n" + completed.stdout + completed.stderr)
@@ -166,9 +197,12 @@ def check(game: Path) -> None:
 
 
 def main() -> int:
+    global MOD
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--game-root", type=Path, required=True)
+    parser.add_argument("--game-root", type=Path, default=Path("D:/SteamLibrary/steamapps/common/Crusader Kings III/game"))
+    parser.add_argument("--mod-root", type=Path, default=MOD)
     args = parser.parse_args()
+    MOD = args.mod_root.resolve()
     try:
         check(args.game_root)
     except (OSError, UnicodeError, ValueError) as error:

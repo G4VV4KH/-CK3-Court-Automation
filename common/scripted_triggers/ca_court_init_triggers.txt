@@ -213,5 +213,29 @@ ca_court_init_has_vacancy_trigger = {
 			ca_position_is_included_trigger = { POSITION = court_position_type:keeper_of_swans_court_position }
 			can_employ_court_position_type = keeper_of_swans_court_position
 		}
+		AND = {
+			ca_position_is_included_trigger = { POSITION = court_position_type:roman_censor_court_position }
+			can_employ_court_position_type = roman_censor_court_position
+		}
+		AND = {
+			ca_position_is_included_trigger = { POSITION = court_position_type:partner_court_position }
+			can_employ_court_position_type = partner_court_position
+		}
+		AND = {
+			ca_position_is_included_trigger = { POSITION = court_position_type:fixer_court_position }
+			can_employ_court_position_type = fixer_court_position
+		}
+		AND = {
+			ca_position_is_included_trigger = { POSITION = court_position_type:translator_court_position }
+			can_employ_court_position_type = translator_court_position
+		}
+		AND = {
+			ca_position_is_included_trigger = { POSITION = court_position_type:market_agent_court_position }
+			can_employ_court_position_type = market_agent_court_position
+		}
+		AND = {
+			ca_position_is_included_trigger = { POSITION = court_position_type:bailiff_court_position }
+			can_employ_court_position_type = bailiff_court_position
+		}
 	}
 }

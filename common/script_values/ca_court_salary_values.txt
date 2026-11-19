@@ -2129,6 +2129,143 @@ ca_court_salary_keeper_of_swans_vacancies = {
 	}
 }
 
+ca_court_salary_roman_censor_gold = {
+	save_temporary_scope_as = liege
+	value = 0
+	if = {
+		limit = { scope:liege = { has_treasury = no } }
+		add = { value = roman_censor_total_salary_value }
+	}
+}
+
+ca_court_salary_roman_censor_treasury = {
+	save_temporary_scope_as = liege
+	value = 0
+	if = {
+		limit = { scope:liege = { has_treasury = yes } }
+		add = { value = roman_censor_total_salary_value }
+	}
+}
+
+ca_court_salary_roman_censor_prestige = 0
+
+ca_court_salary_roman_censor_piety = 0
+
+ca_court_salary_roman_censor_vacancies = {
+	value = 0
+	if = {
+		limit = { can_employ_court_position_type = roman_censor_court_position ca_position_is_included_trigger = { POSITION = court_position_type:roman_censor_court_position } }
+		value = 1
+		every_court_position_holder = { type = roman_censor_court_position subtract = 1 }
+		min = 0
+	}
+}
+
+ca_court_salary_partner_gold = {
+	save_temporary_scope_as = liege
+	value = partner_total_salary_value
+}
+
+ca_court_salary_partner_treasury = 0
+
+ca_court_salary_partner_prestige = 0
+
+ca_court_salary_partner_piety = 0
+
+ca_court_salary_partner_vacancies = {
+	value = 0
+	if = {
+		limit = { can_employ_court_position_type = partner_court_position ca_position_is_included_trigger = { POSITION = court_position_type:partner_court_position } }
+		value = 1
+		every_court_position_holder = { type = partner_court_position subtract = 1 }
+		min = 0
+	}
+}
+
+ca_court_salary_fixer_gold = {
+	save_temporary_scope_as = liege
+	value = fixer_total_salary_value
+}
+
+ca_court_salary_fixer_treasury = 0
+
+ca_court_salary_fixer_prestige = 0
+
+ca_court_salary_fixer_piety = 0
+
+ca_court_salary_fixer_vacancies = {
+	value = 0
+	if = {
+		limit = { can_employ_court_position_type = fixer_court_position ca_position_is_included_trigger = { POSITION = court_position_type:fixer_court_position } }
+		value = 1
+		every_court_position_holder = { type = fixer_court_position subtract = 1 }
+		min = 0
+	}
+}
+
+ca_court_salary_translator_gold = {
+	save_temporary_scope_as = liege
+	value = translator_total_salary_value
+}
+
+ca_court_salary_translator_treasury = 0
+
+ca_court_salary_translator_prestige = 0
+
+ca_court_salary_translator_piety = 0
+
+ca_court_salary_translator_vacancies = {
+	value = 0
+	if = {
+		limit = { can_employ_court_position_type = translator_court_position ca_position_is_included_trigger = { POSITION = court_position_type:translator_court_position } }
+		value = 1
+		every_court_position_holder = { type = translator_court_position subtract = 1 }
+		min = 0
+	}
+}
+
+ca_court_salary_market_agent_gold = 0
+
+ca_court_salary_market_agent_treasury = 0
+
+ca_court_salary_market_agent_prestige = {
+	save_temporary_scope_as = liege
+	value = market_agent_total_salary_value
+}
+
+ca_court_salary_market_agent_piety = 0
+
+ca_court_salary_market_agent_vacancies = {
+	value = 0
+	if = {
+		limit = { can_employ_court_position_type = market_agent_court_position ca_position_is_included_trigger = { POSITION = court_position_type:market_agent_court_position } }
+		value = 1
+		every_court_position_holder = { type = market_agent_court_position subtract = 1 }
+		min = 0
+	}
+}
+
+ca_court_salary_bailiff_gold = {
+	save_temporary_scope_as = liege
+	value = bailiff_total_salary_value
+}
+
+ca_court_salary_bailiff_treasury = 0
+
+ca_court_salary_bailiff_prestige = 0
+
+ca_court_salary_bailiff_piety = 0
+
+ca_court_salary_bailiff_vacancies = {
+	value = 0
+	if = {
+		limit = { can_employ_court_position_type = bailiff_court_position ca_position_is_included_trigger = { POSITION = court_position_type:bailiff_court_position } }
+		value = 1
+		every_court_position_holder = { type = bailiff_court_position subtract = 1 }
+		min = 0
+	}
+}
+
 ca_court_salary_current_gold = {
 	value = 0
 	save_temporary_scope_as = ca_salary_owner
@@ -2319,6 +2456,26 @@ ca_court_salary_current_gold = {
 	every_court_position_holder = {
 		type = keeper_of_swans_court_position
 		scope:ca_salary_owner = { add = ca_court_salary_keeper_of_swans_gold }
+	}
+	every_court_position_holder = {
+		type = roman_censor_court_position
+		scope:ca_salary_owner = { add = ca_court_salary_roman_censor_gold }
+	}
+	every_court_position_holder = {
+		type = partner_court_position
+		scope:ca_salary_owner = { add = ca_court_salary_partner_gold }
+	}
+	every_court_position_holder = {
+		type = fixer_court_position
+		scope:ca_salary_owner = { add = ca_court_salary_fixer_gold }
+	}
+	every_court_position_holder = {
+		type = translator_court_position
+		scope:ca_salary_owner = { add = ca_court_salary_translator_gold }
+	}
+	every_court_position_holder = {
+		type = bailiff_court_position
+		scope:ca_salary_owner = { add = ca_court_salary_bailiff_gold }
 	}
 }
 
@@ -2511,6 +2668,26 @@ ca_court_salary_additional_gold = {
 	if = {
 		limit = { can_employ_court_position_type = keeper_of_swans_court_position }
 		add = { value = ca_court_salary_keeper_of_swans_gold multiply = ca_court_salary_keeper_of_swans_vacancies }
+	}
+	if = {
+		limit = { can_employ_court_position_type = roman_censor_court_position }
+		add = { value = ca_court_salary_roman_censor_gold multiply = ca_court_salary_roman_censor_vacancies }
+	}
+	if = {
+		limit = { can_employ_court_position_type = partner_court_position }
+		add = { value = ca_court_salary_partner_gold multiply = ca_court_salary_partner_vacancies }
+	}
+	if = {
+		limit = { can_employ_court_position_type = fixer_court_position }
+		add = { value = ca_court_salary_fixer_gold multiply = ca_court_salary_fixer_vacancies }
+	}
+	if = {
+		limit = { can_employ_court_position_type = translator_court_position }
+		add = { value = ca_court_salary_translator_gold multiply = ca_court_salary_translator_vacancies }
+	}
+	if = {
+		limit = { can_employ_court_position_type = bailiff_court_position }
+		add = { value = ca_court_salary_bailiff_gold multiply = ca_court_salary_bailiff_vacancies }
 	}
 }
 
@@ -2710,6 +2887,10 @@ ca_court_salary_current_treasury = {
 		type = keeper_of_swans_court_position
 		scope:ca_salary_owner = { add = ca_court_salary_keeper_of_swans_treasury }
 	}
+	every_court_position_holder = {
+		type = roman_censor_court_position
+		scope:ca_salary_owner = { add = ca_court_salary_roman_censor_treasury }
+	}
 }
 
 ca_court_salary_additional_treasury = {
@@ -2902,6 +3083,10 @@ ca_court_salary_additional_treasury = {
 		limit = { can_employ_court_position_type = keeper_of_swans_court_position }
 		add = { value = ca_court_salary_keeper_of_swans_treasury multiply = ca_court_salary_keeper_of_swans_vacancies }
 	}
+	if = {
+		limit = { can_employ_court_position_type = roman_censor_court_position }
+		add = { value = ca_court_salary_roman_censor_treasury multiply = ca_court_salary_roman_censor_vacancies }
+	}
 }
 
 ca_court_salary_full_treasury = {
@@ -3092,6 +3277,10 @@ ca_court_salary_current_prestige = {
 		type = keeper_of_swans_court_position
 		scope:ca_salary_owner = { add = ca_court_salary_keeper_of_swans_prestige }
 	}
+	every_court_position_holder = {
+		type = market_agent_court_position
+		scope:ca_salary_owner = { add = ca_court_salary_market_agent_prestige }
+	}
 }
 
 ca_court_salary_additional_prestige = {
@@ -3275,6 +3464,10 @@ ca_court_salary_additional_prestige = {
 	if = {
 		limit = { can_employ_court_position_type = keeper_of_swans_court_position }
 		add = { value = ca_court_salary_keeper_of_swans_prestige multiply = ca_court_salary_keeper_of_swans_vacancies }
+	}
+	if = {
+		limit = { can_employ_court_position_type = market_agent_court_position }
+		add = { value = ca_court_salary_market_agent_prestige multiply = ca_court_salary_market_agent_vacancies }
 	}
 }
 

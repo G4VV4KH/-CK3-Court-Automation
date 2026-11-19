@@ -2,14 +2,14 @@
 
 ## At a glance
 
-- 🟢 **Version 0.3.0** · Targets CK3 **1.20.1.2**.
+- 🟢 **Version 0.3.1** · Targets CK3 **1.21.0.3**.
 - 🟢 **Standalone:** no other mod required.
 - 🟢 Fill court vacancies now, maintain court and knight rosters, or set native vacancy policies in bulk.
 - 🟢 **Languages:** English, French, German, Japanese, Korean, Polish, Russian, Simplified Chinese and Spanish.
 - 🟢 Optional Court Jester exclusion; conservative AI assistance enabled by default.
 - 🔴 Creates characters without a recruitment fee. Court positions retain normal salaries.
 - 🔴 Automatic knight recruitment clears and locks personal knight filters while enabled.
-- 🔴 Covers vanilla court positions, including available DLC positions. Adventurer camp offices and mod-added positions are outside its scope.
+- 🔴 Covers vanilla court positions, including merchant associates and the Roman Censor when available. Adventurer camp offices and mod-added positions are outside its scope.
 
 ## A court ready to serve
 
@@ -53,7 +53,7 @@ A game rule enables conservative AI help: up to two missing knights and one affo
 
 ## Getting started
 
-1. Enable Court Automation and play a landed ruler.
+1. Enable Court Automation and play a landed ruler or the owner of a merchant company.
 2. Open **Court → Court positions → Court tools**.
 3. Use **Fill court now**, enable either maintenance option, or check **Exclude the Court Jester** to handle that position separately.
 4. Open **Advanced: native policies** for bulk changes while Keep court filled is off. Court Init and Bare Knights also remain in Decisions.

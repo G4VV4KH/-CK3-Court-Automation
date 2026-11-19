@@ -59,6 +59,12 @@ ca_court_init_effect = {
 		ca_court_init_fill_type_effect = { POSITION = chronicler_court_position CAPACITY = 1 }
 		ca_court_init_fill_type_effect = { POSITION = high_almoner_court_position CAPACITY = 1 }
 		ca_court_init_fill_type_effect = { POSITION = keeper_of_swans_court_position CAPACITY = 1 }
+		ca_court_init_fill_type_effect = { POSITION = roman_censor_court_position CAPACITY = 1 }
+		ca_court_init_fill_type_effect = { POSITION = partner_court_position CAPACITY = 1 }
+		ca_court_init_fill_type_effect = { POSITION = fixer_court_position CAPACITY = 1 }
+		ca_court_init_fill_type_effect = { POSITION = translator_court_position CAPACITY = 1 }
+		ca_court_init_fill_type_effect = { POSITION = market_agent_court_position CAPACITY = 1 }
+		ca_court_init_fill_type_effect = { POSITION = bailiff_court_position CAPACITY = 1 }
 		remove_variable = ca_court_init_slots_to_fill
 		clear_saved_scope = ca_court_init_type
 		clear_saved_scope = ca_court_init_employer

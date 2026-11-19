@@ -65,7 +65,7 @@ def salary_fields(game: Path) -> dict[str, dict[str, str]]:
                 key = field[1]
                 if key == "round":
                     continue
-                if key not in CURRENCIES:
+                if key not in (*CURRENCIES, "treasury_or_gold"):
                     raise ValueError(f"Review new salary currency {role}.{key}")
                 if salary[field.end()] == "{":
                     expression, _ = block(salary, field.end())
@@ -77,7 +77,16 @@ def salary_fields(game: Path) -> dict[str, dict[str, str]]:
                 else:
                     value = salary[field.end():].splitlines()[0].split("#", 1)[0].strip()
                     expression = "value = " + value
-                fields[key] = expression.strip()
+                if key == "treasury_or_gold":
+                    for currency, has_treasury in (("gold", "no"), ("treasury", "yes")):
+                        if currency in fields:
+                            raise ValueError(f"Overlapping salary currency {role}.{currency}")
+                        fields[currency] = (f"value = 0\nif = {{\n\tlimit = {{ scope:liege = {{ has_treasury = {has_treasury} }} }}\n"
+                                            f"\tadd = {{ {expression.strip()} }}\n}}")
+                else:
+                    if key in fields:
+                        raise ValueError(f"Overlapping salary currency {role}.{key}")
+                    fields[key] = expression.strip()
             found[role] = fields
     if found.keys() != ROLES.keys():
         raise ValueError(f"Salary coverage mismatch: {found.keys() ^ ROLES.keys()}")
@@ -94,7 +103,7 @@ def adapters(fields: dict[str, dict[str, str]]) -> str:
         "# Owner/character scope API: ca_court_salary_<short_role>_<currency>.",
         "# Values set temporary scope:liege to the owner, as native salaries require.",
         "# Base salaries only: active court-position task costs are separate.",
-        "# Full estimates keep current conditions and price all current vacancies.",
+        "# Full estimates keep current conditions and price included vacancies.",
         "# Family/hooks/event terms can change after appointments; this is not a quote.",
         "",
     ]
@@ -109,7 +118,7 @@ def adapters(fields: dict[str, dict[str, str]]) -> str:
             f"ca_court_salary_{role}_vacancies = {{",
             "\tvalue = 0",
             "\tif = {",
-            f"\t\tlimit = {{ can_employ_court_position_type = {role}_court_position }}",
+            f"\t\tlimit = {{ can_employ_court_position_type = {role}_court_position ca_position_is_included_trigger = {{ POSITION = court_position_type:{role}_court_position }} }}",
             f"\t\tvalue = {ROLES[role]}",
             f"\t\tevery_court_position_holder = {{ type = {role}_court_position subtract = 1 }}",
             "\t\tmin = 0",
@@ -151,13 +160,14 @@ def adapters(fields: dict[str, dict[str, str]]) -> str:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--game-root", type=Path, required=True)
+    parser.add_argument("--mod-root", type=Path, default=MOD.parent)
     parser.add_argument("--check", action="store_true")
     args = parser.parse_args()
     if installed_roles(args.game_root) != ROLES:
         raise SystemExit("Review role coverage/capacities with build_court_roles.py first")
     fields = salary_fields(args.game_root)
     text = adapters(fields)
-    path = MOD / "script_values" / "ca_court_salary_values.txt"
+    path = args.mod_root / "common" / "script_values" / "ca_court_salary_values.txt"
     if args.check:
         if not path.exists() or path.read_text(encoding="utf-8-sig") != text:
             raise SystemExit(f"Salary adapters differ from installed vanilla: {path}")

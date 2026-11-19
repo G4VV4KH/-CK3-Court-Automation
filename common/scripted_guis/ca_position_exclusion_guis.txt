@@ -2,7 +2,7 @@
 ca_toggle_exclude_court_jester = {
 	scope = character
 	is_valid = {
-		ca_player_maintenance_eligible_trigger = yes
+		ca_player_court_eligible_trigger = yes
 		NOT = { has_variable = ca_native_restore_pending }
 		NOT = { has_variable_list = ca_native_release_pending }
 		NOT = { has_variable = ca_auto_court_initial_pending }
@@ -29,7 +29,7 @@ ca_is_court_jester_excluded = {
 ca_native_type_is_managed = {
 	scope = character
 	is_valid = {
-		ca_player_maintenance_eligible_trigger = yes
+		ca_player_court_eligible_trigger = yes
 		exists = scope:ca_native_type
 		ca_position_is_included_trigger = { POSITION = scope:ca_native_type }
 	}
@@ -38,7 +38,7 @@ ca_native_type_is_managed = {
 ca_native_type_is_releasing = {
 	scope = character
 	is_valid = {
-		ca_player_maintenance_eligible_trigger = yes
+		ca_player_court_eligible_trigger = yes
 		exists = scope:ca_native_type
 		NOT = { ca_position_is_included_trigger = { POSITION = scope:ca_native_type } }
 		is_target_in_variable_list = { name = ca_native_release_pending target = scope:ca_native_type }

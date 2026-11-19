@@ -6,7 +6,7 @@ ca_automation_decision = {
 	ai_check_interval = 0
 	is_shown = {
 		is_ai = no
-		is_landed = yes
+		ca_supported_court_employer_trigger = yes
 	}
 	effect = {
 		custom_tooltip = ca_automation_decision_effect
@@ -22,7 +22,7 @@ ca_court_init_decision = {
 	ai_check_interval = 0
 	is_shown = {
 		is_ai = no
-		is_landed = yes
+		ca_supported_court_employer_trigger = yes
 	}
 	is_valid = {
 		custom_tooltip = {

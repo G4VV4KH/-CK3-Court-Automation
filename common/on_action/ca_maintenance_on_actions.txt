@@ -3,7 +3,7 @@ ca_maintenance_tick = {
 	effect = {
 		remove_variable = ca_maintenance_pending
 		if = {
-			limit = { ca_player_maintenance_eligible_trigger = yes }
+			limit = { ca_player_court_eligible_trigger = yes }
 			ca_auto_court_pass_effect = yes
 			ca_auto_knights_pass_effect = yes
 		}

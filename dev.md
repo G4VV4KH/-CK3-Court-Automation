@@ -1,5 +1,11 @@
 # Court Automation — developer notes
 
+## 0.3.1 for CK3 1.21.0.3
+
+Updated the court and knight windows for Florin. Court appointments, AI priorities and salary estimates include the Roman Censor and the five merchant associate positions. Merchant company owners can manage their associate positions from the court window.
+
+## Earlier development notes
+
 Version 0.3.0 targets CK3 1.20.1.1. This repository is a portable, reviewed publication projection. Runtime files are at the repository root; canonical player copy is [publishing/description.en.md](publishing/description.en.md). Regenerate README with `python tools/render_readme.py`.
 
 ## Implementation

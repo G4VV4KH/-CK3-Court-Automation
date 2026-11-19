@@ -63,7 +63,7 @@ ca_automation_error_toast_effect = {
 
 ca_player_fill_court_now_effect = {
 	if = {
-		limit = { ca_player_maintenance_eligible_trigger = yes }
+		limit = { ca_player_court_eligible_trigger = yes }
 		ca_court_init_effect = yes
 		save_scope_as = ca_result_recipient
 		send_interface_toast = {
@@ -77,7 +77,7 @@ ca_player_fill_court_now_effect = {
 ca_auto_court_pass_effect = {
 	if = {
 		limit = {
-			ca_player_maintenance_eligible_trigger = yes
+			ca_player_court_eligible_trigger = yes
 			has_variable = ca_auto_court_enabled
 			has_variable = ca_native_policy_ready
 			ca_court_init_has_vacancy_trigger = yes
@@ -157,7 +157,7 @@ ca_auto_knights_pass_effect = {
 ca_toggle_auto_court_effect = {
 	if = {
 		limit = {
-			ca_player_maintenance_eligible_trigger = yes
+			ca_player_court_eligible_trigger = yes
 			NOT = { has_variable = ca_native_restore_pending }
 		}
 		if = {
@@ -230,7 +230,7 @@ ca_check_native_policy_off_effect = {
 ca_native_policy_ready_effect = {
 	if = {
 		limit = {
-			ca_player_maintenance_eligible_trigger = yes
+			ca_player_court_eligible_trigger = yes
 			has_variable = ca_auto_court_enabled
 			NOT = { has_variable_list = ca_native_release_pending }
 		}

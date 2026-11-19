@@ -4,3 +4,22 @@
 	is_landed = yes
 	exists = location
 }
+
+# Florin's merchant companies own a court through a titular county. Keep the
+# ordinary landed condition for every other government and for knight controls.
+ca_supported_court_employer_trigger = {
+ OR = {
+  is_landed = yes
+  AND = {
+   government_has_flag = government_is_merchant
+   any_held_title = { title_tier = county is_landless_type_title = yes }
+  }
+ }
+}
+
+ca_player_court_eligible_trigger = {
+ is_ai = no
+ is_alive = yes
+ exists = location
+ ca_supported_court_employer_trigger = yes
+}
