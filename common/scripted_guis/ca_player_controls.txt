@@ -1,6 +1,31 @@
 ﻿# Direct player controls and native-policy bridge. The bridge is the only
 # writer of native ACK lists; acknowledgements originate in actual GUI getters.
 
+# Called only in native policy editing views, and once on leaving them or
+# opening the pause/save menu. Samples preferences; it never invents ACKs.
+ca_native_edit_reconcile = {
+	scope = character
+	is_valid = {
+		exists = scope:ca_native_edit_owner_matches
+		scope:ca_native_edit_owner_matches = yes
+		is_ai = no
+		is_alive = yes
+		ca_supported_court_employer_trigger = yes
+	}
+	effect = {
+		if = {
+			limit = {
+				exists = scope:ca_native_edit_owner_matches
+				scope:ca_native_edit_owner_matches = yes
+				is_ai = no
+				is_alive = yes
+				ca_supported_court_employer_trigger = yes
+			}
+			ca_native_edit_reconcile_effect = yes
+		}
+	}
+}
+
 # An older ON save may load while paused without firing the startup on-action.
 # This only requests the ordinary native handshake; it cannot acknowledge it.
 ca_request_initial_knight_filters = {
@@ -625,6 +650,7 @@ ca_native_confirm_off = {
 		ca_position_is_included_trigger = { POSITION = scope:ca_native_type }
 		has_variable = ca_auto_court_enabled
 		is_target_in_variable_list = { name = ca_native_saved_all target = scope:ca_native_type }
+		has_player_court_position_automation_none = scope:ca_native_type
 		NOT = { is_target_in_variable_list = { name = ca_native_off_confirmed target = scope:ca_native_type } }
 	}
 	effect = {
@@ -637,6 +663,7 @@ ca_native_confirm_off = {
 				ca_position_is_included_trigger = { POSITION = scope:ca_native_type }
 				has_variable = ca_auto_court_enabled
 				is_target_in_variable_list = { name = ca_native_saved_all target = scope:ca_native_type }
+				has_player_court_position_automation_none = scope:ca_native_type
 				NOT = { is_target_in_variable_list = { name = ca_native_off_confirmed target = scope:ca_native_type } }
 			}
 			add_to_variable_list = { name = ca_native_off_confirmed target = scope:ca_native_type }
@@ -701,6 +728,7 @@ ca_native_confirm_applied = {
 				is_target_in_variable_list = { name = ca_native_saved_all target = scope:ca_native_type }
 			}
 		}
+		ca_native_expected_policy_matches_actual_trigger = { POSITION = scope:ca_native_type }
 		NOT = { is_target_in_variable_list = { name = ca_native_applied_confirmed target = scope:ca_native_type } }
 	}
 	effect = {
@@ -721,6 +749,7 @@ ca_native_confirm_applied = {
 						is_target_in_variable_list = { name = ca_native_saved_all target = scope:ca_native_type }
 					}
 				}
+				ca_native_expected_policy_matches_actual_trigger = { POSITION = scope:ca_native_type }
 				NOT = { is_target_in_variable_list = { name = ca_native_applied_confirmed target = scope:ca_native_type } }
 			}
 			add_to_variable_list = { name = ca_native_applied_confirmed target = scope:ca_native_type }
@@ -790,6 +819,8 @@ ca_native_policy_restored = {
 			}
 			remove_variable = ca_native_restore_pending
 			remove_variable = ca_native_preserve_unsaved
+			# Finish the actual-policy snapshot before the GUI disposes its rows.
+			ca_native_edit_reconcile_effect = yes
 		}
 	}
 }

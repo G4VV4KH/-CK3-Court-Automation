@@ -2,9 +2,14 @@
 ca_maintenance_tick = {
 	effect = {
 		remove_variable = ca_maintenance_pending
+		# Dispatch only opted-in features. Each pass keeps its own eligibility
+		# guard; a disabled feature must not enter its vacancy/roster checks.
 		if = {
-			limit = { ca_player_court_eligible_trigger = yes }
+			limit = { has_variable = ca_auto_court_enabled }
 			ca_auto_court_pass_effect = yes
+		}
+		if = {
+			limit = { has_variable = ca_auto_knights_enabled }
 			ca_auto_knights_pass_effect = yes
 		}
 		# Keep the opted-in player's single timer through temporary landlessness.

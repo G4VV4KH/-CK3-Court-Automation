@@ -2,9 +2,9 @@
 
 ## At a glance
 
-- 🟢 **Version 0.3.1** · Targets CK3 **1.21.0.3**.
+- 🟢 **Version 0.3.2** · Targets CK3 **1.21.0.3**.
 - 🟢 **Standalone:** no other mod required.
-- 🟢 Fill court vacancies now, maintain court and knight rosters, or set native vacancy policies in bulk.
+- 🟢 Fill vacancies, maintain court and knight rosters, or set vacancy policies in bulk.
 - 🟢 **Languages:** English, French, German, Japanese, Korean, Polish, Russian, Simplified Chinese and Spanish.
 - 🟢 Optional Court Jester exclusion; conservative AI assistance enabled by default.
 - 🔴 Creates characters without a recruitment fee. Court positions retain normal salaries.
@@ -13,7 +13,7 @@
 
 ## A court ready to serve
 
-Fill vacancies as your realm changes and recruit when your court runs short.
+As your realm grows, give each vacancy to the courtier best suited to it.
 
 ## Fill and maintain your court
 
@@ -31,9 +31,9 @@ Excluding it while Keep court filled is on restores its pre-automation native po
 
 ## Native vacancy policies
 
-Four labelled **Advanced: native policies** buttons select no automation, suggest candidates, appoint the best, or appoint the best and notify when nobody qualifies. Bulk changes skip excluded positions.
+Under **Advanced: native policies**, choose no automation, suggestions, best candidate, or best candidate with a notification if nobody qualifies. Bulk changes skip excluded positions.
 
-Policies fill vacancies without replacing holders. Turn off Keep court filled for bulk changes; an excluded jester's native policy remains independent.
+Turn off Keep court filled to change policies in bulk. An excluded jester keeps a separate native policy.
 
 ## Keep your knights filled
 
@@ -70,7 +70,7 @@ Removing the mod does not undo characters, appointments or native settings. Turn
 
 Preferences and saved court policies follow your player character through inheritance. An error stops the affected automatic action; inspect your court before retrying.
 
-Court filling chooses the best remaining candidate in fixed order, not a global optimum across mutually exclusive jobs. Mandatory councillor and active-knight requirements apply.
+Each vacancy gets the best remaining candidate in a fixed order. Mutually exclusive jobs can compete for the same person.
 
 ## Feedback and support
 

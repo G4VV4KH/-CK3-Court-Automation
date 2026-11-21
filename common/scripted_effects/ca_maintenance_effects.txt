@@ -227,6 +227,149 @@ ca_check_native_policy_off_effect = {
 	clear_saved_scope = ca_native_check_owner
 }
 
+# UI edit reconciliation only: these temporary scopes never change a saved
+# preference. Stop querying modes after the first included non-None type.
+ca_native_edit_find_policy_effect = {
+	every_court_position_type = {
+		save_scope_as = ca_native_edit_type
+		scope:ca_native_edit_owner = {
+			if = {
+				limit = { NOT = { exists = scope:ca_native_edit_has_policy } }
+				if = {
+					limit = {
+						ca_position_is_included_trigger = { POSITION = scope:ca_native_edit_type }
+						NOT = { has_player_court_position_automation_none = scope:ca_native_edit_type }
+					}
+					save_scope_value_as = { name = ca_native_edit_has_policy value = yes }
+				}
+			}
+		}
+	}
+}
+
+# While maintenance is Off, retain live manual policy edits for save/load and
+# succession. Compare first: a stable row performs no persistent list writes.
+# Excluded positions remain outside our native-policy ownership.
+ca_native_edit_capture_policies_effect = {
+	every_court_position_type = {
+		save_scope_as = ca_native_edit_type
+		scope:ca_native_edit_owner = {
+			if = {
+				limit = {
+					ca_position_is_included_trigger = { POSITION = scope:ca_native_edit_type }
+					OR = {
+						NOT = { is_target_in_variable_list = { name = ca_native_saved_all target = scope:ca_native_edit_type } }
+						AND = {
+							has_player_court_position_automation_none = scope:ca_native_edit_type
+							OR = {
+								is_target_in_variable_list = { name = ca_native_saved_event target = scope:ca_native_edit_type }
+								is_target_in_variable_list = { name = ca_native_saved_best target = scope:ca_native_edit_type }
+								is_target_in_variable_list = { name = ca_native_saved_best_event target = scope:ca_native_edit_type }
+							}
+						}
+						AND = {
+							has_player_court_position_automation_event = scope:ca_native_edit_type
+							OR = {
+								NOT = { is_target_in_variable_list = { name = ca_native_saved_event target = scope:ca_native_edit_type } }
+								is_target_in_variable_list = { name = ca_native_saved_best target = scope:ca_native_edit_type }
+								is_target_in_variable_list = { name = ca_native_saved_best_event target = scope:ca_native_edit_type }
+							}
+						}
+						AND = {
+							has_player_court_position_automation_assign_best = scope:ca_native_edit_type
+							OR = {
+								is_target_in_variable_list = { name = ca_native_saved_event target = scope:ca_native_edit_type }
+								NOT = { is_target_in_variable_list = { name = ca_native_saved_best target = scope:ca_native_edit_type } }
+								is_target_in_variable_list = { name = ca_native_saved_best_event target = scope:ca_native_edit_type }
+							}
+						}
+						AND = {
+							has_player_court_position_automation_assign_best_or_event = scope:ca_native_edit_type
+							OR = {
+								is_target_in_variable_list = { name = ca_native_saved_event target = scope:ca_native_edit_type }
+								is_target_in_variable_list = { name = ca_native_saved_best target = scope:ca_native_edit_type }
+								NOT = { is_target_in_variable_list = { name = ca_native_saved_best_event target = scope:ca_native_edit_type } }
+							}
+						}
+					}
+				}
+				if = {
+					limit = { NOT = { is_target_in_variable_list = { name = ca_native_saved_all target = scope:ca_native_edit_type } } }
+					add_to_variable_list = { name = ca_native_saved_all target = scope:ca_native_edit_type }
+				}
+				remove_list_variable = { name = ca_native_saved_event target = scope:ca_native_edit_type }
+				remove_list_variable = { name = ca_native_saved_best target = scope:ca_native_edit_type }
+				remove_list_variable = { name = ca_native_saved_best_event target = scope:ca_native_edit_type }
+				if = {
+					limit = { has_player_court_position_automation_event = scope:ca_native_edit_type }
+					add_to_variable_list = { name = ca_native_saved_event target = scope:ca_native_edit_type }
+				}
+				else_if = {
+					limit = { has_player_court_position_automation_assign_best = scope:ca_native_edit_type }
+					add_to_variable_list = { name = ca_native_saved_best target = scope:ca_native_edit_type }
+				}
+				else_if = {
+					limit = { has_player_court_position_automation_assign_best_or_event = scope:ca_native_edit_type }
+					add_to_variable_list = { name = ca_native_saved_best_event target = scope:ca_native_edit_type }
+				}
+			}
+		}
+	}
+}
+
+# Called only by the native policy editing UI, including its final close/save
+# synchronization. A sleeping global bridge does not poll or write this state.
+ca_native_edit_reconcile_effect = {
+	if = {
+		limit = {
+			ca_player_court_eligible_trigger = yes
+			NOT = { has_variable = ca_auto_court_initial_pending }
+			NOT = { has_variable = ca_native_restore_pending }
+			NOT = { has_variable_list = ca_native_release_pending }
+		}
+		save_scope_as = ca_native_edit_owner
+		clear_saved_scope = ca_native_edit_has_policy
+		if = {
+			limit = { has_variable = ca_auto_court_enabled }
+			if = {
+				limit = { has_variable = ca_native_policy_ready }
+				ca_native_edit_find_policy_effect = yes
+				if = {
+					limit = { exists = scope:ca_native_edit_has_policy }
+					set_variable = { name = ca_auto_court_initial_pending value = yes }
+					ca_next_native_policy_epoch_effect = yes
+				}
+			}
+		}
+		else = {
+			if = {
+				limit = {
+					OR = {
+						has_variable = ca_bulk_automation_policy
+						has_variable_list = ca_native_saved_all
+						has_variable_list = ca_native_saved_event
+						has_variable_list = ca_native_saved_best
+						has_variable_list = ca_native_saved_best_event
+					}
+				}
+				ca_native_edit_capture_policies_effect = yes
+			}
+			else = {
+				# A new all-None player has no preference to transfer. Do not
+				# create a full empty snapshot just because the panel was opened.
+				ca_native_edit_find_policy_effect = yes
+				if = {
+					limit = { exists = scope:ca_native_edit_has_policy }
+					ca_native_edit_capture_policies_effect = yes
+				}
+			}
+		}
+		clear_saved_scope = ca_native_edit_has_policy
+		clear_saved_scope = ca_native_edit_type
+		clear_saved_scope = ca_native_edit_owner
+	}
+}
+
 ca_native_policy_ready_effect = {
 	if = {
 		limit = {
@@ -312,6 +455,19 @@ ca_player_changed_effect = {
 		ca_copy_native_policy_list_effect = { LIST = ca_native_saved_best_event }
 		ca_copy_native_policy_list_effect = { LIST = ca_excluded_court_positions }
 		ca_copy_native_policy_list_effect = { LIST = ca_native_release_pending }
+		# The stable Off UI no longer starts a native replay merely because a
+		# snapshot exists. A new player must explicitly apply inherited policies.
+		if = {
+			limit = {
+				NOT = { has_variable = ca_auto_court_enabled }
+				OR = {
+					has_variable = ca_bulk_automation_policy
+					has_variable_list = ca_native_saved_all
+					has_variable_list = ca_native_release_pending
+				}
+			}
+			set_variable = { name = ca_native_restore_pending value = yes }
+		}
 		ca_next_native_policy_epoch_effect = yes
 		scope:previous_player_character = {
 			# Its already queued tick remains bounded and consumes itself.

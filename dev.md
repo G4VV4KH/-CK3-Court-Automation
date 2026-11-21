@@ -1,5 +1,15 @@
 # Court Automation — developer notes
 
+## 0.3.2 for CK3 1.21.0.3
+
+The court policy controller creates row widgets when it has to apply or restore settings. It releases them after the engine confirms each affected position's actual mode. While the player edits a policy in the court window, the mod reads the change there. Loading a save gives subsequent commands a fresh identity, so a repeated command after loading must receive new confirmations. Each daily maintenance callback checks only the staffing options enabled by that player.
+
+On CK3 1.21.0.3, the released 0.3.1 controller evaluated line 31 of `ca_position_exclusion_guis.txt` 6,090 times per paused frame. With 0.3.2 it recorded zero calls to that line across four captures with the court open or closed and court staffing enabled or disabled. In the same 1178 England campaign on one machine, 30 days at speed five with the court open and auto-staffing enabled took 19.86 seconds before the fix and 16.81 seconds after it.
+
+To compare captures, record a settled state in the CK3 script profiler and export the CSV. Pass consecutive exports from a single game process to `python tests/court_automation/summarize_script_capture.py`, starting with `script_profile_000.csv`. The script subtracts earlier counts and divides each capture's increase by its own frame count.
+
+The native regression suite completed 112 checks covering performance, staffing, position exclusions, knight recruitment, inheritance and loading an earlier save twice. In the rollback scenario the same ruler chose a different bulk policy after reloading, and all 87 position types reported the selected native mode. The second reload restored the previous mixed policies, which then passed to the heir.
+
 ## 0.3.1 for CK3 1.21.0.3
 
 Updated the court and knight windows for Florin. Court appointments, AI priorities and salary estimates include the Roman Censor and the five merchant associate positions. Merchant company owners can manage their associate positions from the court window.

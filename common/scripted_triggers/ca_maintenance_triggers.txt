@@ -23,3 +23,60 @@ ca_player_court_eligible_trigger = {
  exists = location
  ca_supported_court_employer_trigger = yes
 }
+
+# Owner scope; POSITION is a court_position_type. Saved mixed/release policy
+# takes priority over the included-role bulk fallback. Unknown targets fail closed.
+ca_native_expected_policy_matches_actual_trigger = {
+	# Recheck native state at dispatch; a cached GUI receipt is insufficient.
+	trigger_if = {
+		limit = { is_target_in_variable_list = { name = ca_native_saved_all target = $POSITION$ } }
+		OR = {
+			AND = {
+				is_target_in_variable_list = { name = ca_native_saved_event target = $POSITION$ }
+				has_player_court_position_automation_event = $POSITION$
+			}
+			AND = {
+				is_target_in_variable_list = { name = ca_native_saved_best target = $POSITION$ }
+				has_player_court_position_automation_assign_best = $POSITION$
+			}
+			AND = {
+				is_target_in_variable_list = { name = ca_native_saved_best_event target = $POSITION$ }
+				has_player_court_position_automation_assign_best_or_event = $POSITION$
+			}
+			AND = {
+				NOR = {
+					is_target_in_variable_list = { name = ca_native_saved_event target = $POSITION$ }
+					is_target_in_variable_list = { name = ca_native_saved_best target = $POSITION$ }
+					is_target_in_variable_list = { name = ca_native_saved_best_event target = $POSITION$ }
+				}
+				has_player_court_position_automation_none = $POSITION$
+			}
+		}
+	}
+	trigger_else_if = {
+		limit = {
+			ca_position_is_included_trigger = { POSITION = $POSITION$ }
+			has_variable = ca_bulk_automation_policy
+			NOT = { has_variable = ca_native_preserve_unsaved }
+		}
+		OR = {
+			AND = {
+				var:ca_bulk_automation_policy = 0
+				has_player_court_position_automation_none = $POSITION$
+			}
+			AND = {
+				var:ca_bulk_automation_policy = 1
+				has_player_court_position_automation_event = $POSITION$
+			}
+			AND = {
+				var:ca_bulk_automation_policy = 2
+				has_player_court_position_automation_assign_best = $POSITION$
+			}
+			AND = {
+				var:ca_bulk_automation_policy = 3
+				has_player_court_position_automation_assign_best_or_event = $POSITION$
+			}
+		}
+	}
+	trigger_else = { always = no }
+}

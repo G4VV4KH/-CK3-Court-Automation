@@ -1,6 +1,6 @@
 """Read-only integration checks for Court Automation's source package.
 
-Run with Python 3: check_source.py [--game-root PATH_TO_CK3_GAME] [--mod-root PATH]
+Run with Python 3: check_source.py --game-root PATH_TO_CK3_GAME [--mod-root PATH]
 This complements native probes; it does not claim to validate engine behavior.
 """
 
@@ -187,7 +187,7 @@ def check(game: Path) -> None:
     # generator defaults must not accidentally validate a different active tree.
     for generator in ("build_court_roles.py", "build_court_salaries.py", "build_court_ai.py"):
         completed = subprocess.run(
-            [sys.executable, str(ROOT / "tools" / generator), "--game-root", str(game), "--mod-root", str(MOD), "--check"],
+            [sys.executable, "-B", str(ROOT / "tools" / generator), "--game-root", str(game), "--mod-root", str(MOD), "--check"],
             cwd=ROOT, text=True, encoding="utf-8", capture_output=True, check=False,
         )
         require(completed.returncode == 0, f"Generator drift check failed ({generator}):\n" + completed.stdout + completed.stderr)
@@ -199,7 +199,7 @@ def check(game: Path) -> None:
 def main() -> int:
     global MOD
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--game-root", type=Path, default=Path("D:/SteamLibrary/steamapps/common/Crusader Kings III/game"))
+    parser.add_argument("--game-root", type=Path, required=True, help="CK3 game directory")
     parser.add_argument("--mod-root", type=Path, default=MOD)
     args = parser.parse_args()
     MOD = args.mod_root.resolve()

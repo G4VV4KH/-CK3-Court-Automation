@@ -1,13 +1,16 @@
 ﻿# Saved native policy bridge. Always loaded; no panel visibility dependency.
 # Native getters acknowledge each type; no failed command is retried per frame.
-# Job targets freeze per owner/epoch. After Off restore, manual vanilla changes
-# are tracked back into saved lists, so succession preserves mixed settings.
+# Job targets freeze per owner/epoch. Stable jobs have zero position widgets.
+# Manual native changes are reconciled only in editing views and on closing them.
 # Excluded roles are ignored except for a one-time release of their saved policy.
 window = {
 	name = ca_native_automation_controller
 	size = { 1 1 }
 	alwaystransparent = yes
 	visible = "[GetPlayer.IsValid]"
+	# Process-local load stamp: GVS survives rollback while saved epochs rewind.
+	# Advance only with controller initialization; ordinary jobs use saved epochs.
+	oncreate = "[GetVariableSystem.Set('ca_native_gui_stamp', Concatenate(GetVariableSystem.Get('ca_native_gui_stamp'), 'x'))]"
 	oncreate = "[GetVariableSystem.Clear('ca_native_session')]"
 	oncreate = "[GetVariableSystem.Clear('ca_native_session_ready')]"
 	oncreate = "[GetVariableSystem.Clear('ca_native_begin_busy')]"
@@ -16,18 +19,20 @@ window = {
 	state = {
 		name = _show
 		alpha = 1
+		on_start = "[GetVariableSystem.Set('ca_native_gui_stamp', Concatenate(GetVariableSystem.Get('ca_native_gui_stamp'), 'x'))]"
 		on_start = "[GetVariableSystem.Clear('ca_native_session')]"
 		on_start = "[GetVariableSystem.Clear('ca_native_session_ready')]"
 		on_start = "[GetVariableSystem.Clear('ca_native_begin_busy')]"
 		on_start = "[GetVariableSystem.Clear('ca_native_begin_attempt_session')]"
 		on_start = "[GetVariableSystem.Clear('ca_native_begin_attempt_count')]"
+		on_start = "[GetVariableSystem.Clear('ca_native_edit_active')]"
 	}
 	state = { name = ca_native_noop alpha = 1 }
 	state = {
 		name = ca_native_begin
 		alpha = 1
-		trigger_when = "[And( Not( GetVariableSystem.Exists('ca_native_begin_busy') ), And( And( And( And( GetPlayer.IsValid, GetPlayer.IsAlive ), And( GetPlayer.IsLocalPlayer, GetPlayer.IsPlayer ) ), GetScriptedGui('ca_native_player_available').IsValid( GuiScope.SetRoot( GetPlayer.MakeScope ).End ) ), And( Or( Not( GetVariableSystem.HasValue('ca_native_begin_attempt_session', Concatenate(UIntToString(GetPlayer.GetID), Concatenate('_', Concatenate(IntToString(FixedPointToInt(GetPlayer.MakeScope.GetVariable('ca_native_policy_epoch').GetValue)), Concatenate('_', Select_CString(GetPlayer.MakeScope.GetVariable('ca_auto_court_enabled').IsSet, 'on', 'off')))))) ), Not( GetVariableSystem.HasValue('ca_native_begin_attempt_count', '4') ) ), Or( Not( GetVariableSystem.HasValue('ca_native_session', Concatenate(UIntToString(GetPlayer.GetID), Concatenate('_', Concatenate(IntToString(FixedPointToInt(GetPlayer.MakeScope.GetVariable('ca_native_policy_epoch').GetValue)), Concatenate('_', Select_CString(GetPlayer.MakeScope.GetVariable('ca_auto_court_enabled').IsSet, 'on', 'off')))))) ), And( Not( GetVariableSystem.Exists('ca_native_session_ready') ), GetVariableSystem.HasValue('ca_native_begin_before', IntToString(FixedPointToInt(GetPlayer.MakeScope.GetVariable('ca_native_bridge_generation').GetValue))) ) ) ) ) )]"
-		on_start = "[PdxGuiWidget.TriggerAnimation(Select_CString(And( Not( GetVariableSystem.Exists('ca_native_begin_busy') ), And( And( And( And( GetPlayer.IsValid, GetPlayer.IsAlive ), And( GetPlayer.IsLocalPlayer, GetPlayer.IsPlayer ) ), GetScriptedGui('ca_native_player_available').IsValid( GuiScope.SetRoot( GetPlayer.MakeScope ).End ) ), And( Or( Not( GetVariableSystem.HasValue('ca_native_begin_attempt_session', Concatenate(UIntToString(GetPlayer.GetID), Concatenate('_', Concatenate(IntToString(FixedPointToInt(GetPlayer.MakeScope.GetVariable('ca_native_policy_epoch').GetValue)), Concatenate('_', Select_CString(GetPlayer.MakeScope.GetVariable('ca_auto_court_enabled').IsSet, 'on', 'off')))))) ), Not( GetVariableSystem.HasValue('ca_native_begin_attempt_count', '4') ) ), Or( Not( GetVariableSystem.HasValue('ca_native_session', Concatenate(UIntToString(GetPlayer.GetID), Concatenate('_', Concatenate(IntToString(FixedPointToInt(GetPlayer.MakeScope.GetVariable('ca_native_policy_epoch').GetValue)), Concatenate('_', Select_CString(GetPlayer.MakeScope.GetVariable('ca_auto_court_enabled').IsSet, 'on', 'off')))))) ), And( Not( GetVariableSystem.Exists('ca_native_session_ready') ), GetVariableSystem.HasValue('ca_native_begin_before', IntToString(FixedPointToInt(GetPlayer.MakeScope.GetVariable('ca_native_bridge_generation').GetValue))) ) ) ) ) ), 'ca_native_begin_action', 'ca_native_noop'))]"
+		trigger_when = "[And( And( GetPlayer.IsValid, And( GetPlayer.IsAlive, And( GetPlayer.IsLocalPlayer, GetPlayer.IsPlayer ) ) ), And( Or( GetPlayer.MakeScope.GetVariable('ca_auto_court_enabled').IsSet, GetPlayer.MakeScope.GetVariable('ca_native_restore_pending').IsSet ), And( Not( GetVariableSystem.Exists('ca_native_begin_busy') ), And( Or( Not( GetVariableSystem.HasValue('ca_native_begin_attempt_session', Concatenate(UIntToString(GetPlayer.GetID), Concatenate('_', Concatenate(IntToString(FixedPointToInt(GetPlayer.MakeScope.GetVariable('ca_native_policy_epoch').GetValue)), Concatenate('_', Select_CString(GetPlayer.MakeScope.GetVariable('ca_auto_court_enabled').IsSet, 'on', 'off')))))) ), Not( GetVariableSystem.HasValue('ca_native_begin_attempt_count', '4') ) ), Or( Not( GetVariableSystem.HasValue('ca_native_session', Concatenate(UIntToString(GetPlayer.GetID), Concatenate('_', Concatenate(IntToString(FixedPointToInt(GetPlayer.MakeScope.GetVariable('ca_native_policy_epoch').GetValue)), Concatenate('_', Select_CString(GetPlayer.MakeScope.GetVariable('ca_auto_court_enabled').IsSet, 'on', 'off')))))) ), And( Not( GetVariableSystem.Exists('ca_native_session_ready') ), GetVariableSystem.HasValue('ca_native_begin_before', IntToString(FixedPointToInt(GetPlayer.MakeScope.GetVariable('ca_native_bridge_generation').GetValue))) ) ) ) ) ) )]"
+		on_start = "[PdxGuiWidget.TriggerAnimation(Select_CString(And( And( And( GetPlayer.IsValid, And( GetPlayer.IsAlive, And( GetPlayer.IsLocalPlayer, GetPlayer.IsPlayer ) ) ), And( Or( GetPlayer.MakeScope.GetVariable('ca_auto_court_enabled').IsSet, GetPlayer.MakeScope.GetVariable('ca_native_restore_pending').IsSet ), And( Not( GetVariableSystem.Exists('ca_native_begin_busy') ), And( Or( Not( GetVariableSystem.HasValue('ca_native_begin_attempt_session', Concatenate(UIntToString(GetPlayer.GetID), Concatenate('_', Concatenate(IntToString(FixedPointToInt(GetPlayer.MakeScope.GetVariable('ca_native_policy_epoch').GetValue)), Concatenate('_', Select_CString(GetPlayer.MakeScope.GetVariable('ca_auto_court_enabled').IsSet, 'on', 'off')))))) ), Not( GetVariableSystem.HasValue('ca_native_begin_attempt_count', '4') ) ), Or( Not( GetVariableSystem.HasValue('ca_native_session', Concatenate(UIntToString(GetPlayer.GetID), Concatenate('_', Concatenate(IntToString(FixedPointToInt(GetPlayer.MakeScope.GetVariable('ca_native_policy_epoch').GetValue)), Concatenate('_', Select_CString(GetPlayer.MakeScope.GetVariable('ca_auto_court_enabled').IsSet, 'on', 'off')))))) ), And( Not( GetVariableSystem.Exists('ca_native_session_ready') ), GetVariableSystem.HasValue('ca_native_begin_before', IntToString(FixedPointToInt(GetPlayer.MakeScope.GetVariable('ca_native_bridge_generation').GetValue))) ) ) ) ) ) ), GetScriptedGui('ca_native_player_available').IsValid( GuiScope.SetRoot( GetPlayer.MakeScope ).End ) ), 'ca_native_begin_action', 'ca_native_noop'))]"
 	}
 	state = {
 		name = ca_native_begin_action
@@ -47,20 +52,20 @@ window = {
 	state = {
 		name = ca_native_begin_ack
 		alpha = 1
-		trigger_when = "[And( And( GetPlayer.IsValid, GetScriptedGui('ca_native_player_available').IsValid( GuiScope.SetRoot( GetPlayer.MakeScope ).End ) ), And( GetVariableSystem.HasValue('ca_native_session', Concatenate(UIntToString(GetPlayer.GetID), Concatenate('_', Concatenate(IntToString(FixedPointToInt(GetPlayer.MakeScope.GetVariable('ca_native_policy_epoch').GetValue)), Concatenate('_', Select_CString(GetPlayer.MakeScope.GetVariable('ca_auto_court_enabled').IsSet, 'on', 'off')))))), And( Not( GetVariableSystem.Exists('ca_native_session_ready') ), Not( GetVariableSystem.HasValue('ca_native_begin_before', IntToString(FixedPointToInt(GetPlayer.MakeScope.GetVariable('ca_native_bridge_generation').GetValue))) ) ) ) )]"
-		on_start = "[PdxGuiWidget.TriggerAnimation(Select_CString(And( And( GetPlayer.IsValid, GetScriptedGui('ca_native_player_available').IsValid( GuiScope.SetRoot( GetPlayer.MakeScope ).End ) ), And( GetVariableSystem.HasValue('ca_native_session', Concatenate(UIntToString(GetPlayer.GetID), Concatenate('_', Concatenate(IntToString(FixedPointToInt(GetPlayer.MakeScope.GetVariable('ca_native_policy_epoch').GetValue)), Concatenate('_', Select_CString(GetPlayer.MakeScope.GetVariable('ca_auto_court_enabled').IsSet, 'on', 'off')))))), And( Not( GetVariableSystem.Exists('ca_native_session_ready') ), Not( GetVariableSystem.HasValue('ca_native_begin_before', IntToString(FixedPointToInt(GetPlayer.MakeScope.GetVariable('ca_native_bridge_generation').GetValue))) ) ) ) ), 'ca_native_begin_ack_action', 'ca_native_noop'))]"
+		trigger_when = "[And( And( GetPlayer.IsValid, And( GetPlayer.IsAlive, And( GetPlayer.IsLocalPlayer, GetPlayer.IsPlayer ) ) ), And( GetVariableSystem.HasValue('ca_native_session', Concatenate(UIntToString(GetPlayer.GetID), Concatenate('_', Concatenate(IntToString(FixedPointToInt(GetPlayer.MakeScope.GetVariable('ca_native_policy_epoch').GetValue)), Concatenate('_', Select_CString(GetPlayer.MakeScope.GetVariable('ca_auto_court_enabled').IsSet, 'on', 'off')))))), And( Not( GetVariableSystem.Exists('ca_native_session_ready') ), Not( GetVariableSystem.HasValue('ca_native_begin_before', IntToString(FixedPointToInt(GetPlayer.MakeScope.GetVariable('ca_native_bridge_generation').GetValue))) ) ) ) )]"
+		on_start = "[PdxGuiWidget.TriggerAnimation(Select_CString(And( And( And( GetPlayer.IsValid, And( GetPlayer.IsAlive, And( GetPlayer.IsLocalPlayer, GetPlayer.IsPlayer ) ) ), And( GetVariableSystem.HasValue('ca_native_session', Concatenate(UIntToString(GetPlayer.GetID), Concatenate('_', Concatenate(IntToString(FixedPointToInt(GetPlayer.MakeScope.GetVariable('ca_native_policy_epoch').GetValue)), Concatenate('_', Select_CString(GetPlayer.MakeScope.GetVariable('ca_auto_court_enabled').IsSet, 'on', 'off')))))), And( Not( GetVariableSystem.Exists('ca_native_session_ready') ), Not( GetVariableSystem.HasValue('ca_native_begin_before', IntToString(FixedPointToInt(GetPlayer.MakeScope.GetVariable('ca_native_bridge_generation').GetValue))) ) ) ) ), GetScriptedGui('ca_native_player_available').IsValid( GuiScope.SetRoot( GetPlayer.MakeScope ).End ) ), 'ca_native_begin_ack_action', 'ca_native_noop'))]"
 	}
 	state = {
 		name = ca_native_begin_ack_action
 		alpha = 1
-		on_start = "[GetVariableSystem.Set('ca_native_job_token', Concatenate(GetVariableSystem.Get('ca_native_session'), Concatenate('_', IntToString(FixedPointToInt(GetPlayer.MakeScope.GetVariable('ca_native_bridge_generation').GetValue)))))]"
+		on_start = "[GetVariableSystem.Set('ca_native_job_token', Concatenate(GetVariableSystem.Get('ca_native_session'), Concatenate('_', Concatenate(IntToString(FixedPointToInt(GetPlayer.MakeScope.GetVariable('ca_native_bridge_generation').GetValue)), Concatenate('_', GetVariableSystem.Get('ca_native_gui_stamp'))))))]"
 		on_start = "[GetVariableSystem.Set('ca_native_session_ready', 'yes')]"
 	}
 	state = {
 		name = ca_native_ready
 		alpha = 1
-		trigger_when = "[And( And( GetPlayer.IsValid, And( GetVariableSystem.HasValue('ca_native_session', Concatenate(UIntToString(GetPlayer.GetID), Concatenate('_', Concatenate(IntToString(FixedPointToInt(GetPlayer.MakeScope.GetVariable('ca_native_policy_epoch').GetValue)), Concatenate('_', Select_CString(GetPlayer.MakeScope.GetVariable('ca_auto_court_enabled').IsSet, 'on', 'off')))))), GetVariableSystem.Exists('ca_native_session_ready') ) ), And( GetPlayer.MakeScope.GetVariable('ca_auto_court_enabled').IsSet, And( Not( GetPlayer.MakeScope.GetVariable('ca_native_policy_ready').IsSet ), And( GetScriptedGui('ca_native_policy_ready').IsValid( GuiScope.SetRoot( GetPlayer.MakeScope ).End ), EqualTo_int32(FixedPointToInt(GetPlayer.MakeScope.GetVariable('ca_native_off_count').GetValue), FixedPointToInt(GetPlayer.MakeScope.GetVariable('ca_native_type_count').GetValue)) ) ) ) )]"
-		on_start = "[PdxGuiWidget.TriggerAnimation(Select_CString(And( And( GetPlayer.IsValid, And( GetVariableSystem.HasValue('ca_native_session', Concatenate(UIntToString(GetPlayer.GetID), Concatenate('_', Concatenate(IntToString(FixedPointToInt(GetPlayer.MakeScope.GetVariable('ca_native_policy_epoch').GetValue)), Concatenate('_', Select_CString(GetPlayer.MakeScope.GetVariable('ca_auto_court_enabled').IsSet, 'on', 'off')))))), GetVariableSystem.Exists('ca_native_session_ready') ) ), And( GetPlayer.MakeScope.GetVariable('ca_auto_court_enabled').IsSet, And( Not( GetPlayer.MakeScope.GetVariable('ca_native_policy_ready').IsSet ), And( GetScriptedGui('ca_native_policy_ready').IsValid( GuiScope.SetRoot( GetPlayer.MakeScope ).End ), EqualTo_int32(FixedPointToInt(GetPlayer.MakeScope.GetVariable('ca_native_off_count').GetValue), FixedPointToInt(GetPlayer.MakeScope.GetVariable('ca_native_type_count').GetValue)) ) ) ) ), 'ca_native_ready_action', 'ca_native_noop'))]"
+		trigger_when = "[And( And( And( GetPlayer.IsValid, And( GetPlayer.IsAlive, And( GetPlayer.IsLocalPlayer, GetPlayer.IsPlayer ) ) ), And( GetVariableSystem.HasValue('ca_native_session', Concatenate(UIntToString(GetPlayer.GetID), Concatenate('_', Concatenate(IntToString(FixedPointToInt(GetPlayer.MakeScope.GetVariable('ca_native_policy_epoch').GetValue)), Concatenate('_', Select_CString(GetPlayer.MakeScope.GetVariable('ca_auto_court_enabled').IsSet, 'on', 'off')))))), GetVariableSystem.Exists('ca_native_session_ready') ) ), And( GetPlayer.MakeScope.GetVariable('ca_auto_court_enabled').IsSet, And( Not( GetPlayer.MakeScope.GetVariable('ca_native_policy_ready').IsSet ), And( EqualTo_int32(FixedPointToInt(GetPlayer.MakeScope.GetVariable('ca_native_off_count').GetValue), FixedPointToInt(GetPlayer.MakeScope.GetVariable('ca_native_type_count').GetValue)), EqualTo_int32(FixedPointToInt(GetPlayer.MakeScope.GetVariable('ca_native_applied_count').GetValue), FixedPointToInt(GetPlayer.MakeScope.GetVariable('ca_native_apply_type_count').GetValue)) ) ) ) )]"
+		on_start = "[PdxGuiWidget.TriggerAnimation(Select_CString(And( And( And( And( GetPlayer.IsValid, And( GetPlayer.IsAlive, And( GetPlayer.IsLocalPlayer, GetPlayer.IsPlayer ) ) ), And( GetVariableSystem.HasValue('ca_native_session', Concatenate(UIntToString(GetPlayer.GetID), Concatenate('_', Concatenate(IntToString(FixedPointToInt(GetPlayer.MakeScope.GetVariable('ca_native_policy_epoch').GetValue)), Concatenate('_', Select_CString(GetPlayer.MakeScope.GetVariable('ca_auto_court_enabled').IsSet, 'on', 'off')))))), GetVariableSystem.Exists('ca_native_session_ready') ) ), And( GetPlayer.MakeScope.GetVariable('ca_auto_court_enabled').IsSet, And( Not( GetPlayer.MakeScope.GetVariable('ca_native_policy_ready').IsSet ), And( EqualTo_int32(FixedPointToInt(GetPlayer.MakeScope.GetVariable('ca_native_off_count').GetValue), FixedPointToInt(GetPlayer.MakeScope.GetVariable('ca_native_type_count').GetValue)), EqualTo_int32(FixedPointToInt(GetPlayer.MakeScope.GetVariable('ca_native_applied_count').GetValue), FixedPointToInt(GetPlayer.MakeScope.GetVariable('ca_native_apply_type_count').GetValue)) ) ) ) ), GetScriptedGui('ca_native_policy_ready').IsValid( GuiScope.SetRoot( GetPlayer.MakeScope ).End ) ), 'ca_native_ready_action', 'ca_native_noop'))]"
 	}
 	state = {
 		name = ca_native_ready_action
@@ -70,8 +75,8 @@ window = {
 	state = {
 		name = ca_native_restore_ready
 		alpha = 1
-		trigger_when = "[And( And( GetPlayer.IsValid, And( GetVariableSystem.HasValue('ca_native_session', Concatenate(UIntToString(GetPlayer.GetID), Concatenate('_', Concatenate(IntToString(FixedPointToInt(GetPlayer.MakeScope.GetVariable('ca_native_policy_epoch').GetValue)), Concatenate('_', Select_CString(GetPlayer.MakeScope.GetVariable('ca_auto_court_enabled').IsSet, 'on', 'off')))))), GetVariableSystem.Exists('ca_native_session_ready') ) ), And( Not( GetPlayer.MakeScope.GetVariable('ca_auto_court_enabled').IsSet ), And( GetPlayer.MakeScope.GetVariable('ca_native_restore_pending').IsSet, And( GetScriptedGui('ca_native_policy_restored').IsValid( GuiScope.SetRoot( GetPlayer.MakeScope ).End ), EqualTo_int32(FixedPointToInt(GetPlayer.MakeScope.GetVariable('ca_native_applied_count').GetValue), FixedPointToInt(GetPlayer.MakeScope.GetVariable('ca_native_apply_type_count').GetValue)) ) ) ) )]"
-		on_start = "[PdxGuiWidget.TriggerAnimation(Select_CString(And( And( GetPlayer.IsValid, And( GetVariableSystem.HasValue('ca_native_session', Concatenate(UIntToString(GetPlayer.GetID), Concatenate('_', Concatenate(IntToString(FixedPointToInt(GetPlayer.MakeScope.GetVariable('ca_native_policy_epoch').GetValue)), Concatenate('_', Select_CString(GetPlayer.MakeScope.GetVariable('ca_auto_court_enabled').IsSet, 'on', 'off')))))), GetVariableSystem.Exists('ca_native_session_ready') ) ), And( Not( GetPlayer.MakeScope.GetVariable('ca_auto_court_enabled').IsSet ), And( GetPlayer.MakeScope.GetVariable('ca_native_restore_pending').IsSet, And( GetScriptedGui('ca_native_policy_restored').IsValid( GuiScope.SetRoot( GetPlayer.MakeScope ).End ), EqualTo_int32(FixedPointToInt(GetPlayer.MakeScope.GetVariable('ca_native_applied_count').GetValue), FixedPointToInt(GetPlayer.MakeScope.GetVariable('ca_native_apply_type_count').GetValue)) ) ) ) ), 'ca_native_restore_ready_action', 'ca_native_noop'))]"
+		trigger_when = "[And( And( And( GetPlayer.IsValid, And( GetPlayer.IsAlive, And( GetPlayer.IsLocalPlayer, GetPlayer.IsPlayer ) ) ), And( GetVariableSystem.HasValue('ca_native_session', Concatenate(UIntToString(GetPlayer.GetID), Concatenate('_', Concatenate(IntToString(FixedPointToInt(GetPlayer.MakeScope.GetVariable('ca_native_policy_epoch').GetValue)), Concatenate('_', Select_CString(GetPlayer.MakeScope.GetVariable('ca_auto_court_enabled').IsSet, 'on', 'off')))))), GetVariableSystem.Exists('ca_native_session_ready') ) ), And( Not( GetPlayer.MakeScope.GetVariable('ca_auto_court_enabled').IsSet ), And( GetPlayer.MakeScope.GetVariable('ca_native_restore_pending').IsSet, EqualTo_int32(FixedPointToInt(GetPlayer.MakeScope.GetVariable('ca_native_applied_count').GetValue), FixedPointToInt(GetPlayer.MakeScope.GetVariable('ca_native_apply_type_count').GetValue)) ) ) )]"
+		on_start = "[PdxGuiWidget.TriggerAnimation(Select_CString(And( And( And( And( GetPlayer.IsValid, And( GetPlayer.IsAlive, And( GetPlayer.IsLocalPlayer, GetPlayer.IsPlayer ) ) ), And( GetVariableSystem.HasValue('ca_native_session', Concatenate(UIntToString(GetPlayer.GetID), Concatenate('_', Concatenate(IntToString(FixedPointToInt(GetPlayer.MakeScope.GetVariable('ca_native_policy_epoch').GetValue)), Concatenate('_', Select_CString(GetPlayer.MakeScope.GetVariable('ca_auto_court_enabled').IsSet, 'on', 'off')))))), GetVariableSystem.Exists('ca_native_session_ready') ) ), And( Not( GetPlayer.MakeScope.GetVariable('ca_auto_court_enabled').IsSet ), And( GetPlayer.MakeScope.GetVariable('ca_native_restore_pending').IsSet, EqualTo_int32(FixedPointToInt(GetPlayer.MakeScope.GetVariable('ca_native_applied_count').GetValue), FixedPointToInt(GetPlayer.MakeScope.GetVariable('ca_native_apply_type_count').GetValue)) ) ) ), GetScriptedGui('ca_native_policy_restored').IsValid( GuiScope.SetRoot( GetPlayer.MakeScope ).End ) ), 'ca_native_restore_ready_action', 'ca_native_noop'))]"
 	}
 	state = {
 		name = ca_native_restore_ready_action
@@ -103,8 +108,8 @@ window = {
 		state = {
 			name = ca_native_resume_initial_knights
 			alpha = 1
-			trigger_when = "[And( And( And( GetPlayer.IsValid, GetPlayer.IsAlive ), And( GetPlayer.IsLocalPlayer, GetPlayer.IsPlayer ) ), GetScriptedGui('ca_resume_initial_knights').IsValid( GuiScope.SetRoot( GetPlayer.MakeScope ).End ) )]"
-			on_start = "[PdxGuiWidget.TriggerAnimation(Select_CString(And( And( And( GetPlayer.IsValid, GetPlayer.IsAlive ), And( GetPlayer.IsLocalPlayer, GetPlayer.IsPlayer ) ), GetScriptedGui('ca_resume_initial_knights').IsValid( GuiScope.SetRoot( GetPlayer.MakeScope ).End ) ), 'ca_native_initial_knights_capture', 'ca_native_knights_noop'))]"
+			trigger_when = "[And( And( GetPlayer.IsValid, And( GetPlayer.IsAlive, And( GetPlayer.IsLocalPlayer, GetPlayer.IsPlayer ) ) ), And( GetPlayer.MakeScope.GetVariable('ca_auto_knights_enabled').IsSet, And( GetPlayer.MakeScope.GetVariable('ca_auto_knights_initial_pending').IsSet, GetPlayer.MakeScope.GetVariable('ca_knight_filters_ready').IsSet ) ) )]"
+			on_start = "[PdxGuiWidget.TriggerAnimation(Select_CString(And( And( And( GetPlayer.IsValid, And( GetPlayer.IsAlive, And( GetPlayer.IsLocalPlayer, GetPlayer.IsPlayer ) ) ), And( GetPlayer.MakeScope.GetVariable('ca_auto_knights_enabled').IsSet, And( GetPlayer.MakeScope.GetVariable('ca_auto_knights_initial_pending').IsSet, GetPlayer.MakeScope.GetVariable('ca_knight_filters_ready').IsSet ) ) ), GetScriptedGui('ca_resume_initial_knights').IsValid( GuiScope.SetRoot( GetPlayer.MakeScope ).End ) ), 'ca_native_initial_knights_capture', 'ca_native_knights_noop'))]"
 		}
 		state = {
 			name = ca_native_initial_knights_capture
@@ -128,8 +133,10 @@ window = {
 		name = ca_native_all_workers
 		size = { 1 1 }
 		alwaystransparent = yes
-		datamodel = "[GetAllCourtPositionTypes]"
-		datamodel_reuse_widgets = yes
+		# No per-position widgets or eager script guards remain after real ACK.
+		# Dispose rows instead of caching hidden reusable workers.
+		datamodel_reuse_widgets = no
+		datamodel = "[DataModelFirst(GetAllCourtPositionTypes, Select_int32(And( And( And( GetPlayer.IsValid, GetPlayer.IsAlive ), And( GetPlayer.IsLocalPlayer, GetPlayer.IsPlayer ) ), And( GetVariableSystem.HasValue('ca_native_session', Concatenate(UIntToString(GetPlayer.GetID), Concatenate('_', Concatenate(IntToString(FixedPointToInt(GetPlayer.MakeScope.GetVariable('ca_native_policy_epoch').GetValue)), Concatenate('_', Select_CString(GetPlayer.MakeScope.GetVariable('ca_auto_court_enabled').IsSet, 'on', 'off')))))), And( GetVariableSystem.Exists('ca_native_session_ready'), Or( And( GetPlayer.MakeScope.GetVariable('ca_auto_court_enabled').IsSet, Not(GetPlayer.MakeScope.GetVariable('ca_native_policy_ready').IsSet) ), And( Not(GetPlayer.MakeScope.GetVariable('ca_auto_court_enabled').IsSet), GetPlayer.MakeScope.GetVariable('ca_native_restore_pending').IsSet ) ) ) ) ), GetDataModelSize(GetAllCourtPositionTypes), '(int32)0'))]"
 		item = {
 			widget = {
 				name = ca_native_position_worker
@@ -155,17 +162,6 @@ window = {
 					on_start = "[GetVariableSystem.Set(Concatenate('ca_native_target_epoch_', CourtPositionType.GetKey), GetVariableSystem.Get('ca_native_job_token'))]"
 				}
 				state = {
-					name = ca_native_sync_none
-					alpha = 1
-					trigger_when = "[And( And( GetPlayer.IsValid, And( GetVariableSystem.HasValue('ca_native_session', Concatenate(UIntToString(GetPlayer.GetID), Concatenate('_', Concatenate(IntToString(FixedPointToInt(GetPlayer.MakeScope.GetVariable('ca_native_policy_epoch').GetValue)), Concatenate('_', Select_CString(GetPlayer.MakeScope.GetVariable('ca_auto_court_enabled').IsSet, 'on', 'off')))))), GetVariableSystem.Exists('ca_native_session_ready') ) ), And( And( Not( GetPlayer.MakeScope.GetVariable('ca_auto_court_enabled').IsSet ), GetScriptedGui('ca_native_type_is_managed').IsValid( GuiScope.SetRoot( GetPlayer.MakeScope ).AddScope('ca_native_type', CourtPositionType.MakeScope).End ) ), And( GetVariableSystem.HasValue(Concatenate('ca_native_done_', CourtPositionType.GetKey), GetVariableSystem.Get('ca_native_job_token')), And( CourtPositionType.HasAutomationNone(GetPlayer), Not( GetScriptedGui('ca_native_saved_none').IsValid( GuiScope.SetRoot( GetPlayer.MakeScope ).AddScope('ca_native_type', CourtPositionType.MakeScope).End ) ) ) ) ) )]"
-					on_start = "[PdxGuiWidget.TriggerAnimation(Select_CString(And( And( GetPlayer.IsValid, And( GetVariableSystem.HasValue('ca_native_session', Concatenate(UIntToString(GetPlayer.GetID), Concatenate('_', Concatenate(IntToString(FixedPointToInt(GetPlayer.MakeScope.GetVariable('ca_native_policy_epoch').GetValue)), Concatenate('_', Select_CString(GetPlayer.MakeScope.GetVariable('ca_auto_court_enabled').IsSet, 'on', 'off')))))), GetVariableSystem.Exists('ca_native_session_ready') ) ), And( And( Not( GetPlayer.MakeScope.GetVariable('ca_auto_court_enabled').IsSet ), GetScriptedGui('ca_native_type_is_managed').IsValid( GuiScope.SetRoot( GetPlayer.MakeScope ).AddScope('ca_native_type', CourtPositionType.MakeScope).End ) ), And( GetVariableSystem.HasValue(Concatenate('ca_native_done_', CourtPositionType.GetKey), GetVariableSystem.Get('ca_native_job_token')), And( CourtPositionType.HasAutomationNone(GetPlayer), Not( GetScriptedGui('ca_native_saved_none').IsValid( GuiScope.SetRoot( GetPlayer.MakeScope ).AddScope('ca_native_type', CourtPositionType.MakeScope).End ) ) ) ) ) ), 'ca_native_sync_none_action', 'ca_native_noop'))]"
-				}
-				state = {
-					name = ca_native_sync_none_action
-					alpha = 1
-					on_start = "[GetScriptedGui('ca_native_record_none').Execute( GuiScope.SetRoot( GetPlayer.MakeScope ).AddScope('ca_native_type', CourtPositionType.MakeScope).End )]"
-				}
-				state = {
 					name = ca_native_capture_event
 					alpha = 1
 					trigger_when = "[And( And( GetPlayer.IsValid, And( GetVariableSystem.HasValue('ca_native_session', Concatenate(UIntToString(GetPlayer.GetID), Concatenate('_', Concatenate(IntToString(FixedPointToInt(GetPlayer.MakeScope.GetVariable('ca_native_policy_epoch').GetValue)), Concatenate('_', Select_CString(GetPlayer.MakeScope.GetVariable('ca_auto_court_enabled').IsSet, 'on', 'off')))))), GetVariableSystem.Exists('ca_native_session_ready') ) ), And( And( GetPlayer.MakeScope.GetVariable('ca_auto_court_enabled').IsSet, GetScriptedGui('ca_native_type_is_managed').IsValid( GuiScope.SetRoot( GetPlayer.MakeScope ).AddScope('ca_native_type', CourtPositionType.MakeScope).End ) ), And( Not( GetScriptedGui('ca_native_has_saved').IsValid( GuiScope.SetRoot( GetPlayer.MakeScope ).AddScope('ca_native_type', CourtPositionType.MakeScope).End ) ), CourtPositionType.HasAutomationShowEvent(GetPlayer) ) ) )]"
@@ -182,17 +178,6 @@ window = {
 					trigger_when = "[And( And( GetPlayer.IsValid, And( GetVariableSystem.HasValue('ca_native_session', Concatenate(UIntToString(GetPlayer.GetID), Concatenate('_', Concatenate(IntToString(FixedPointToInt(GetPlayer.MakeScope.GetVariable('ca_native_policy_epoch').GetValue)), Concatenate('_', Select_CString(GetPlayer.MakeScope.GetVariable('ca_auto_court_enabled').IsSet, 'on', 'off')))))), GetVariableSystem.Exists('ca_native_session_ready') ) ), And( Or( And( Not( GetPlayer.MakeScope.GetVariable('ca_auto_court_enabled').IsSet ), GetScriptedGui('ca_native_type_is_managed').IsValid( GuiScope.SetRoot( GetPlayer.MakeScope ).AddScope('ca_native_type', CourtPositionType.MakeScope).End ) ), GetScriptedGui('ca_native_type_is_releasing').IsValid( GuiScope.SetRoot( GetPlayer.MakeScope ).AddScope('ca_native_type', CourtPositionType.MakeScope).End ) ), And( Not( GetVariableSystem.HasValue(Concatenate('ca_native_target_epoch_', CourtPositionType.GetKey), GetVariableSystem.Get('ca_native_job_token')) ), Or( GetScriptedGui('ca_native_saved_event').IsValid( GuiScope.SetRoot( GetPlayer.MakeScope ).AddScope('ca_native_type', CourtPositionType.MakeScope).End ), And( Not( GetScriptedGui('ca_native_has_saved').IsValid( GuiScope.SetRoot( GetPlayer.MakeScope ).AddScope('ca_native_type', CourtPositionType.MakeScope).End ) ), And( And( GetScriptedGui('ca_native_type_is_managed').IsValid( GuiScope.SetRoot( GetPlayer.MakeScope ).AddScope('ca_native_type', CourtPositionType.MakeScope).End ), And( GetPlayer.MakeScope.GetVariable('ca_bulk_automation_policy').IsSet, Not( GetPlayer.MakeScope.GetVariable('ca_native_preserve_unsaved').IsSet ) ) ), EqualTo_CFixedPoint(GetPlayer.MakeScope.GetVariable('ca_bulk_automation_policy').GetValue, '(CFixedPoint)1') ) ) ) ) ) )]"
 					on_start = "[GetVariableSystem.Set(Concatenate('ca_native_target_', CourtPositionType.GetKey), '1')]"
 					on_start = "[GetVariableSystem.Set(Concatenate('ca_native_target_epoch_', CourtPositionType.GetKey), GetVariableSystem.Get('ca_native_job_token'))]"
-				}
-				state = {
-					name = ca_native_sync_event
-					alpha = 1
-					trigger_when = "[And( And( GetPlayer.IsValid, And( GetVariableSystem.HasValue('ca_native_session', Concatenate(UIntToString(GetPlayer.GetID), Concatenate('_', Concatenate(IntToString(FixedPointToInt(GetPlayer.MakeScope.GetVariable('ca_native_policy_epoch').GetValue)), Concatenate('_', Select_CString(GetPlayer.MakeScope.GetVariable('ca_auto_court_enabled').IsSet, 'on', 'off')))))), GetVariableSystem.Exists('ca_native_session_ready') ) ), And( And( Not( GetPlayer.MakeScope.GetVariable('ca_auto_court_enabled').IsSet ), GetScriptedGui('ca_native_type_is_managed').IsValid( GuiScope.SetRoot( GetPlayer.MakeScope ).AddScope('ca_native_type', CourtPositionType.MakeScope).End ) ), And( GetVariableSystem.HasValue(Concatenate('ca_native_done_', CourtPositionType.GetKey), GetVariableSystem.Get('ca_native_job_token')), And( CourtPositionType.HasAutomationShowEvent(GetPlayer), Not( GetScriptedGui('ca_native_saved_event').IsValid( GuiScope.SetRoot( GetPlayer.MakeScope ).AddScope('ca_native_type', CourtPositionType.MakeScope).End ) ) ) ) ) )]"
-					on_start = "[PdxGuiWidget.TriggerAnimation(Select_CString(And( And( GetPlayer.IsValid, And( GetVariableSystem.HasValue('ca_native_session', Concatenate(UIntToString(GetPlayer.GetID), Concatenate('_', Concatenate(IntToString(FixedPointToInt(GetPlayer.MakeScope.GetVariable('ca_native_policy_epoch').GetValue)), Concatenate('_', Select_CString(GetPlayer.MakeScope.GetVariable('ca_auto_court_enabled').IsSet, 'on', 'off')))))), GetVariableSystem.Exists('ca_native_session_ready') ) ), And( And( Not( GetPlayer.MakeScope.GetVariable('ca_auto_court_enabled').IsSet ), GetScriptedGui('ca_native_type_is_managed').IsValid( GuiScope.SetRoot( GetPlayer.MakeScope ).AddScope('ca_native_type', CourtPositionType.MakeScope).End ) ), And( GetVariableSystem.HasValue(Concatenate('ca_native_done_', CourtPositionType.GetKey), GetVariableSystem.Get('ca_native_job_token')), And( CourtPositionType.HasAutomationShowEvent(GetPlayer), Not( GetScriptedGui('ca_native_saved_event').IsValid( GuiScope.SetRoot( GetPlayer.MakeScope ).AddScope('ca_native_type', CourtPositionType.MakeScope).End ) ) ) ) ) ), 'ca_native_sync_event_action', 'ca_native_noop'))]"
-				}
-				state = {
-					name = ca_native_sync_event_action
-					alpha = 1
-					on_start = "[GetScriptedGui('ca_native_record_event').Execute( GuiScope.SetRoot( GetPlayer.MakeScope ).AddScope('ca_native_type', CourtPositionType.MakeScope).End )]"
 				}
 				state = {
 					name = ca_native_capture_best
@@ -213,17 +198,6 @@ window = {
 					on_start = "[GetVariableSystem.Set(Concatenate('ca_native_target_epoch_', CourtPositionType.GetKey), GetVariableSystem.Get('ca_native_job_token'))]"
 				}
 				state = {
-					name = ca_native_sync_best
-					alpha = 1
-					trigger_when = "[And( And( GetPlayer.IsValid, And( GetVariableSystem.HasValue('ca_native_session', Concatenate(UIntToString(GetPlayer.GetID), Concatenate('_', Concatenate(IntToString(FixedPointToInt(GetPlayer.MakeScope.GetVariable('ca_native_policy_epoch').GetValue)), Concatenate('_', Select_CString(GetPlayer.MakeScope.GetVariable('ca_auto_court_enabled').IsSet, 'on', 'off')))))), GetVariableSystem.Exists('ca_native_session_ready') ) ), And( And( Not( GetPlayer.MakeScope.GetVariable('ca_auto_court_enabled').IsSet ), GetScriptedGui('ca_native_type_is_managed').IsValid( GuiScope.SetRoot( GetPlayer.MakeScope ).AddScope('ca_native_type', CourtPositionType.MakeScope).End ) ), And( GetVariableSystem.HasValue(Concatenate('ca_native_done_', CourtPositionType.GetKey), GetVariableSystem.Get('ca_native_job_token')), And( CourtPositionType.HasAutomationAssignBest(GetPlayer), Not( GetScriptedGui('ca_native_saved_best').IsValid( GuiScope.SetRoot( GetPlayer.MakeScope ).AddScope('ca_native_type', CourtPositionType.MakeScope).End ) ) ) ) ) )]"
-					on_start = "[PdxGuiWidget.TriggerAnimation(Select_CString(And( And( GetPlayer.IsValid, And( GetVariableSystem.HasValue('ca_native_session', Concatenate(UIntToString(GetPlayer.GetID), Concatenate('_', Concatenate(IntToString(FixedPointToInt(GetPlayer.MakeScope.GetVariable('ca_native_policy_epoch').GetValue)), Concatenate('_', Select_CString(GetPlayer.MakeScope.GetVariable('ca_auto_court_enabled').IsSet, 'on', 'off')))))), GetVariableSystem.Exists('ca_native_session_ready') ) ), And( And( Not( GetPlayer.MakeScope.GetVariable('ca_auto_court_enabled').IsSet ), GetScriptedGui('ca_native_type_is_managed').IsValid( GuiScope.SetRoot( GetPlayer.MakeScope ).AddScope('ca_native_type', CourtPositionType.MakeScope).End ) ), And( GetVariableSystem.HasValue(Concatenate('ca_native_done_', CourtPositionType.GetKey), GetVariableSystem.Get('ca_native_job_token')), And( CourtPositionType.HasAutomationAssignBest(GetPlayer), Not( GetScriptedGui('ca_native_saved_best').IsValid( GuiScope.SetRoot( GetPlayer.MakeScope ).AddScope('ca_native_type', CourtPositionType.MakeScope).End ) ) ) ) ) ), 'ca_native_sync_best_action', 'ca_native_noop'))]"
-				}
-				state = {
-					name = ca_native_sync_best_action
-					alpha = 1
-					on_start = "[GetScriptedGui('ca_native_record_best').Execute( GuiScope.SetRoot( GetPlayer.MakeScope ).AddScope('ca_native_type', CourtPositionType.MakeScope).End )]"
-				}
-				state = {
 					name = ca_native_capture_best_event
 					alpha = 1
 					trigger_when = "[And( And( GetPlayer.IsValid, And( GetVariableSystem.HasValue('ca_native_session', Concatenate(UIntToString(GetPlayer.GetID), Concatenate('_', Concatenate(IntToString(FixedPointToInt(GetPlayer.MakeScope.GetVariable('ca_native_policy_epoch').GetValue)), Concatenate('_', Select_CString(GetPlayer.MakeScope.GetVariable('ca_auto_court_enabled').IsSet, 'on', 'off')))))), GetVariableSystem.Exists('ca_native_session_ready') ) ), And( And( GetPlayer.MakeScope.GetVariable('ca_auto_court_enabled').IsSet, GetScriptedGui('ca_native_type_is_managed').IsValid( GuiScope.SetRoot( GetPlayer.MakeScope ).AddScope('ca_native_type', CourtPositionType.MakeScope).End ) ), And( Not( GetScriptedGui('ca_native_has_saved').IsValid( GuiScope.SetRoot( GetPlayer.MakeScope ).AddScope('ca_native_type', CourtPositionType.MakeScope).End ) ), CourtPositionType.HasAutomationAssignBestOrEvent(GetPlayer) ) ) )]"
@@ -240,17 +214,6 @@ window = {
 					trigger_when = "[And( And( GetPlayer.IsValid, And( GetVariableSystem.HasValue('ca_native_session', Concatenate(UIntToString(GetPlayer.GetID), Concatenate('_', Concatenate(IntToString(FixedPointToInt(GetPlayer.MakeScope.GetVariable('ca_native_policy_epoch').GetValue)), Concatenate('_', Select_CString(GetPlayer.MakeScope.GetVariable('ca_auto_court_enabled').IsSet, 'on', 'off')))))), GetVariableSystem.Exists('ca_native_session_ready') ) ), And( Or( And( Not( GetPlayer.MakeScope.GetVariable('ca_auto_court_enabled').IsSet ), GetScriptedGui('ca_native_type_is_managed').IsValid( GuiScope.SetRoot( GetPlayer.MakeScope ).AddScope('ca_native_type', CourtPositionType.MakeScope).End ) ), GetScriptedGui('ca_native_type_is_releasing').IsValid( GuiScope.SetRoot( GetPlayer.MakeScope ).AddScope('ca_native_type', CourtPositionType.MakeScope).End ) ), And( Not( GetVariableSystem.HasValue(Concatenate('ca_native_target_epoch_', CourtPositionType.GetKey), GetVariableSystem.Get('ca_native_job_token')) ), Or( GetScriptedGui('ca_native_saved_best_event').IsValid( GuiScope.SetRoot( GetPlayer.MakeScope ).AddScope('ca_native_type', CourtPositionType.MakeScope).End ), And( Not( GetScriptedGui('ca_native_has_saved').IsValid( GuiScope.SetRoot( GetPlayer.MakeScope ).AddScope('ca_native_type', CourtPositionType.MakeScope).End ) ), And( And( GetScriptedGui('ca_native_type_is_managed').IsValid( GuiScope.SetRoot( GetPlayer.MakeScope ).AddScope('ca_native_type', CourtPositionType.MakeScope).End ), And( GetPlayer.MakeScope.GetVariable('ca_bulk_automation_policy').IsSet, Not( GetPlayer.MakeScope.GetVariable('ca_native_preserve_unsaved').IsSet ) ) ), EqualTo_CFixedPoint(GetPlayer.MakeScope.GetVariable('ca_bulk_automation_policy').GetValue, '(CFixedPoint)3') ) ) ) ) ) )]"
 					on_start = "[GetVariableSystem.Set(Concatenate('ca_native_target_', CourtPositionType.GetKey), '3')]"
 					on_start = "[GetVariableSystem.Set(Concatenate('ca_native_target_epoch_', CourtPositionType.GetKey), GetVariableSystem.Get('ca_native_job_token'))]"
-				}
-				state = {
-					name = ca_native_sync_best_event
-					alpha = 1
-					trigger_when = "[And( And( GetPlayer.IsValid, And( GetVariableSystem.HasValue('ca_native_session', Concatenate(UIntToString(GetPlayer.GetID), Concatenate('_', Concatenate(IntToString(FixedPointToInt(GetPlayer.MakeScope.GetVariable('ca_native_policy_epoch').GetValue)), Concatenate('_', Select_CString(GetPlayer.MakeScope.GetVariable('ca_auto_court_enabled').IsSet, 'on', 'off')))))), GetVariableSystem.Exists('ca_native_session_ready') ) ), And( And( Not( GetPlayer.MakeScope.GetVariable('ca_auto_court_enabled').IsSet ), GetScriptedGui('ca_native_type_is_managed').IsValid( GuiScope.SetRoot( GetPlayer.MakeScope ).AddScope('ca_native_type', CourtPositionType.MakeScope).End ) ), And( GetVariableSystem.HasValue(Concatenate('ca_native_done_', CourtPositionType.GetKey), GetVariableSystem.Get('ca_native_job_token')), And( CourtPositionType.HasAutomationAssignBestOrEvent(GetPlayer), Not( GetScriptedGui('ca_native_saved_best_event').IsValid( GuiScope.SetRoot( GetPlayer.MakeScope ).AddScope('ca_native_type', CourtPositionType.MakeScope).End ) ) ) ) ) )]"
-					on_start = "[PdxGuiWidget.TriggerAnimation(Select_CString(And( And( GetPlayer.IsValid, And( GetVariableSystem.HasValue('ca_native_session', Concatenate(UIntToString(GetPlayer.GetID), Concatenate('_', Concatenate(IntToString(FixedPointToInt(GetPlayer.MakeScope.GetVariable('ca_native_policy_epoch').GetValue)), Concatenate('_', Select_CString(GetPlayer.MakeScope.GetVariable('ca_auto_court_enabled').IsSet, 'on', 'off')))))), GetVariableSystem.Exists('ca_native_session_ready') ) ), And( And( Not( GetPlayer.MakeScope.GetVariable('ca_auto_court_enabled').IsSet ), GetScriptedGui('ca_native_type_is_managed').IsValid( GuiScope.SetRoot( GetPlayer.MakeScope ).AddScope('ca_native_type', CourtPositionType.MakeScope).End ) ), And( GetVariableSystem.HasValue(Concatenate('ca_native_done_', CourtPositionType.GetKey), GetVariableSystem.Get('ca_native_job_token')), And( CourtPositionType.HasAutomationAssignBestOrEvent(GetPlayer), Not( GetScriptedGui('ca_native_saved_best_event').IsValid( GuiScope.SetRoot( GetPlayer.MakeScope ).AddScope('ca_native_type', CourtPositionType.MakeScope).End ) ) ) ) ) ), 'ca_native_sync_best_event_action', 'ca_native_noop'))]"
-				}
-				state = {
-					name = ca_native_sync_best_event_action
-					alpha = 1
-					on_start = "[GetScriptedGui('ca_native_record_best_event').Execute( GuiScope.SetRoot( GetPlayer.MakeScope ).AddScope('ca_native_type', CourtPositionType.MakeScope).End )]"
 				}
 				state = {
 					name = ca_native_off_ack
@@ -430,5 +393,63 @@ window = {
 			}
 		}
 	}
+	# No global idle scan: reconcile only while native editing views are open.
+	# A final live-owner snapshot on closing or opening the pause/save menu
+	# preserves paused manual changes without reading a dead predecessor.
+	widget = {
+		name = ca_native_edit_observer
+		datacontext = "[AccessCourtWindow]"
+		size = { 1 1 }
+		alwaystransparent = yes
+		oncreate = "[GetVariableSystem.Clear('ca_native_edit_active')]"
+		state = {
+			name = ca_native_edit_noop
+			alpha = 1
+		}
+		state = {
+			name = ca_native_edit_open
+			alpha = 1
+			trigger_when = "[And( And( GetPlayer.IsValid, And( GetPlayer.IsAlive, And( GetPlayer.IsLocalPlayer, GetPlayer.IsPlayer ) ) ), And( Or( And(IsGameViewDataShown('court_window', GetPlayer.GetID), CourtWindow.IsShowPositions), IsGameViewOpen('appoint_court_position_view') ), And( Not( IsPauseMenuShown ), Not( GetVariableSystem.Exists('ca_native_edit_active') ) ) ) )]"
+			on_finish = "[PdxGuiWidget.TriggerAnimation(Select_CString(And( And( GetPlayer.IsValid, And( GetPlayer.IsAlive, And( GetPlayer.IsLocalPlayer, GetPlayer.IsPlayer ) ) ), And( Or( And(IsGameViewDataShown('court_window', GetPlayer.GetID), CourtWindow.IsShowPositions), IsGameViewOpen('appoint_court_position_view') ), And( Not( IsPauseMenuShown ), Not( GetVariableSystem.Exists('ca_native_edit_active') ) ) ) ), 'ca_native_edit_open_action', 'ca_native_edit_noop'))]"
+		}
+		state = {
+			name = ca_native_edit_open_action
+			alpha = 1
+			on_finish = "[GetVariableSystem.Set('ca_native_edit_owner', UIntToString(GetPlayer.GetID))]"
+			on_finish = "[GetVariableSystem.Set('ca_native_edit_active', 'yes')]"
+			on_finish = "[GetScriptedGui('ca_native_edit_reconcile').Execute( GuiScope.SetRoot(GetPlayer.MakeScope).AddScope('ca_native_edit_owner_matches', MakeScopeBool(And( And( GetPlayer.IsValid, And( GetPlayer.IsAlive, And( GetPlayer.IsLocalPlayer, GetPlayer.IsPlayer ) ) ), GetVariableSystem.HasValue('ca_native_edit_owner', UIntToString(GetPlayer.GetID)) ))).End )]"
+			on_finish = "[PdxGuiWidget.TriggerAnimation('ca_native_edit_wait')]"
+		}
+		state = {
+			name = ca_native_edit_wait
+			alpha = 1
+			duration = 1.0
+			on_finish = "[PdxGuiWidget.TriggerAnimation(Select_CString(And( And( And( GetPlayer.IsValid, And( GetPlayer.IsAlive, And( GetPlayer.IsLocalPlayer, GetPlayer.IsPlayer ) ) ), GetVariableSystem.HasValue('ca_native_edit_owner', UIntToString(GetPlayer.GetID)) ), And( Or( And(IsGameViewDataShown('court_window', GetPlayer.GetID), CourtWindow.IsShowPositions), IsGameViewOpen('appoint_court_position_view') ), Not( IsPauseMenuShown ) ) ), 'ca_native_edit_tick', 'ca_native_edit_finish'))]"
+		}
+		state = {
+			name = ca_native_edit_tick
+			alpha = 1
+			on_finish = "[GetScriptedGui('ca_native_edit_reconcile').Execute( GuiScope.SetRoot(GetPlayer.MakeScope).AddScope('ca_native_edit_owner_matches', MakeScopeBool(And( And( GetPlayer.IsValid, And( GetPlayer.IsAlive, And( GetPlayer.IsLocalPlayer, GetPlayer.IsPlayer ) ) ), GetVariableSystem.HasValue('ca_native_edit_owner', UIntToString(GetPlayer.GetID)) ))).End )]"
+			on_finish = "[PdxGuiWidget.TriggerAnimation('ca_native_edit_wait')]"
+		}
+		state = {
+			name = ca_native_edit_finish
+			alpha = 1
+			trigger_when = "[And( GetVariableSystem.Exists('ca_native_edit_active'), Or( Not( Or( And(IsGameViewDataShown('court_window', GetPlayer.GetID), CourtWindow.IsShowPositions), IsGameViewOpen('appoint_court_position_view') ) ), Or( IsPauseMenuShown, Not( GetVariableSystem.HasValue('ca_native_edit_owner', UIntToString(GetPlayer.GetID)) ) ) ) )]"
+			on_finish = "[PdxGuiWidget.TriggerAnimation(Select_CString(And( And( GetPlayer.IsValid, And( GetPlayer.IsAlive, And( GetPlayer.IsLocalPlayer, GetPlayer.IsPlayer ) ) ), GetVariableSystem.HasValue('ca_native_edit_owner', UIntToString(GetPlayer.GetID)) ), 'ca_native_edit_finish_action', 'ca_native_edit_cancel'))]"
+		}
+		state = {
+			name = ca_native_edit_finish_action
+			alpha = 1
+			on_finish = "[GetScriptedGui('ca_native_edit_reconcile').Execute( GuiScope.SetRoot(GetPlayer.MakeScope).AddScope('ca_native_edit_owner_matches', MakeScopeBool(And( And( GetPlayer.IsValid, And( GetPlayer.IsAlive, And( GetPlayer.IsLocalPlayer, GetPlayer.IsPlayer ) ) ), GetVariableSystem.HasValue('ca_native_edit_owner', UIntToString(GetPlayer.GetID)) ))).End )]"
+			on_finish = "[GetVariableSystem.Clear('ca_native_edit_active')]"
+		}
+		state = {
+			name = ca_native_edit_cancel
+			alpha = 1
+			on_finish = "[GetVariableSystem.Clear('ca_native_edit_active')]"
+		}
+	}
+
 }
 
